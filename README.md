@@ -10,7 +10,7 @@ standard formats using the scripts contained in the makefile.
 
 ## Background
 
-The CMS 9619 and 9609 computers are EXORBus compatible, have MC6809 processors and a number of PIAs and ACIAs, making them fairly capable SBCs. The ROMS appear to be versions of the MICROWARE SYSTEMS CORPORATION DEBUG machine monitor. [The source code of an earlier version of it](http://www.retro.co.za/6809/documents/debug09.pdf) is available online. The sections with similar functions have comments straight from that document. There also appears to be user code in U17_9619 that I have not looked at yet.
+The CMS 9619 and 9609 computers are EXORBus compatible, have MC6809 processors and a number of PIAs and ACIAs, making them fairly capable SBCs. The ROMS appear to be versions of the MICROWARE SYSTEMS CORPORATION DEBUG machine monitor. [The source code of an earlier version of it](http://www.retro.co.za/6809/documents/debug09.pdf) is available online. The sections with similar functions have comments straight from that document. The [debugger in Nitros-9](https://github.com/boisy/nitros9/blob/master/level1/cmds/debug.asm) contains similar code. There also appears to be user code in U17_9619 that I have not looked at yet.
 
 ## Prerequisites
 
