@@ -1,0 +1,454 @@
+FILE "U7_9619.bin" E000
+unused E000-E6FF
+unused FF80-FFDF
+*data FF73-FF7F
+data E7FD-E7FF
+word E800-E801
+
+
+comment  F700     6819 INTERACTIVE DEBUG PROGRAM
+comment  E700 FOR CREATIVE MICRO SYSTEMS 9619 MODULE
+comment  E700 MICROWARE SYSTEMS CORPORATION
+* HARDWARE:
+comment  E700 Unfortunately the SW1 jumpers are disabled to set ACIA0,1 CR
+comment  E700 /
+insert E700 MFFFF   EQU     $FFFF
+label 9F04 A1IOBUF
+label 9F0B A1CVECT
+label 9F0A USECRLF
+
+label E715
+label E700 _SETCLK
+label E70A _SETCL1
+label E715 _SETCL2
+
+label E71D _RTC_WRITE
+label E738 _RTCADDRWR
+label E74E _DELAY3
+label E758 DTCMDERR
+label E77C _PRCLK
+label E780 _PRDIV
+label E785 _PRDDIG
+label E78B _PR2X
+label E78D _PR1X
+label E795 _RDCLK
+label E79A _RDCL2
+label E79E _RDCL3
+label E7A8 _RDCL4
+label E7AF _RTC_READ
+label E7DB _RTC_SSR
+label EC7A RETNO
+label EC67 DIGIT
+label EC77 DIGIT2
+label ECF5 M_ESSGES
+label F800 START
+label F82C _BKPINIT
+label F831 A1INIT2
+label F841 A1IOINIT
+label F86B A1INIT3
+label F86E COMAND
+label F8A2 ILLCMD
+label F8A8 CMDERR
+
+label F9C6 DSPREG
+
+label FB50 FNDBKP
+
+label FC46 A0IOINIT
+label FE6D _ENDLN
+label FC59 A0INPCHR
+label FC5E A0INPCH2
+label FCA0 BKPT
+label FCBD BKPT2
+label FCC2 BKPT3
+label FCCA BKPT4
+label FCD1 SSBK
+label FCF3 _PREGCMD
+
+
+label FD24 ERRMSG
+label FD2E PROMPT
+label FD4A REGLIST
+*label FD4A CMDTBL
+
+label FDAF _NCOMAND
+label FDB2 _NCMDERR
+label FDB5 _NSSBK
+
+label FE05 RDLIN
+label FE08 RDLN2
+label FE17 RDLN3
+label FE21 RDLN4
+label FE21 RDLN4
+
+label FE2A CHKEOL
+label FE2F SKIPSP
+label FE4C A1INPCHR
+label FE51 A1INPCH2
+label FE88 CPYSTR
+label FE38 WRTLIN
+label FE79 A1OUTCHR
+label FE7E OUTCH2
+label FEE0 _XCMDCHK
+label FEE2 _ACMDCHK
+label FEF4 _CLRC
+label FEF7 _SETC
+
+
+label FF23 BIN4HS
+label FF29 BIN2HS
+label FF2B PUTSPC
+label FF33 BIN4HX
+label FF39 BIN2HX
+label FF47 HEXCHR
+label FF4D HXCHR2
+
+* I/O Addresses
+label FFC4 PIADDR0
+label FFC8 PIADDR1
+label FFCC PIADDR2
+label FFD0 ACADDR0
+label FFD4 ACADDR1
+label FFD8 TIMER
+data  ED07-EDE1
+data  FD1A-FD45
+data  FD46-FDA6
+data  FDC0-FE04
+data  F59C-F7FF
+data  ECE0-ED05
+data  EDE5-EE27
+data  F475-F4B4
+data  F4B5-F59A
+comment F800 Initialization Entry Point
+label 0002 DBUGSP
+label 0004 IOBUF
+label 0006 BKPTBL
+label 000B ACVECT
+label 000C TIMOUT
+label 0009 ACINIT
+label 0011 SWIVCT
+label 0017 NMIVCT
+
+comment  E700 CB2 is EN' for decoder U33
+comment  E700 U is pointing to PIADDR0
+comment  E700 RTC DATA STORED IN A
+comment  E700 RTC ADDR DECrementeD AT B
+
+lcomment E705 GET PIA0 ADDR
+lcomment E708 START AT RTC DECADE ADDR
+dec E709
+lcomment E70A CHECK VALID INPUT
+lcomment E70D thought _XCMDCHK did this already
+bin E710
+lcomment E70F ON 10 HR DIGIT REG...
+lcomment E713 FORCE 24 HR CLOCK
+
+lcomment E719 DECREMENT RTC ADDR
+comment  E71D Set the RTC DATA from A Reg
+lcomment E71D SAVE A&B REGISTERS
+
+lcomment E721 GET A FROM A ON STACK
+lcomment E723 SET PB4 HI (RTC-WT)
+bin E724
+lcomment E725 SAVE TO PIA0 PORB
+bin E728
+lcomment E727 SELECT POR, SET CB2-LO
+lcomment E729 SAVE TO PIA0 CRB
+lcomment E72D 16 CYCLE DELAY?
+lcomment E72F SELECT POR, SET CB2-HI
+bin E730
+lcomment E731 SAVE TO PIA0 CRB
+lcomment E736 RESTORE A&B, RTS
+comment  E738 Set the RTC ADDR from B Reg
+lcomment E738 SAVE A&B REGISTERS
+bin E73B
+lcomment E73A SELECT DDR, SET CB2-HI
+lcomment E73C SAVE TO PIA0 CRB
+lcomment E73E PB7,6 in; PB5-0 out
+bin E73F
+lcomment E740 SAVE TO PIA0 DDRB
+bin E743
+lcomment E742 SELECT POR
+lcomment E744 SAVE TO PIA0 CRB
+lcomment E746 LOAD B FROM B ON STACK
+lcomment E748 SAVE TO PIA0 PORB
+bin E74B
+lcomment E74A SELECT POR, SET CB2-LO
+lcomment E74C SAVE TO PIA0 CRB
+lcomment E74E 3 CYCLE DELAY?
+bin E753
+lcomment E752 SELECT POR, SET CB2-HI
+lcomment E754 SAVE TO PIA0 CRB
+lcomment E756 RESTORE A&D, RTS
+*bin E758
+char E764
+lcomment E765 PUSH '/' ON TO STACK
+lcomment E767 PRINT DATE
+lcomment E76B SPACE BTWN DT, TM
+char E771
+lcomment E770 USE ':' NOW
+lcomment E774 PRINT TIME
+lcomment E777 #$34 in S and A
+lcomment E77C LOOP 3 TIMES
+lcomment E782 PRINT / or : BTWN DIGITS
+lcomment E787 DECREMENT LOOP COUNTER
+lcomment E788 KEEP OUTPUTTING
+lcomment E78D GET X, INC X
+lcomment E78F CONVERT TO ASCII #
+lcomment E791 PRINT IT
+lcomment E794 RETURN
+lcomment GET THE DATE/TIME STORE AT X BUF
+lcomment E79A SET LOOP COUNT
+dec E79B
+lcomment E7A2 ON 10 HR DIGIT REG...
+lcomment E7A6 JUST GET DIGIT
+lcomment E7AA DECREMENT RTC ADDR
+lcomment E7AB DO NEXT
+lcomment E7AD RESTORE X, RTS
+lcomment E7AF SAVE A&B REGISTERS
+lcomment E7B4 SELECT DDR, SET CB2-HI
+bin E7B5
+lcomment E7B6 SAVE TO PIA0 CRB
+bin E7B9
+lcomment E7BC SELECT POR
+bin E7BD
+lcomment E7BE SAVE TO PIA0 CRB
+lcomment E7B8 PB7,6 in; PB5,4 out PB3-0 in
+lcomment E7BA SAVE TO PIA0 DDRB
+lcomment E7C0 SET PB5 HI (RTC-RD)
+bin E7C1
+lcomment E7C2 SAVE TO PIA0 PORB
+lcomment E7C4 SELECT POR, SET CB2-LO (EN')
+bin E7C5
+lcomment E7C6 SAVE TO PIA0 CRB
+lcomment E7CC LOAD PIA0 PORB
+lcomment E7CE KEEP ONLY RTC DATA
+
+lcomment E7CA 16 CYCLE DELAY?
+lcomment E7D0 STORE VALUE IN A ON STACK
+lcomment E7D2 SELECT POR, SET CB2-HI
+bin E7D3
+lcomment E7D4 SAVE TO PIA0 CRB
+lcomment E7D9 RESTORE A&D, RTS
+lcomment E7DD RTC ADDR FOR STANDARD SIGNAL REG
+lcomment E7E2 SELECT DDR, SET CB2-HI
+bin E7E3
+lcomment E7E4 SAVE TO PIA0 CRB
+lcomment E7E6 PB7,6 in; PB5,4 out PB3-0 in
+bin E7E7
+lcomment E7E8 SAVE TO PIA0 DDRB
+lcomment E7EA SELECT POR
+bin E7EB
+lcomment E7EC SAVE TO PIA0 CRB
+lcomment E7EE SET PB5 HI (RTC-RD)
+bin E7EF
+lcomment E7F0 SAVE TO PIA0 PORB
+lcomment E7F2 SELECT POR, SET CB2-LO (EN')
+bin E7F3
+lcomment E7F4 SAVE TO PIA0 CRB
+lcomment E7F6 STORE SSR DATA IN A
+bin E7F9
+lcomment E7FA SHIFT LEFT, SET CARRY?
+lcomment E7FB RESTORE A&D, RTS
+
+lcomment E84E ESC?
+lcomment E86C SET LOOP COUNTER 255
+lcomment E870 DECREMENT COUNTER
+lcomment E871 KEEP LOOPING IF >0
+
+lcomment EC67 TEST LOWER BOUND
+lcomment EC69 EXIT IF NOT A DIGIT
+lcomment EC6B TEST HIGH BOUND
+lcomment EC6D PROCEED IF OK
+
+lcomment F07C STOP TIMER
+label F07A SSBK2?
+
+
+
+lcomment F800 DIRECT PAGE ADDR
+lcomment F802 START AT TOP OF DP
+lcomment F804 GET DP ADDRESS
+lcomment F806 ALLOCATE USER STACK
+dec F809
+lcomment F808 MAKE ROOM FOR REGS
+lcomment F810 DEFAULT USER PC
+lcomment F80A SAVE INITIAL USER SP
+lcomment F814 INITIAL USER CC REG
+lcomment F816 GIVE TOTAL OF 64 BYTES
+lcomment F819 SET DEBUG TOP OF STACK
+lcomment F81C COPY MEM PTR TO X
+lcomment F81E ALLOCATE I/0 BUFFER
+lcomment F821 ALREADY ALLOCATED?
+lcomment F825 SAVE ITS ADDRESS
+lcomment F82C ALLOCATE BKPT TABLE
+lcomment F82F SAVE ITS ADDRESS
+lcomment F831 CLEAR BKPT TABLE
+lcomment F835 LOOP TIL CLEAR
+lcomment F837 GET ADDR OF BKPT SERVICE ROUTINE
+comment  F841 I/0 (ACIA1) INITIALIZATION
+lcomment F841 GET ACIA1 ADDRESS
+lcomment F844 INIT VECTOR
+
+lcomment F846 ($C5) CLEAR PIA0 CRA
+lcomment F848 CLEAR PIA0 DDRA REG
+bin F84B
+lcomment F84C SET PIA0 CRA -IRQ, +POR, CA2 OUTPUT HI ON WRITE TO CRA
+lcomment F84E GET PIA0 PORA
+lcomment F850 GET LO NIBBLE (SW1, JP2)
+
+lcomment F856 SET ACIA1 COMMAND REG ($FF)
+lcomment F856 (DTR LOW, IRQ disabled, Echo, Space Parity)
+lcomment F856 (SHOULD THIS BE STA, OR MAYBE STB ?!?)
+
+lcomment F858 GET TIMER ADDRESS
+lcomment F85B TIMER INIT VALUE
+lcomment F85D INIT TIMER
+lcomment F85F GET TIMEOUT VALUE
+lcomment F862 SET VALUE INTO TIMER
+comment  F86E FALL THROUGH TO COMMAND LOOP
+comment  F86E Command Loop
+
+lcomment F864 PROG NAME ADDR
+lcomment F868 MOVE TO BUFFER
+
+lcomment F86E GET PROMPT STRING
+lcomment F86F PRINT IT
+lcomment F872 INPUT COMMAND LINE
+lcomment F87E IGNORE IF DELETED LINE
+lcomment F888 COMPARE TO TEXT
+lcomment F893 EXIT IF TABLE END
+
+lcomment F8A0 GO FOR ANOTHER
+comment  F8A2 UNRECOGNIZED COMMAND HANDLER
+lcomment F8A4 REPORT IT...
+
+comment  F8A8 COMMAND ERROR PROCESSOR
+
+comment  FC46 CHECK PIA0-A SW1 DIP SWITCHES
+comment  FC46 BUT DO NOTHING WITH THEM?!
+lcomment FC11 PRINT A SLASH
+lcomment FC4B LOAD PIA0 PORA
+lcomment FC50 GET HI NIBBLE (SW1)
+lcomment FC55 SET ACIA0 COMMAND REG ($00)
+lcomment FC55 (SHOULD THIS BE STA, OR MAYBE STB ?!?)
+comment  FC59 INPUT CHARACTER FROM ACIA0
+lcomment FC5E READ ACIA STATUS REGISTER
+lcomment FC60 CHECK RX FULL BIT
+lcomment FC62 WAIT TIL READY
+lcomment FC64 GET CHAR
+lcomment FC66 MASK OUT PARITY
+lcomment FC68 CHECK FOR DELETE CHAR
+lcomment FC6A IF DELETE GET NEXT CAR
+
+lcomment EC7F NEGATIVE?
+lcomment FC9E
+comment  FCA0 BREAKPOINT SERVICE ROUTINE
+comment  FCA0 /
+comment  FCA0 SAVE USER STACK, SWITCH TO
+comment  FCA0 DEBUG STACK, REMOVE BREAKPOINTS
+comment  FCA0 AND DUMP USER REGISTERS
+lcomment FCA0 DEBUG DP
+lcomment FCA6 SAVE USER STACK PTR
+lcomment FCA9 GET USER'S PC
+lcomment FCAB DECREMENT IT
+lcomment FCAE REPLACE IT
+lcomment FCB0 LOAD DEBUG STACK
+lcomment FCB3 ADDR IN TABLE?
+lcomment FCB6 SKIP IF SO
+lcomment FCC0 ELSE REPORT ILLEGAL BREAKPOINT
+
+lcomment FCC6 GET SAVED OPCODE
+lcomment FCC8 RESTORE IT
+lcomment FCCA MOVE TO NEXT ENTRY
+lcomment FCCC DONE YET?
+lcomment FCCD LOOP IF NOT
+lcomment FCCF PRINT REGS (?)
+comment  FCD1 /
+comment  FCD1 SINGLE STEP SERVICE ROUTINE
+comment  FCD1 /
+lcomment FCD3 STOP TIMER
+lcomment FCD6 GET DEBUGGER DIRECT PAGE
+lcomment FCDA SAVE USER STACK
+lcomment FCDF LOAD DEBUGGER STACK
+
+comment  FCE6 /
+comment  FCE6 SINGLE STEP COMMAND PROCESSOR (?)
+comment  FCE6 /
+
+lcomment FCF3 PRINT REGISTERS
+lcomment FCF6 GOTO COMMAND LOOP
+
+lcomment FE0A BACKSPACE?
+lcomment FE0C SKIP IF NOT
+lcomment FE0E DONT BACKSPACE...
+lcomment FE11 PAST BEG OF LINE
+lcomment FE17 LINE DELETE?
+
+lcomment FE23 WAS IT EOL?
+lcomment FE25 IF NOT GET ANOTHER
+
+lcomment FEA5 PRINT A SPACE
+
+lcomment FE4C SAVE XREG
+lcomment FE4E GET ACAI ADDRESS
+lcomment FE51 READ ACAI STATUS REGISTER
+lcomment FE53 MASK READY BIT
+lcomment FE55 WAIT TIL READY
+lcomment FE57 GET CHAR
+lcomment FE59 MASK OUT PARITY
+lcomment FE5B RESTORE X REG
+lcomment FE5D TEST ECHO?
+lcomment FE62 OUTPUT IF ECHO ON
+lcomment FE64 CR?
+lcomment FE66 IF SO SKIP LF CHECK
+lcomment FE68 LF?
+lcomment FE6A GET NEXT
+lcomment FE6C ELSE RETURN
+
+*comment  FE79 Subroutine BINEC - Convert word in D reg to
+*comment  FE79 five-character decimal.
+
+lcomment FE74 SEND LF
+lcomment FE79 SAVE REGISTERS
+lcomment FE7B GET FE7B ADDRESS
+lcomment FE7E GET THE CHAR
+lcomment FE80 LINEFEED?
+lcomment FE82 IF SO GET NEXT
+lcomment FE86 RESTORE REGISTERS
+lcomment FEE2 CONVERT TO ASCII
+lcomment FEE4 IF <0 SET CARRY, RETURN
+lcomment FEE6 ASCII NUMBER 9
+lcomment FEE8 IF <=, CLEAR CARRY, RETURN
+lcomment FEEA ';'
+lcomment FEEC IF [:-9], SET CARRY, RETURN
+lcomment FEEE '@'
+lcomment FEF0 IF >, SET CARRY, RETURN
+
+lcomment FEF2 ';<=>?@' ARE LEFT
+lcomment FEF4 CLEAR CARRY, RETURN
+lcomment FEF7 SET   CARRY, RETURN
+
+comment  FF21 Input Conversion Subroutines
+comment  FF21 These subroutines convert an usnigned binary
+comment  FF21 number (passed in B or D) to an ASCII character
+comment  FF21 string starting at the address passed in the
+comment  FF21 X register, which will return with the address
+comment  FF21 following the string. All other registers
+comment  FF21 except CC are preserved
+comment  FF21 /
+
+comment  FF29 Subroutine BIN2HS - Convert workd in D reg to
+comment  FF29 four-character hexadecimal followed by a space.
+comment  FF2B FALL THROUGH TO PUTSPC
+comment  FF2B /
+comment  FF2B Subroutine PUTSPC - Put a space character in
+comment  FF2B the output buffer and increment pointer (x)
+comment  FF33 Subroutine BIN4HX - Convert word in D reg to
+comment  FF33 four-character hexadecimal.
+comment  FF39 FALL THROUGH TO CONVERT LOW BYTE
+comment  FF39 /
+comment  FF39 Subroutine BIN2HX - convert byte in D reg to
+comment  FF39 two-character hexadecimal.
+
+label FD1A TITLE
