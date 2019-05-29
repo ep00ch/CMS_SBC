@@ -4,8 +4,8 @@ This project contains data downloaded from the Read Only Memory (ROM) of a
 Creative Micro Systems (CMS) 9619 Advanced Single Board Computer (SBC) and a 
 CMS 6909 MPU module.
 
-The ROMs were downloaded using an Apple IIe, so the raw data is in the 
-Apple II monitor format. However, they are easily changed to other more 
+The ROMs were downloaded using an Apple IIe, so the  data is in the 
+Apple II monitor format (.mon). However, they are easily changed to other more 
 standard formats using the scripts contained in the makefile.
 
 ## Background
@@ -14,11 +14,15 @@ The CMS 9619 and 9609 computers are EXORBus compatible, have MC6809 processors a
 
 ## Prerequisites
 
-The makefile uses sed and xxd to convert from the Apple II monitor format to hex
-or binary format.
-The makefile uses [f9dasm](https://github.com/Arakula/f9dasm) to disassemble the
-binary, and incorprate the comments.
-In the future, I hope to be able to use lwasm from [LWTools](https://github.com/milliluk/LWTools) to compile the source files back to binaries.
+The makefile uses:
+* sed, xxd - to convert from the Apple II monitor format to hex, binary, or hexdump format.
+
+* [f9dasm](https://github.com/Arakula/f9dasm) - to disassemble the binary, and incorprate the comments.
+
+* lwasm from [LWTools](https://github.com/milliluk/LWTools) - to assemble the source files back to binaries.
+
+* diff - to compare the original binary hexdump to the compiled binary hexdump.
+
 
 ## Makefile Commands
 
@@ -35,10 +39,16 @@ will convert the U7_9619.mon file to a more standard hex format, then convert it
 
 The command:
 
+`make U7_9619.diff`
+
+do the same as above, then assemble the the .asm file using lwtools, then generate a hexdump of the re-assembled binary. Finally, it compares the original binary hexdump to the re-assembled binary hexdump.
+
+The command:
+
 `make all`
 
 will convert all of the mon files, disassemble them, and combine them into final EPROM_9619.asm and EPROM_9609.asm files for each model number.
 
 ## TO DO
 
-The disassembly comments are not complete yet, and the files will not yet re-assemble due to data tables that are being interpreted as code. It is a work in progress, but still helpful to see what the monitors do.
+The disassembly comments are not complete yet. It is a work in progress, but still helpful to see what the monitors do.
