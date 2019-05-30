@@ -41,7 +41,7 @@ The command:
 
 `make U7_9619.diff`
 
-do the same as above, then assemble the the .asm file using lwtools, then generate a hexdump of the re-assembled binary. Finally, it compares the original binary hexdump to the re-assembled binary hexdump.
+does the same as above, then assembles the the .asm file using lwtools, then generates a hexdump of the re-assembled binary. Finally, it compares the original binary hexdump to the re-assembled binary hexdump.
 
 The command:
 

@@ -5,20 +5,28 @@ data FF80-FFDF
 *unused FF80-FFDF
 data FF7F-E7FF
 word E800-E803
-data FFE0-FFF1
 data E80A-E820
+data EFD9-F025
 data F0AE-F117
 data F9F3-FA20
-data F010-F025
-comment  F700     6819 INTERACTIVE DEBUG PROGRAM
-comment  E700 FOR CREATIVE MICRO SYSTEMS 9619 MODULE
-comment  E700 MICROWARE SYSTEMS CORPORATION
+data FFE0-FFFF
+
 comment  E700 ROM labeled:  Debug 2418
 comment  E700 FFFE=A0
 comment  E700 11/6/99
-* HARDWARE:
-comment  E700 Unfortunately the SW1 jumpers are disabled to set ACIA0,1 CR
 comment  E700 /
+comment  E700 E700-E7FF    RTC CLOCK UTILITIES
+comment  E700 E800?EFFF    EPROM PROGRAMMER
+comment  E700 F000?F7FF    ASSEMBLER
+comment  E700 F800-FF7F    DEBUGGER
+comment  E700 /
+comment  E700 ### RTC CLOCK UTILITIES
+comment  E800 ### EPROM PROGRAMMER
+comment  F000 ### ASSEMBLER
+comment  F800 ### DEBUGGER
+
+
+
 insert E700 MFFFF   EQU     $FFFF
 label 9F04 A1IOBUF
 label 9F0B A1CVECT
@@ -46,7 +54,21 @@ label E7AF _RTC_READ
 label E7DB _RTC_SSR
 
 label E802 EXT_CMDTBL
+label E80C PIA2PRA_VEC
+label E80E PIA2CRA_VEC
+label E810 PIA2PRB_VEC
+label E812 PIA2CRB_VEC
+label E814 PIA1PRA_VEC
+label E816 PIA1CRA_VEC
+label E818 PIA1PRB_VEC
+label E81A PIA1CRB_VEC
+label E81C AC1CR_VEC
+label E81E AC1DR_VEC
+label E820 BSP
+label E821 DLE
+
 label EBB2 SKIPSP2
+label EC3E HEXDEC2
 label EC7A RETNO
 label EC67 DIGIT
 label EC77 DIGIT2
@@ -54,9 +76,10 @@ label ECF5 MESSGES
 
 
 label F07A SSBK2?X
+label F475 SFLGS
 label F800 START
 label F82C _BKPINIT
-label F831 A1INIT2
+label F831 INIT2
 label F841 A1IOINIT
 label F86B A1INIT3
 label F86E COMAND
@@ -70,7 +93,7 @@ label F9F3 REGSTR
 label FB50 FNDBKP
 
 label FC46 A0IOINIT
-label FE6D _ENDLN
+
 label FC59 A0INPCHR
 label FC5E A0INPCH2
 label FCA0 BKPT
@@ -80,15 +103,26 @@ label FCCA BKPT4
 label FCD1 SSBK
 label FCF3 _PREGCMD
 
-
+label FD1A TITLE
 label FD24 ERRMSG
 label FD2E PROMPT
-label FD4A REGLIST
-*label FD4A CMDTBL
+comment  FD4A register name/offset lookup table
+label FD4A REGTBL
 
 label FDAF _NCOMAND
 label FDB2 _NCMDERR
 label FDB5 _NSSBK
+
+label FE6D _ENDLN
+
+*label 0000 RESDVC
+label FD02 SW3SVC
+label FD06 SW2SVC
+label FD0E FRQSVC
+label FD12 IRQSVC
+label FD0A SWISVC
+label FD16 NMISVC
+label A000 _START2
 
 label FE05 RDLIN
 label FE08 RDLN2
@@ -110,6 +144,7 @@ label FEE0 _CHEXBIN
 label FEE2 HEXDEC
 label FEF4 _CLRC
 label FEF7 _SETC
+
 
 label FF21 _C4HSP
 label FF23 BIN4HS
@@ -136,7 +171,28 @@ data  ECE0-ED05
 data  EDE5-EE27
 data  F475-F4B4
 data  F4B5-F59A
-comment F800 Initialization Entry Point
+
+comment  F800 .   6819 INTERACTIVE DEBUG PROGRAM
+comment  F800 .FOR CREATIVE MICRO SYSTEMS 9619 MODULE
+comment  F800 .(C) 198? MICROWARE SYSTEMS CORPORATION
+comment  F800 .         DES MOINES, IOWA
+comment  F800 .
+comment  F800 .
+comment  F800 .HARDWARE REQUIREMENTS:
+comment  F800 .
+comment  F800 .  THIS ROM AT $F800 - $FFFF
+comment  F800 .  RAM  AT ?
+comment  F800 .  ACIA AT FFD4
+comment  F800 .  PTM  AT FFD8   (ENABLED TO NMI)
+comment  F800 .
+comment  F800 .
+comment  F800 .     TTL    6809 UTILITY SUBROUTINE PACKAGE
+comment  F800 .
+comment  F800 .
+
+comment  F800 Unfortunately the SW1 jumpers are disabled to set ACIA0,1 CR
+comment  F800 .
+comment  F800 Initialization Entry Point
 label 0002 DBUGSP
 label 0004 IOBUF
 label 0006 BKPTBL
@@ -145,6 +201,7 @@ label 000C TIMOUT
 label 0009 ACINIT
 label 0011 SWIVCT
 label 0017 NMIVCT
+
 
 comment  E700 CB2 is EN' for decoder U33
 comment  E700 U is pointing to PIADDR0
@@ -274,6 +331,12 @@ lcomment E86C SET LOOP COUNTER 255
 lcomment E870 DECREMENT COUNTER
 lcomment E871 KEEP LOOPING IF >0
 *char EA25
+comment  E800 /
+comment  E800 This area appears to be for a EPROM programmer
+comment  E80A I/O VECTOR TABLE
+lcomment E821 DATA LINK ESCAPE ?
+lcomment E820 BACKSPACE ?
+
 char E8F9
 lcomment EA4A BELL CHAR
 lcomment EB8F LO NIBBLE
@@ -294,10 +357,14 @@ lcomment EFA1 store X,D
 comment  F07C Looks same as SSBK @ FCD1
 lcomment F07C STOP TIMER
 lcomment F083 SAVE USER STACK
+lcomment F1C2 CHECK FLAG VIA CARRY BIT
+*label F1C2 DSPCC1
+lcomment F1CA BRANCH IF NOT DONE
 lcomment #$9F GET DEBUGGER DIRECT PAGE
 lcomment OUTPUT $
 char F1F2
 char F1D9
+lcomment F475 CONDITION CODE LABELS
 
 lcomment F800 DIRECT PAGE ADDR
 lcomment F802 START AT TOP OF DP
@@ -319,8 +386,6 @@ lcomment F82F SAVE ITS ADDRESS
 lcomment F831 CLEAR BKPT TABLE
 lcomment F835 LOOP TIL CLEAR
 lcomment F83A SETUP NMI VECTOR
-lcomment F83F SETUP SWI VECTOR
-
 lcomment F83F SETUP SWI VECTOR
 
 comment  F841 I/0 (ACIA1) INITIALIZATION
@@ -366,6 +431,13 @@ comment  F8B5 COMMAND TABLE SEARCH
 lcomment F8C3 INCR TABLE PTR
 lcomment F8CF GET MATCH CHAR
 
+dec FB55
+label FB59 FNDBK2
+label FB67 FNDBK3
+****
+label FB69 GOCMD
+label FB6B GOCMD1
+label FB80 GOCMD2
 char F9BE
 comment  FC46 CHECK PIA0-A SW1 DIP SWITCHES
 comment  FC46 BUT DO NOTHING WITH THEM?!
@@ -420,6 +492,7 @@ comment  FCE6 /
 
 lcomment FCF3 PRINT REGISTERS
 lcomment FCF6 GOTO COMMAND LOOP
+
 
 lcomment FE0A BACKSPACE?
 lcomment FE0C SKIP IF NOT
@@ -497,10 +570,6 @@ comment  FF39 /
 comment  FF39 Subroutine BIN2HX - convert byte in D reg to
 comment  FF39 two-character hexadecimal.
 
-label FD1A TITLE
-*< 00000820: 0810 8d03 25fc 3934 02a6 9dff f1a5 8dff  ....%.94........
-*> 00000820: 0810 8d03 25fc 3934 02a6 9cf2 a58d fff0  ....%.94........
-
-*> 00000820: 0810 8d03 25fc 3934 02a6 9cf2 a58d fff0  ....%.94........
+lcomment  FFF0 RESERVED
 
 
