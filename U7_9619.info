@@ -1,47 +1,46 @@
 FILE "U7_9619.bin" E000
+
+***** General Info
+comment  .
+comment  ROM LABEL:
+comment  .      Debug 2418
+comment  .      FFFE=A0
+comment  .      11/6/99
+comment  .
+comment  .ORGANIZATION:
+comment  .  E000-E6FF    EMPTY
 data E000-E6FF
-*unused E000-E6FF
-data FF80-FFDF
-*unused FF80-FFDF
-data FF7F-E7FF
-word E800-E803
-data E80A-E820
-data EFD9-F025
-data F0AE-F117
-data F9F3-FA20
-data FFE0-FFFF
+*unused   E000-E6FF
+comment  .  E700-E7FF    RTC DATE/TIME
+*unused   E700-E7FF
+comment  .  E800?EFFF    EPROM PROGRAMMER
+*unused   E800-EFFF
+comment  .  F000?F7FF    ASSEMBLER
+*unused   F000-F7FF
+comment  .  F800-FF7F    DEBUGGER
+*unused   F800-FF7F
+comment  .  FF80-FFDF    I/O SPACE
+*unused   FF80-FFDF
+comment  .  FFE0-FFFF    VECTORS
+*unused   FFE0-FFFF
 
-comment  E700 ROM labeled:  Debug 2418
-comment  E700 FFFE=A0
-comment  E700 11/6/99
-comment  E700 /
-comment  E700 E700-E7FF    RTC CLOCK UTILITIES
-comment  E700 E800?EFFF    EPROM PROGRAMMER
-comment  E700 F000?F7FF    ASSEMBLER
-comment  E700 F800-FF7F    DEBUGGER
-comment  E700 /
+**** Section Info
+comment  E700 .
 comment  E700 ### RTC CLOCK UTILITIES
-comment  E800 ### EPROM PROGRAMMER
-comment  F000 ### ASSEMBLER
-comment  F800 ### DEBUGGER
 
+*** Section Format
+data E7FD-E7FF
 
-
-insert E700 MFFFF   EQU     $FFFF
-label 9F04 A1IOBUF
-label 9F0B A1CVECT
-label 9F0A USECRLF
-
-label E715
+*** Section Labels
 label E700 _SETCLK
 label E70A _SETCL1
 label E715 _SETCL2
-
-label E71D _RTC_WRITE
+label E71D _RTC_WR
 label E738 _RTCADDRWR
 label E74E _DELAY3
-label E758 DTCMDERR
-label E77C _PRCLK
+label E75D _PRCLK
+label E758 _DTCMDERR
+label E77C _PRCL3
 label E780 _PRDIV
 label E785 _PRDDIG
 label E78B _PR2X
@@ -50,164 +49,14 @@ label E795 _RDCLK
 label E79A _RDCL2
 label E79E _RDCL3
 label E7A8 _RDCL4
-label E7AF _RTC_READ
+label E7AF _RTC_RD
 label E7DB _RTC_SSR
 
-label E802 EXT_CMDTBL
-label E80C PIA2PRA_VEC
-label E80E PIA2CRA_VEC
-label E810 PIA2PRB_VEC
-label E812 PIA2CRB_VEC
-label E814 PIA1PRA_VEC
-label E816 PIA1CRA_VEC
-label E818 PIA1PRB_VEC
-label E81A PIA1CRB_VEC
-label E81C AC1CR_VEC
-label E81E AC1DR_VEC
-label E820 BSP
-label E821 DLE
-
-label EBB2 SKIPSP2
-label EC3E HEXDEC2
-label EC7A RETNO
-label EC67 DIGIT
-label EC77 DIGIT2
-label ECF5 MESSGES
-
-
-label F07A SSBK2?X
-label F475 SFLGS
-label F800 START
-label F82C _BKPINIT
-label F831 INIT2
-label F841 A1IOINIT
-label F86B A1INIT3
-label F86E COMAND
-label F871 MF871
-label F8A2 ILLCMD
-label F8A8 CMDERR
-label F8B5 _CMDSRC
-
-label F9C6 DSPREG
-label F9F3 REGSTR
-label FB50 FNDBKP
-
-label FC46 A0IOINIT
-
-label FC59 A0INPCHR
-label FC5E A0INPCH2
-label FCA0 BKPT
-label FCBD BKPT2
-label FCC2 BKPT3
-label FCCA BKPT4
-label FCD1 SSBK
-label FCF3 _PREGCMD
-
-label FD1A TITLE
-label FD24 ERRMSG
-label FD2E PROMPT
-comment  FD4A register name/offset lookup table
-label FD4A REGTBL
-
-label FDAF _NCOMAND
-label FDB2 _NCMDERR
-label FDB5 _NSSBK
-
-label FE6D _ENDLN
-
-*label 0000 RESDVC
-label FD02 SW3SVC
-label FD06 SW2SVC
-label FD0E FRQSVC
-label FD12 IRQSVC
-label FD0A SWISVC
-label FD16 NMISVC
-label A000 _START2
-
-label FE05 RDLIN
-label FE08 RDLN2
-label FE17 RDLN3
-label FE21 RDLN4
-label FE21 RDLN4
-
-label FE2A CHKEOL
-label FE2F SKIPSP
-label FE38 WRTLIN
-label FE47 WRTLN2
-label FE4C A1INPCHR
-label FE51 A1INPCH2
-label FE88 CPYSTR
-label FE79 A1OUTCHR
-label FE7E OUTCH2
-
-label FEE0 _CHEXBIN
-label FEE2 HEXDEC
-label FEF4 _CLRC
-label FEF7 _SETC
-
-
-label FF21 _C4HSP
-label FF23 BIN4HS
-label FF29 BIN2HS
-label FF2B PUTSPC
-label FF33 BIN4HX
-label FF39 BIN2HX
-label FF47 HEXCHR
-label FF4D HXCHR2
-
-* I/O Addresses
-label FFC4 PIADDR0
-label FFC8 PIADDR1
-label FFCC PIADDR2
-label FFD0 ACADDR0
-label FFD4 ACADDR1
-label FFD8 TIMER
-data  ED07-EDE1
-data  FD1A-FD45
-data  FD46-FDA6
-data  FDC0-FE04
-data  F59C-F7FF
-data  ECE0-ED05
-data  EDE5-EE27
-data  F475-F4B4
-data  F4B5-F59A
-
-comment  F800 .   6819 INTERACTIVE DEBUG PROGRAM
-comment  F800 .FOR CREATIVE MICRO SYSTEMS 9619 MODULE
-comment  F800 .(C) 198? MICROWARE SYSTEMS CORPORATION
-comment  F800 .         DES MOINES, IOWA
-comment  F800 .
-comment  F800 .
-comment  F800 .HARDWARE REQUIREMENTS:
-comment  F800 .
-comment  F800 .  THIS ROM AT $F800 - $FFFF
-comment  F800 .  RAM  AT ?
-comment  F800 .  ACIA AT FFD4
-comment  F800 .  PTM  AT FFD8   (ENABLED TO NMI)
-comment  F800 .
-comment  F800 .
-comment  F800 .     TTL    6809 UTILITY SUBROUTINE PACKAGE
-comment  F800 .
-comment  F800 .
-
-comment  F800 Unfortunately the SW1 jumpers are disabled to set ACIA0,1 CR
-comment  F800 .
-comment  F800 Initialization Entry Point
-label 0002 DBUGSP
-label 0004 IOBUF
-label 0006 BKPTBL
-label 000B ACVECT
-label 000C TIMOUT
-label 0009 ACINIT
-label 0011 SWIVCT
-label 0017 NMIVCT
-
-
+*** Section Comments
 comment  E700 CB2 is EN' for decoder U33
 comment  E700 U is pointing to PIADDR0
 comment  E700 RTC DATA STORED IN A
 comment  E700 RTC ADDR DECrementeD AT B
-
 lcomment E705 GET PIA0 ADDR
 lcomment E708 START AT RTC DECADE ADDR
 dec E709
@@ -216,11 +65,9 @@ lcomment E70D thought _XCMDCHK did this already
 bin E710
 lcomment E70F ON 10 HR DIGIT REG...
 lcomment E713 FORCE 24 HR CLOCK
-
 lcomment E719 DECREMENT RTC ADDR
 comment  E71D Set the RTC DATA from A Reg
 lcomment E71D SAVE A&B REGISTERS
-
 lcomment E721 GET A FROM A ON STACK
 lcomment E723 SET PB4 HI (RTC-WT)
 bin E724
@@ -298,7 +145,6 @@ bin E7C5
 lcomment E7C6 SAVE TO PIA0 CRB
 lcomment E7CC LOAD PIA0 PORB
 lcomment E7CE KEEP ONLY RTC DATA
-
 lcomment E7CA 16 CYCLE DELAY?
 lcomment E7D0 STORE VALUE IN A ON STACK
 lcomment E7D2 SELECT POR, SET CB2-HI
@@ -325,24 +171,100 @@ lcomment E7F6 STORE SSR DATA IN A
 bin E7F9
 lcomment E7FA SHIFT LEFT, SET CARRY?
 lcomment E7FB RESTORE A&D, RTS
+
+
+comment  E800 .
+comment  E800 ### EPROM PROGRAMMER
+
+*** Section Format
+word E800-E803
+data E80A-E820
+data ECE0-ED05
+data ED07-EDE1
+data EDE5-EE27
+data EFD9-EFFF
+
+word EFDD
+word EFE1
+word EFE5
+
+*** Section Labels
+label AA55 XTAG
+label E800 XTAGLOC
+label E80A EPRM_DP
+label E802 XCMDTBL_VEC
+label E80C PIA2PRA_VEC
+label E80E PIA2CRA_VEC
+label E810 PIA2PRB_VEC
+label E812 PIA2CRB_VEC
+label E814 PIA1PRA_VEC
+label E816 PIA1CRA_VEC
+label E818 PIA1PRB_VEC
+label E81A PIA1CRB_VEC
+label E81C AC1CR_VEC
+label E81E AC1DR_VEC
+label E820 BSP
+label E821 DLE
+
+label EBB2 SKIPSP2
+label EC3E HEXDEC2
+label EC7A RETNO
+label EC67 DIGIT2
+label EC77 DIGIT3
+label ECF5 MESSGES
+label EE5A EP1INIT
+label EE60 EPINIT0
+label EE8F EP_IN3
+label EE94 EP_IN2
+label EE9F EP_IN1
+label EEA2 EP2INIT
+label EFDB XCMDTBL
+
+*** Section Comments
 lcomment E842 Appears to be the main command character processor
 lcomment E84E ESC?
+lcomment E868 SET DIRECT PAGE TO BUFFER
+
+lcomment E86A DATA BUFFER DIRECT PAGE ADDRESS
 lcomment E86C SET LOOP COUNTER 255
+lcomment E86E CLEAR THE BUFFER
 lcomment E870 DECREMENT COUNTER
 lcomment E871 KEEP LOOPING IF >0
 *char EA25
-comment  E800 /
-comment  E800 This area appears to be for a EPROM programmer
-comment  E80A I/O VECTOR TABLE
+
+comment  E80C I/O VECTOR TABLE
 lcomment E821 DATA LINK ESCAPE ?
 lcomment E820 BACKSPACE ?
-
+label E863 EPROM
+label E86E EPRM2
+label E87A EPRM3
+lcomment E87E SET DIRECT PAGE TO BUFFER
+lcomment E883 $9DFF = END OF DP?
 char E8F9
 lcomment EA4A BELL CHAR
+
+lcomment EAFA SAVE B
+lcomment EAFF RESTORE B
+
 lcomment EB8F LO NIBBLE
 lcomment EB91 CONVERT TO ASCII NUM
 char EB94
 lcomment EB95 DIGIT?
+dec EB98
+*label EB81 BIN2HEX
+*label EB8F HEXCHR
+*label EB99 HXCHR2
+
+lcomment EB83 GET HI NIBBLE
+lcomment EB87 THEN CONVERT IT
+lcomment EB89 RESTORE BYTE
+lcomment EB8B CONVERT IT
+lcomment EB8D RESTORE A, RETURN
+lcomment EB8F MASK LOW BYTE
+lcomment EB93 RANGE 0-9?
+lcomment EB95 IF SO SKIP CORRECTION
+lcomment EB97 ADJUST FOR A-F
+
 lcomment EC5B CR   CHAR
 lcomment EC60 LF   CHAR
 lcomment EC67 TEST LOWER BOUND
@@ -351,9 +273,87 @@ lcomment EC6B TEST HIGH BOUND
 lcomment EC6D PROCEED IF OK
 lcomment ECAF SPACE CHAR
 lcomment ECB4 BACK SPACE CHAR
-lcomment EF9F restore X&A, RTS
-lcomment EFA1 store X,D
 
+comment  EE5A CLEAR THE PIA I/O ADDRESS STORED AT E81A-E80C
+lcomment EE5A LOAD EFFECTIVE ADDRESS OF AC1CR_VEC
+lcomment EE5E 8 PIA REGISTERS TO CLEAR
+lcomment EE60 DECREMENT EXTENDED ADDRESS
+lcomment EE62 DEC COUNTER
+lcomment EE63 CONTINUE TO CLEAR REGISTERS
+lcomment EE65 SET 4-7 IN, 0-3 OUT
+lcomment EE67 SAVE TO PIA1 DDRB
+lcomment EE6B SELECT POR, SET CA/B2-LO
+lcomment EE6D SAVE TO PIA1 CRB
+lcomment EE71 LOAD PIA1 PORB
+lcomment EE75 SELECT PIA1 DDRB
+bin EE6C
+bin EE7A
+bin EE7E
+bin EE82
+bin EE86
+bin EE95
+bin EEAF
+bin EEA5
+
+label 009D EPTYPEHI
+label 0096 EPTYPELO
+lcomment EE79 CHECK ONLY PB6 AND PB7
+lcomment EE7B IF BOTH,
+lcomment EE7D CHECK IF PB7 HI
+lcomment EE7F IF SO
+lcomment EE81 CHECK IF PB6 HI
+lcomment EE83 IF SO
+lcomment EE94 SET 6-7 IN, 0-5 OUT
+lcomment EE96 SAVE TO PIA1 DDRB
+lcomment EEA4 SET 0-7 OUTPUT
+lcomment EEA6 SAVE TO PIA1 DDRA
+lcomment EEAA SAVE TO PIA2 DDRA
+
+lcomment EEAE SELECT POR, SET CA/B2-LO
+lcomment EEB0 SAVE TO PIA2 CRA
+lcomment EEB4 SAVE TO PIA1 CRA
+lcomment EEB8 SAVE TO PIA1 CRB
+
+lcomment EF7B SAVE X,A
+lcomment EF9F restore X,A, RTS
+lcomment EFA1 store X,D
+bin EF82
+lcomment EF79 RESTORE X,A&B, RTS
+lcomment EF81 SELECT DDR
+lcomment EF8D SELECT POR
+bin EF8E
+comment  EFDB EXTENDED COMMAND DISPATCH TABLE
+
+comment  F000 .
+comment  F000 ### ASSEMBLER
+
+*** Section Format
+data F000-F01B
+data F0AE-F117
+data F59C-F7FF
+data F475-F4B4
+data F4B5-F59A
+
+word F002
+word F009
+word F00E
+word F013
+word F018
+
+* Command Table Entry Points
+label F01C DICMD
+label F039 DBCMD
+label F064 XDCMD
+label F060 TDCMD
+label F039 DBCMD
+label F039 DBCMD
+label F039 DBCMD
+
+*** Section Labels
+label F07A SSBK2?X
+label F475 SFLGS
+
+*** Section Comments
 comment  F07C Looks same as SSBK @ FCD1
 lcomment F07C STOP TIMER
 lcomment F083 SAVE USER STACK
@@ -365,6 +365,177 @@ lcomment OUTPUT $
 char F1F2
 char F1D9
 lcomment F475 CONDITION CODE LABELS
+
+
+comment  F800 .
+comment  F800 ### DEBUGGER
+
+*** Section Format
+data F9F3-FA17
+data FD1A-FD45
+data FD46-FDAE
+data FDC0-FE04
+data FF7F
+word FD4C
+word FD50
+word FD55
+word FD5A
+word FD5F
+word FD63
+word FD68
+word FD6C
+word FD70
+word FD74
+word FD78
+word FD7C
+word FD80
+word FD84
+word FD88
+word FD8C
+word FD91
+word FD96
+word FD9A
+word FD9A
+word FD9F
+word FDA3
+data FDA7
+word FDA8
+word FDAA
+word FDAC
+*** Section Labels
+** ZP LABELS
+label 0002 DBUGSP
+label 0004 IOBUF
+label 0006 BKPTBL
+label 000B ACVECT
+label 000C TIMOUT
+label 0009 ACINIT
+label 0011 SWIVCT
+label 0017 NMIVCT
+
+* Command Table Entry Points
+label F8FE ACMD
+label F902 BCMD
+label F906 CCCMD
+label F909 DPCMD
+label F96D PCCMD
+label F961 UCMD
+label F965 XCMD
+label F969 YCMD
+label F99F ECMD
+label FA18 VCMD
+label FA48 CCMD
+label FA90 MCMD
+label FAB5 GCMD
+label FADE JCMD
+label FAED BKCMD
+label FB2E KBCMD
+label FB69 NCMD
+label FB72 GTCMD
+label FB92 LCMD
+label FB8C VLCMD
+
+** Debugger LABELS
+label F800 START
+label F82C _BKPINIT
+label F831 INIT2
+label F841 A1IOINIT
+label F86B A1INIT3
+label F86E COMAND
+label F871 MF871
+label F8A2 ILLCMD
+label F8A8 CMDERR
+label F8B5 _CMDSRC
+
+label F9C6 DSPREG
+label F9F3 REGSTR
+label FB50 FNDBKP
+
+label FC46 A0IOINIT
+
+label FC59 A0INPCHR
+label FC5E A0INPCH2
+label FCA0 BKPT
+label FCBD BKPT2
+label FCC2 BKPT3
+label FCCA BKPT4
+label FCD1 SSBK
+label FCF3 _PREGCMD
+
+label FD1A TITLE
+label FD24 ERRMSG
+label FD2E PROMPT
+label FD30 OK_MSG
+label FD34 BADMSG
+label FD39 VRFMSG
+
+comment  FD4A COMMAND DISPATCH TABLE
+label FD4A CMDTBL
+
+label FDAF _NCOMAND
+label FDB2 _NCMDERR
+label FDB5 _NSSBK
+
+label FE6D _ENDLN
+
+label FD02 SW3SVC
+label FD06 SW2SVC
+label FD0E FRQSVC
+label FD12 IRQSVC
+label FD0A SWISVC
+label FD16 NMISVC
+label A000 _START2
+
+label FE05 RDLIN
+label FE08 RDLN2
+label FE17 RDLN3
+label FE21 RDLN4
+label FE21 RDLN4
+
+label FE2A CHKEOL
+label FE2F SKIPSP
+label FE38 WRTLIN
+label FE47 WRTLN2
+label FE4C A1INPCHR
+label FE51 A1INPCH2
+label FE88 CPYSTR
+label FE79 A1OUTCHR
+label FE7E OUTCH2
+
+label FEE0 _CHEXBIN
+label FEE2 HEXDEC
+label FEF4 _CLRC
+label FEF7 _SETC
+
+
+label FF21 _C4HSP
+label FF23 BIN4HS
+label FF29 BIN2HS
+label FF2B PUTSPC
+label FF33 BIN4HX
+label FF39 BIN2HX
+label FF47 HEXCHR
+label FF4D HXCHR2
+
+*** Section Comments
+comment  F800 .   6819 INTERACTIVE DEBUG PROGRAM
+comment  F800 .FOR CREATIVE MICRO SYSTEMS 9619 MODULE
+comment  F800 .(C) 198? MICROWARE SYSTEMS CORPORATION
+comment  F800 .         DES MOINES, IOWA
+comment  F800 .
+comment  F800 .
+comment  F800 .HARDWARE REQUIREMENTS:
+comment  F800 .
+comment  F800 .  THIS ROM AT $F800 - $FFFF
+comment  F800 .  RAM  AT ?
+comment  F800 .  ACIA AT FFD4
+comment  F800 .  PTM  AT FFD8   (ENABLED TO NMI)
+comment  F800 .
+comment  F800 .
+
+comment  F800 Unfortunately the SW1 jumpers are disabled to set ACIA0,1 CR
+comment  F800 .
+comment  F800 Initialization Entry Point
 
 lcomment F800 DIRECT PAGE ADDR
 lcomment F802 START AT TOP OF DP
@@ -419,9 +590,10 @@ lcomment F86F PRINT IT
 lcomment F872 INPUT COMMAND LINE
 lcomment F87E IGNORE IF DELETED LINE
 lcomment F888 COMPARE TO TEXT
-lcomment F88F CHECK FOR EXTENDED CMD TABLE(?)
-lcomment F895 START OF EXTENDED CMD TABLE
-lcomment F89C EXIT IF NOT EXTENDED TABLE
+lcomment F88F CHECK FOR EPROM PROGRAM ROM
+lcomment F893 IF NOT THERE, EXIT
+lcomment F895 START ADDR OF EXTENDED CMD TABLE
+lcomment F89C EXIT IF NOT IN EXTENDED CMD TABLE
 
 lcomment F8A0 GO FOR ANOTHER
 comment  F8A2 UNRECOGNIZED COMMAND HANDLER
@@ -435,7 +607,7 @@ dec FB55
 label FB59 FNDBK2
 label FB67 FNDBK3
 ****
-label FB69 GOCMD
+label FB69
 label FB6B GOCMD1
 label FB80 GOCMD2
 char F9BE
@@ -458,7 +630,7 @@ lcomment FC6A IF DELETE GET NEXT CAR
 lcomment EC7F NEGATIVE?
 lcomment FC9E
 comment  FCA0 BREAKPOINT SERVICE ROUTINE
-comment  FCA0 /
+comment  FCA0 .
 comment  FCA0 SAVE USER STACK, SWITCH TO
 comment  FCA0 DEBUG STACK, REMOVE BREAKPOINTS
 comment  FCA0 AND DUMP USER REGISTERS
@@ -478,17 +650,17 @@ lcomment FCCA MOVE TO NEXT ENTRY
 lcomment FCCC DONE YET?
 lcomment FCCD LOOP IF NOT
 lcomment FCCF PRINT REGS (?)
-comment  FCD1 /
+comment  FCD1 .
 comment  FCD1 SINGLE STEP SERVICE ROUTINE
-comment  FCD1 /
+comment  FCD1 .
 lcomment FCD3 STOP TIMER
 lcomment FCD6 GET DEBUGGER DIRECT PAGE
 lcomment FCDA SAVE USER STACK
 lcomment FCDF LOAD DEBUGGER STACK
 
-comment  FCE6 /
+comment  FCE6 .
 comment  FCE6 SINGLE STEP COMMAND PROCESSOR (?)
-comment  FCE6 /
+comment  FCE6 .
 
 lcomment FCF3 PRINT REGISTERS
 lcomment FCF6 GOTO COMMAND LOOP
@@ -531,12 +703,19 @@ lcomment FE7E GET THE CHAR
 lcomment FE80 LINEFEED?
 lcomment FE82 IF SO GET NEXT
 lcomment FE86 RESTORE REGISTERS
+label FEBF HEX4BIN
+label FECB HEX2DEC
+lcomment FECB CONVERT NEXT CHAR TO DECIMAL
 lcomment FECD RETURN IF NOT HEX
+lcomment FED1 MULTIPLY BY 16
 lcomment FED7 RETURN IF NOT HEX
+lcomment FEDB ADD NEW DIGIT TO SUM
+comment  FEE2 Subroutine HEXDEC - convert hexadecimal
+comment  FEE2 ASCII char to decimal
+
 lcomment FEE2 CONVERT FROM ASCII
-lcomment FEE2 Subroutine HEXDEC - convert hexadecimal
-lcomment FEE2 ASCII char to decimal
 lcomment FEE4 IF <'0' SET CARRY, RETURN
+
 dec FEE7
 dec FEEB
 dec FEEF
@@ -548,6 +727,10 @@ lcomment FEF0 SET CARRY, RETURN IF > 'F'
 lcomment FEF2 [A-F] ARE LEFT
 lcomment FEF4 CLEAR CARRY, RETURN
 lcomment FEF7 SET   CARRY, RETURN
+
+comment  FF21 .
+comment  FF21 .     TTL    6809 UTILITY SUBROUTINE PACKAGE
+comment  FF21 .
 comment  FF21 Input Conversion Subroutines
 comment  FF21 These subroutines convert an usnigned binary
 comment  FF21 number (passed in B or D) to an ASCII character
@@ -555,21 +738,53 @@ comment  FF21 string starting at the address passed in the
 comment  FF21 X register, which will return with the address
 comment  FF21 following the string. All other registers
 comment  FF21 except CC are preserved
-comment  FF21 /
+comment  FF21 .
 
 comment  FF29 Subroutine BIN2HS - Convert word in D reg to
 comment  FF29 four-character hexadecimal followed by a space.
 comment  FF2B FALL THROUGH TO PUTSPC
-comment  FF2B /
+comment  FF2B .
 comment  FF2B Subroutine PUTSPC - Put a space character in
 comment  FF2B the output buffer and increment pointer (x)
 comment  FF33 Subroutine BIN4HX - Convert word in D reg to
 comment  FF33 four-character hexadecimal.
 comment  FF39 FALL THROUGH TO CONVERT LOW BYTE
-comment  FF39 /
+comment  FF39 .
 comment  FF39 Subroutine BIN2HX - convert byte in D reg to
 comment  FF39 two-character hexadecimal.
 
+comment  FF80 .
+comment  FF80 ### I/O SPACE
+
+data FF80-FFDF
+*unused FF80-FFC3
+
+label FFC4 PIADDR0
+label FFC8 PIADDR1
+label FFCC PIADDR2
+label FFD0 ACADDR0
+label FFD4 ACADDR1
+label FFD8 TIMER
+
+comment  FFE0 .
+comment  FFE0 ### VECTORS
+
+data FFE0-FFFF
+*unused FFE0-FFEF
+
+label 9F0D RAM_SW3_VEC
+label 9F0F RAM_SW2_VEC
+label 9F11 RAM_SWI_VEC
+label 9F15 RAM_FRQ_VEC
+label 9F13 RAM_IRQ_VEC
+label 9F17 RAM_NMI_VEC
+
+label 9F04 A1IOBUF
+label 9F0B A1CVECT
+label 9F0A USECRLF
+
 lcomment  FFF0 RESERVED
+
+
 
 
