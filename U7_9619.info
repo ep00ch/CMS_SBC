@@ -531,9 +531,7 @@ comment  F800 .  RAM  AT ?
 comment  F800 .  ACIA AT FFD4
 comment  F800 .  PTM  AT FFD8   (ENABLED TO NMI)
 comment  F800 .
-comment  F800 .
-
-comment  F800 Unfortunately the SW1 jumpers are disabled to set ACIA0,1 CR
+comment  F800 SW1 jumpers set ACIA_1 BAUD
 comment  F800 .
 comment  F800 Initialization Entry Point
 
@@ -559,7 +557,7 @@ lcomment F835 LOOP TIL CLEAR
 lcomment F83A SETUP NMI VECTOR
 lcomment F83F SETUP SWI VECTOR
 
-comment  F841 I/0 (ACIA1) INITIALIZATION
+comment  F841 I/O (ACIA1) INITIALIZATION
 lcomment F841 GET ACIA1 ADDRESS
 lcomment F844 INIT VECTOR
 
@@ -569,11 +567,11 @@ bin F84B
 lcomment F84C SET PIA0 CRA -IRQ, +POR, CA2 OUTPUT HI ON WRITE TO CRA
 lcomment F84E GET PIA0 PORA
 lcomment F850 GET LO NIBBLE (SW1, JP2)
-
-lcomment F856 SET ACIA1 COMMAND REG ($FF)
-lcomment F856 (DTR LOW, IRQ disabled, Echo, Space Parity)
-lcomment F856 (SHOULD THIS BE STA, OR MAYBE STB ?!?)
-
+lcomment F852 USE INTERNAL BAUD RATE GEN
+bin F853
+lcomment F854 DTR LOW, RTS LOW, NO IRQ, NO PARITY
+bin F855
+lcomment F856 SET ACIA1 COMMAND & CONTROL REG
 lcomment F858 GET TIMER ADDRESS
 lcomment F85B TIMER INIT VALUE
 lcomment F85D INIT TIMER
@@ -617,7 +615,6 @@ lcomment FC11 PRINT A SLASH
 lcomment FC4B LOAD PIA0 PORA
 lcomment FC50 GET HI NIBBLE (SW1)
 lcomment FC55 SET ACIA0 COMMAND REG ($00)
-lcomment FC55 (SHOULD THIS BE STA, OR MAYBE STB ?!?)
 comment  FC59 INPUT CHARACTER FROM ACIA0
 lcomment FC5E READ ACIA STATUS REGISTER
 lcomment FC60 CHECK RX FULL BIT
