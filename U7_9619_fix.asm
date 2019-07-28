@@ -2570,17 +2570,16 @@ ZFC1A   LBSR    WRTLIN                   *FC1A: 17 02 1B       '...'
         LEAS    $07,S                    *FC41: 32 67          '2g'
         LBRA    WRTLIN                   *FC43: 16 01 F2       '...'
 * CHECK PIA0-A SW1 DIP SWITCHES
-* BUT DO NOTHING WITH THEM?!
 A0IOINIT PSHS    X,D                      *FC46: 34 16          '4.'
         LDX     #ACADDR0                 *FC48: 8E FF D0       '...'
         LDB     -$0C,X                   *FC4B: E6 14          '..'    LOAD PIA0 PORA
         LSRB                             *FC4D: 54             'T'
         LSRB                             *FC4E: 54             'T'
         LSRB                             *FC4F: 54             'T'
-        LSRB                             *FC50: 54             'T'     GET HI NIBBLE (SW1)
-        ORB     #$10                     *FC51: CA 10          '..'
-        LDA     #$0B                     *FC53: 86 0B          '..'
-        STD     $02,X                    *FC55: ED 02          '..'    SET ACIA0 COMMAND REG ($00)
+        LSRB                             *FC50: 54             'T'     SHIFT HI NIBBLE TO LO (SW1)
+        ORB     #%00010000               *FC51: CA 10          '..'    USE INTERNAL BAUD RATE GEN
+        LDA     #%00001011               *FC53: 86 0B          '..'    DTR LOW, RTS LOW, NO IRQ, NO PARITY
+        STD     $02,X                    *FC55: ED 02          '..'    SET ACIA0 COMMAND & CONTROL REG
         PULS    PC,X,D                   *FC57: 35 96          '5.'
 * INPUT CHARACTER FROM ACIA0
 A0INPCHR PSHS    X                        *FC59: 34 10          '4.'
