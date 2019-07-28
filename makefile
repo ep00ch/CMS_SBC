@@ -36,12 +36,18 @@ $(warning ${O_SRC} )
 %.asm : %.info %.bin
 	$(F9DASM) -info $< -out $@
 
-%.raw %.raw.bin : %.asm %.bin
+%.raw %.raw.bin : %.asm
 	lwasm -f raw -o $@ $<
 
+%.monout : %.raw
+	xxd -g1 -c8 -u -o $$((16#8000)) $< | sed -e 's/0000//' -e 's/  .*//' | tr '[:lower:]' '[:upper:]' > $@
 
 %.diff : %.raw.hexdump %.hexdump
 	diff -s $^ | tee $@
+
+fix : U7_9619.mon U7_9619.info
+	sed -e 's/FD 16 A0 00/FD 16 F8 00/' U7_9619.mon > U7_9619_fix.mon
+	sed -e 's/U7_9619/U7_9619_fix/' U7_9619.info > U7_9619_fix.info
 
 help : 
 	echo "Uses xxd, f9dasm, lwasm, and diff to disassemble, reassemble, and compare\n\
@@ -59,11 +65,14 @@ clean:
 	rm -f *bin
 	rm -f *0bin
 #	rm -f *info
+	rm -f *_fix.mon
+	rm -f *_fix.info
 	rm -f *tmp
 	rm -f EPROM_9609.info EPROM_9619.info
 	rm -f *asm
 	rm -f *raw
 	rm -f *diff
+	rm -f *monout
 
 
 .PHONY: clean all 9609 9619 help
