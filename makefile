@@ -10,6 +10,9 @@ $(warning ${O_SRC} )
 %.bin : %.mon
 	xxd -r -seek -$$((16#8000)) -g1 -c8 $< > $@
 
+%.aif : %.mon
+	c2t -2 $< $@
+
 %.hex : %.bin
 	xxd $< > $@
 
@@ -45,22 +48,29 @@ $(warning ${O_SRC} )
 %.diff : %.mon %.raw.mon
 	diff -s $^ | tee $@
 
+help : 
+	@echo "Uses xxd, f9dasm, lwasm, and diff to disassemble, reassemble, and\n\
+	  compare 6809 code as exported from the Apple II monitor. Try: \n\
+	     make all \n\
+	     make U7_9619.hex\n     make U7_9619.asm\n\
+	     make U7_9619.raw\n     make U7_9619.diff\n\
+	     make clean is aggressive, don't keep modifications in this folder."
+
 fix : U7_9619.mondmp U7_9619.info
 	sed -e 's/FD 16 A0 00/FD 16 F8 00/' U7_9619.mondmp > U7_9619_fix.mondmp
 	sed -e 's/U7_9619/U7_9619_fix/' U7_9619.info > U7_9619_fix.info
 
-help : 
-	echo "Uses xxd, f9dasm, lwasm, and diff to disassemble, reassemble, and compare\n\
-	  6809 code as exported from the Apple II monitor. Try: \n\
-	     make all \n\
-	     make U7_9619.hex\n     make U7_9619.asm\n\
-	     make U7_9619.raw\n     make U7_9619.diff"
-
-
 all : EPROM_9619.asm EPROM_9609.asm
+
+# This sets up for a git commit with the viewable U7_9619.asm file.
+clean-git : | clean fix 
+	make U7_9619_fix.asm
+	rm -f U7_9619_fix.mondmp
+	rm -f U7_9619_fix.info
 
 clean:
 	rm -f *.mon
+	rm -f *.aif
 	rm -f *.hex
 	rm -f *.bin
 	rm -f *_fix.mondmp
