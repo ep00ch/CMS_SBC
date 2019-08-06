@@ -9,12 +9,16 @@ comment  .      11/6/99
 comment  .
 comment  .ORGANIZATION:
 comment  .  E000-E6FF    EMPTY
-data E000-E6FF
-*unused   E000-E6FF
+*data E000-E6FF
+unused   E000-E6FF
+insert   .        ORG     $E000
+insert   .        FILL    $FF,$700
+
 comment  .  E700-E7FF    RTC DATE/TIME
 *unused   E700-E7FF
 comment  .  E800?EFFF    EPROM PROGRAMMER
 *unused   E800-EFFF
+
 comment  .  F000?F7FF    ASSEMBLER
 *unused   F000-F7FF
 comment  .  F800-FF7F    DEBUGGER
@@ -25,11 +29,11 @@ comment  .  FFE0-FFFF    VECTORS
 *unused   FFE0-FFFF
 
 **** Section Info
-comment  E700 .
+
 comment  E700 ### RTC CLOCK UTILITIES
 
 *** Section Format
-data E7FD-E7FF
+data  E7FD-E7FF
 
 *** Section Labels
 label E700 _SETCLK

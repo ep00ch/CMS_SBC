@@ -48,6 +48,18 @@ $(warning ${O_SRC} )
 %.diff : %.mon %.raw.mon
 	diff -s $^ | tee $@
 
+%.dbge : %.raw
+	# Format to dump to EEPROM using debugger and ignore errors.
+	# The value is checked before the EEPROM write interval is reached,
+	# casing an error, but it will write it, slowly!
+	xxd -c1 -u -o $$((16#A000)) $< | sed -e 's/0000/E /' -e 's/  .*//' -e 's/: /:/'| tr '[:lower:]' '[:upper:]' | tr ':' '\n'> $@
+
+%.debug : %.asm
+	lwasm -f hex -o $*.debug.tmp $<
+	echo "E " | cat - $*.debug.tmp | sed -e '4,$$s/....://' | tr -d '\r\n,'| tr ':' '\n' > $@
+	echo $$'\n' >> $@
+	@cat $@
+
 help : 
 	@echo "Uses xxd, f9dasm, lwasm, and diff to disassemble, reassemble, and\n\
 	  compare 6809 code as exported from the Apple II monitor. Try: \n\
@@ -77,9 +89,12 @@ clean:
 	rm -f *_fix.info
 	rm -f *.tmp
 	rm -f EPROM_9609.info EPROM_9619.info
+	#rm -i *.asm
 	rm -f *.asm
 	rm -f *.raw
 	rm -f *.diff
+	rm -f *.debug
+	rm -f *.dbge
 
 .PHONY: clean all 9609 9619 help
 
