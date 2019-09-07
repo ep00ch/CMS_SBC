@@ -1,0 +1,22 @@
+FILE "U3_9642.bin" E000
+
+***** General Info
+comment  .
+comment  ROM LABEL:
+comment  .      9642 [ILLEG]
+comment  .      (c) 1985 CMS INC.
+comment  .      30 [ILLEG] 07-02     2.[ILLEG] / [ILLEG]
+comment  .
+comment  .ORGANIZATION:
+comment  .  E000-EFFF    EMPTY
+unused E000-EFFF
+insert   .        ORG     $E000
+insert   .        FILL    $FF,$1000
+
+
+
+comment  .  FF80-FFDF    I/O SPACE?
+data   FF2B-FFEF
+word   FFF0
+comment  .  FFE0-FFFF    VECTORS
+

@@ -1,5 +1,5 @@
 * f9dasm: M6800/1/2/3/8/9 / H6309 Binary/OS9/FLEX9 Disassembler V1.76
-* Loaded binary file U7_9619_fix.bin
+* Loaded binary file U7_9619.bin
 
 * ROM LABEL:
 *       Debug 2418

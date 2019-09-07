@@ -1,0 +1,24 @@
+FILE "U26_9639.bin" E000
+
+***** General Info
+comment  .
+comment  ROM LABEL:
+comment  .      9639-OS92  V1.2
+comment  .      (c) 1982 MICROWARE CORP.
+comment  .      3975A            [U26]
+comment  .      3A109007-18   1.00/850717
+comment  .      [handwritten] 4.01 10-18-85
+comment  .
+comment  .ORGANIZATION:
+comment  .  E000-EFFF    EMPTY
+unused E000-EFFF
+insert   .        ORG     $E000
+insert   .        FILL    $FF,$1000
+
+
+
+comment  .  FF80-FFDF    I/O SPACE?
+data   FF2B-FFEF
+word   FFF0
+comment  .  FFE0-FFFF    VECTORS
+
