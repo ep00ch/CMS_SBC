@@ -1,0 +1,48 @@
+FILE "U12_XK_300.bin" F000
+option 6802
+
+***** General Info
+comment  .
+comment  ROM LABEL:
+comment  .      ELENCO
+comment  .      ADVENT
+comment  .      ELECTRONICS
+comment  .      (312) 297-6200
+
+***** Program Addresses
+label F000  RESET
+label F024  PROMPT
+label F04E  GET
+label F0BB  PUT
+label F120  DYSCOD
+label F169  DLY25
+label F171  DLY1
+label F179  DLYX
+label F183  ADDAX
+label F195  CLRDS
+label F1AA  ROLL2
+label F1CC  ROLL4
+label F1EF  RDKEY
+label F533  TIN
+label F608  PNCHB
+label F630  PUNCH
+label F69C  LOAD
+
+***** Scratch RAM Addresses
+label E419  MNPTR
+label E41B  KEY
+label E41C  KEYFLG
+label E41D  DISBUF
+label E423  ROLPAS
+label E42C  HEXBUF
+label E42D  HEXBU1
+label E42E  HEXBU2
+label E42F  USP
+label E431  UCC
+
+
+
+
+
+
+
