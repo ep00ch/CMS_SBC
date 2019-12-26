@@ -22,14 +22,19 @@ $(warning ${O_SRC} )
 #Transition from mondmp to dbgdmp
 %.mon.dbgdmp : %.bin
 	xxd -g1 -c16 -u -o $$((16#C000)) $< | \
-	sed -e 's/0000//' -e 's/  .*//' -e 's/://' | \
+	sed -e 's/^0000\(....\):\(\( [[:xdigit:]]\{2\}\)*\)  .*/\1\2/' | \
+	tr '[:lower:]' '[:upper:]' > $@ 
+
+%.raw.dbgdmp : %.raw
+	xxd -g1 -c16 -u -o $$((16#C000)) $< | \
+	sed -e 's/^0000\(....\):\(\( [[:xdigit:]]\{2\}\)*\)  .*/\1\2/' | \
 	tr '[:lower:]' '[:upper:]' > $@ 
 
 %.hex : %.bin
 	xxd $< > $@
 
-#%.info : %.bin
-#	echo "FILE \"$<\" E000" > $@
+%.info : %.bin
+	echo "FILE \"$<\" E000" > $@
 
 %9609.asm : %9609.info U22_9609.bin U23_9609.bin
 	$(F9DASM) -info $< -out $@
@@ -40,12 +45,7 @@ $(warning ${O_SRC} )
 %.raw %.raw.bin : %.asm
 	lwasm -f raw -o $@ $<
 
-%.raw.dbgdmp : %.raw
-	xxd -g1 -c8 -u -o $$((16#8000)) $< | \
-	sed -e 's/0000//' -e 's/  .*//' | \
-	tr '[:lower:]' '[:upper:]' > $@
-
-# Format to output to Apple II system monitor.
+# Compare before and after disassembly and reassembly.
 %.diff : %.dbgdmp %.raw.dbgdmp
 	diff -s $^ | tee $@
 
@@ -61,7 +61,7 @@ $(warning ${O_SRC} )
 # Format to dump to EEPROM using DEBUG19 and ignore errors.
 # The value is checked by the monitor before the 
 # EEPROM write interval is reached, causing an error,
-# but it will write it, and the format continues, slowly!
+# but it will write it, and the writing continues, slowly!
 %.dbgee : %.raw
 	xxd -c1 -u -o $$((16#A000)) $< | \
 	sed -e 's/0000/E /' -e 's/  .*//' -e 's/: /:/'| \
@@ -78,7 +78,7 @@ help :
 all : U22_U23_9609.asm U7_9619.asm U26_9639.asm U3_9642.asm
 
 # This sets up for a git commit with the viewable U7_9619.asm file.
-clean-git : | clean U7_9619.asm
+clean-git : | clean U7_9619.asm U26_9639.asm
 	git status
 
 clean:
