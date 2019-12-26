@@ -33,8 +33,8 @@ $(warning ${O_SRC} )
 %.hex : %.bin
 	xxd $< > $@
 
-%.info : %.bin
-	echo "FILE \"$<\" E000" > $@
+#%.info : %.bin
+	#echo "FILE \"$<\" E000" > $@
 
 %9609.asm : %9609.info U22_9609.bin U23_9609.bin
 	$(F9DASM) -info $< -out $@
