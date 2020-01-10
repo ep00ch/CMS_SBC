@@ -26,22 +26,19 @@ M0001   EQU     $0001
 DBUGSP  EQU     $0002
 IOBUF   EQU     $0004
 BKPTBL  EQU     $0006
-M0008   EQU     $0008
+INBKPT  EQU     $0008
 ACINIT  EQU     $0009
 ACVECT  EQU     $000B
 TIMOUT  EQU     $000C
 M0010   EQU     $0010
 SWIVCT  EQU     $0011
-M0014   EQU     $0014
-M0015   EQU     $0015
 NMIVCT  EQU     $0017
-M0018   EQU     $0018
 M0019   EQU     $0019
 M001A   EQU     $001A
 M001E   EQU     $001E
 M001F   EQU     $001F
 M0020   EQU     $0020
-M0022   EQU     $0022
+BYTCNT  EQU     $0022
 M0023   EQU     $0023
 M0027   EQU     $0027
 M0028   EQU     $0028
@@ -65,12 +62,12 @@ M008F   EQU     $008F
 M0090   EQU     $0090
 M0092   EQU     $0092
 M0093   EQU     $0093
-EPTYPELO EQU     $0096
+EPLOC   EQU     $0096
 M0097   EQU     $0097
 M0099   EQU     $0099
 M009B   EQU     $009B
 M009C   EQU     $009C
-EPTYPEHI EQU     $009D
+EPHEAD  EQU     $009D
 M00FF   EQU     $00FF
 M1401   EQU     $1401
 M1700   EQU     $1700
@@ -78,15 +75,10 @@ M1805   EQU     $1805
 M2324   EQU     $2324
 M293D   EQU     $293D
 M2A2A   EQU     $2A2A
-Z3438   EQU     $3438
-Z3548   EQU     $3548
-Z354F   EQU     $354F
 M4101   EQU     $4101
 M4202   EQU     $4202
 M44FF   EQU     $44FF
 M5043   EQU     $5043
-M6620   EQU     $6620
-M7145   EQU     $7145
 M8008   EQU     $8008
 M9F00   EQU     $9F00
 A1IOBUF EQU     $9F04
@@ -225,7 +217,7 @@ _RTC_RD PSHS    D                        *E7AF: 34 06          '4.'    SAVE A&B 
         LDB     #%00111100               *E7D2: C6 3C          '.<'    SELECT POR, SET CB2-HI
         STB     $03,U                    *E7D4: E7 43          '.C'    SAVE TO PIA0 CRB
         LBSR    _RTC_SSR                 *E7D6: 17 00 02       '...'
-        PULS    PC,D                     *E7D9: 35 86          '5.'    RESTORE A&D, RTS
+        PULS    PC,D                     *E7D9: 35 86          '5.'    RESTORE A&B, RTS
 _RTC_SSR PSHS    D                        *E7DB: 34 06          '4.'
         LDB     #$0F                     *E7DD: C6 0F          '..'    RTC ADDR FOR STANDARD SIGNAL REG
         LBSR    _RTCADDRWR               *E7DF: 17 FF 56       '..V'
@@ -264,37 +256,39 @@ AC1CR_VEC FCB     $FF,$D4                  *E81C: FF D4          '..'
 AC1DR_VEC FCB     $FF,$D5                  *E81E: FF D5          '..'
 BSP     FCB     $08                      *E820: 08             '.'     BACKSPACE ?
 DLE     FCB     $10                      *E821: 10             '.'     DATA LINK ESCAPE ?
-ZE822   BSR     ZE827                    *E822: 8D 03          '..'
-        BCS     ZE822                    *E824: 25 FC          '%.'
+PRWTNXT BSR     PRCKNXT                  *E822: 8D 03          '..'
+        BCS     PRWTNXT                  *E824: 25 FC          '%.'
         RTS                              *E826: 39             '9'
-ZE827   PSHS    A                        *E827: 34 02          '4.'
-        LDA     [>AC1DR_VEC,PCR]         *E829: A6 9D FF F1    '....'
-        BITA    >BSP,PCR                 *E82D: A5 8D FF EF    '....'
-        BEQ     ZE83E                    *E831: 27 0B          ''.'
-        PULS    A                        *E833: 35 02          '5.'
-        LDA     [>AC1CR_VEC,PCR]         *E835: A6 9D FF E3    '....'
-        ANDA    #$7F                     *E839: 84 7F          '..'
-        ANDCC   #$FE                     *E83B: 1C FE          '..'
-        RTS                              *E83D: 39             '9'
-ZE83E   ORCC    #$01                     *E83E: 1A 01          '..'
-        PULS    PC,A                     *E840: 35 82          '5.'
-ZE842   PSHS    A                        *E842: 34 02          '4.'    Appears to be the main command character processor
-        BSR     ZE827                    *E844: 8D E1          '..'
-        BCS     ZE852                    *E846: 25 0A          '%.'
-        CMPA    #$1B                     *E848: 81 1B          '..'
-        BNE     ZE852                    *E84A: 26 06          '&.'
-        BSR     ZE822                    *E84C: 8D D4          '..'
-        CMPA    #$1B                     *E84E: 81 1B          '..'    ESC?
+PRCKNXT PSHS    A                        *E827: 34 02          '4.'    SAVE A TO STACK
+        LDA     [>AC1DR_VEC,PCR]         *E829: A6 9D FF F1    '....'  GET NEXT CHAR FROM ACIA
+        BITA    >BSP,PCR                 *E82D: A5 8D FF EF    '....'  CHECK IF CHAR AVAILABLE
+        BEQ     PRGOTBS                  *E831: 27 0B          ''.'
+        PULS    A                        *E833: 35 02          '5.'    RESTORE A FROM STACK
+        LDA     [>AC1CR_VEC,PCR]         *E835: A6 9D FF E3    '....'  LOAD ACIA STATUS REGISTER
+        ANDA    #%01111111               *E839: 84 7F          '..'    MASK OUT IRQ
+        ANDCC   #$FE                     *E83B: 1C FE          '..'    CLEAR CARRY FLAG
+        RTS                              *E83D: 39             '9'     RETURN WITH STATUS IN A, CARRY SET IS BKS
+PRGOTBS ORCC    #$01                     *E83E: 1A 01          '..'    SET CARRY FLAG
+        PULS    PC,A                     *E840: 35 82          '5.'    RETURN
+ZE842   PSHS    A                        *E842: 34 02          '4.'    SAVE A
+        BSR     PRCKNXT                  *E844: 8D E1          '..'    CHECK IF NEXT CHAR IS AVAIL
+        BCS     PRGETCHAR                *E846: 25 0A          '%.'
+        CMPA    #%00011011               *E848: 81 1B          '..'
+        BNE     PRGETCHAR                *E84A: 26 06          '&.'
+        BSR     PRWTNXT                  *E84C: 8D D4          '..'
+        CMPA    #$1B                     *E84E: 81 1B          '..'    ESC KEY
         BEQ     ZE807                    *E850: 27 B5          ''.'
-ZE852   LDA     [>AC1DR_VEC,PCR]         *E852: A6 9D FF C8    '....'
-        BITA    >DLE,PCR                 *E856: A5 8D FF C7    '....'
-        BEQ     ZE852                    *E85A: 27 F6          ''.'
+PRGETCHAR LDA     [>AC1DR_VEC,PCR]         *E852: A6 9D FF C8    '....'  GET CHAR FROM ACIA
+        BITA    >DLE,PCR                 *E856: A5 8D FF C7    '....'  CHECK IF DATA LINK ESC CHAR
+        BEQ     PRGETCHAR                *E85A: 27 F6          ''.'
         PULS    A                        *E85C: 35 02          '5.'
         STA     [>AC1CR_VEC,PCR]         *E85E: A7 9D FF BA    '....'
         RTS                              *E862: 39             '9'
+* ENTRY POINT INTO EPROM PROGRAMMER
+* FOR CMS 9614, 9617, 9618 HEADS
 EPROM   CLRB                             *E863: 5F             '_'
         LDA     >EPRM_DP,PCR             *E864: A6 8D FF A2    '....'
-        TFR     A,DP                     *E868: 1F 8B          '..'    SET DIRECT PAGE TO BUFFER
+        TFR     A,DP                     *E868: 1F 8B          '..'    DIRECT PAGE TO BUFFER
         TFR     D,X                      *E86A: 1F 01          '..'    DATA BUFFER DIRECT PAGE ADDRESS
         LDB     #$FF                     *E86C: C6 FF          '..'    SET LOOP COUNTER 255
 EPRM2   CLR     ,X+                      *E86E: 6F 80          'o.'    CLEAR THE BUFFER
@@ -302,21 +296,21 @@ EPRM2   CLR     ,X+                      *E86E: 6F 80          'o.'    CLEAR THE
         BNE     EPRM2                    *E871: 26 FB          '&.'    KEEP LOOPING IF >0
         LBSR    EP1INIT                  *E873: 17 05 E4       '...'
         LDA     #$FF                     *E876: 86 FF          '..'
-        STA     EPTYPELO                 *E878: 97 96          '..'
+        STA     EPLOC                    *E878: 97 96          '..'
 EPRM3   LDD     >EPRM_DP,PCR             *E87A: EC 8D FF 8C    '....'
         TFR     A,DP                     *E87E: 1F 8B          '..'    SET DIRECT PAGE TO BUFFER
-        ADDD    #M00FF                   *E880: C3 00 FF       '...'
+        ADDD    #$00FF                   *E880: C3 00 FF       '...'
         TFR     D,S                      *E883: 1F 04          '..'    $9DFF = END OF DP?
         LBSR    ZEF1B                    *E885: 17 06 93       '...'
         LBSR    ZEC59                    *E888: 17 03 CE       '...'
         LDA     #$04                     *E88B: 86 04          '..'
-        LBSR    ZEB1C                    *E88D: 17 02 8C       '...'
+        LBSR    EPPRMSG                  *E88D: 17 02 8C       '...'   PRINT PROMPT
         LBSR    ZEC97                    *E890: 17 04 04       '...'
         BCS     EPRM3                    *E893: 25 E5          '%.'
         LBSR    ZEB36                    *E895: 17 02 9E       '...'
         BCC     ZE8A1                    *E898: 24 07          '$.'
         LDA     #$05                     *E89A: 86 05          '..'
-        LBSR    ZEB1C                    *E89C: 17 02 7D       '..}'
+        LBSR    EPPRMSG                  *E89C: 17 02 7D       '..}'   PRINT "WHAT?"
         BRA     EPRM3                    *E89F: 20 D9          ' .'
 ZE8A1   LDD     ,X                       *E8A1: EC 84          '..'
         JSR     D,X                      *E8A3: AD 8B          '..'
@@ -391,10 +385,10 @@ ZE92C   PSHS    D                        *E92C: 34 06          '4.'
         PSHS    A                        *E939: 34 02          '4.'
         LBSR    ZEC59                    *E93B: 17 03 1B       '...'
         LDA     #$07                     *E93E: 86 07          '..'
-        LBSR    ZEB1C                    *E940: 17 01 D9       '...'
-        LBSR    ZEB1C                    *E943: 17 01 D6       '...'
-        LBSR    ZEB1C                    *E946: 17 01 D3       '...'
-        LBSR    ZEB1C                    *E949: 17 01 D0       '...'
+        LBSR    EPPRMSG                  *E940: 17 01 D9       '...'   PRINT "ADDR PR MM" x4
+        LBSR    EPPRMSG                  *E943: 17 01 D6       '...'
+        LBSR    EPPRMSG                  *E946: 17 01 D3       '...'
+        LBSR    EPPRMSG                  *E949: 17 01 D0       '...'
         LDA     #$04                     *E94C: 86 04          '..'
         STA     M008F                    *E94E: 97 8F          '..'
         LBSR    ZEC59                    *E950: 17 03 06       '...'
@@ -427,7 +421,7 @@ ZE98B   LEAY    $01,Y                    *E98B: 31 21          '1!'
         CMPY    M0099                    *E98D: 10 9C 99       '...'
         BNE     ZE92C                    *E990: 26 9A          '&.'
         LDA     #$02                     *E992: 86 02          '..'
-        LBSR    ZEB1C                    *E994: 17 01 85       '...'
+        LBSR    EPPRMSG                  *E994: 17 01 85       '...'   PRINT "EXEEDED SIZE"
         RTS                              *E997: 39             '9'
         LBSR    ZEBCB                    *E998: 17 02 30       '..0'
         LDA     #$01                     *E99B: 86 01          '..'
@@ -438,13 +432,13 @@ ZE98B   LEAY    $01,Y                    *E98B: 31 21          '1!'
         LBSR    ZE914                    *E9A8: 17 FF 69       '..i'
         RTS                              *E9AB: 39             '9'
         LBSR    ZEBCB                    *E9AC: 17 02 1C       '...'
-        LDA     EPTYPELO                 *E9AF: 96 96          '..'
+        LDA     EPLOC                    *E9AF: 96 96          '..'
         INCA                             *E9B1: 4C             'L'
         LEAX    MECE4,PCR                *E9B2: 30 8D 03 2E    '0...'
         LBSR    ZEB32                    *E9B6: 17 01 79       '..y'
         LBSR    ZEC59                    *E9B9: 17 02 9D       '...'
         LDA     #$00                     *E9BC: 86 00          '..'
-        LBSR    ZEB1C                    *E9BE: 17 01 5B       '..['
+        LBSR    EPPRMSG                  *E9BE: 17 01 5B       '..['   PRINT "START  END"
         LBSR    ZEC59                    *E9C1: 17 02 95       '...'
         LDX     M0084                    *E9C4: 9E 84          '..'
         LBSR    ZEB67                    *E9C6: 17 01 9E       '...'
@@ -484,9 +478,9 @@ ZEA06   PSHS    D                        *EA06: 34 06          '4.'
         BNE     ZEA06                    *EA16: 26 EE          '&.'
         BRA     ZEA2E                    *EA18: 20 14          ' .'
 ZEA1A   PULS    D                        *EA1A: 35 06          '5.'
-        LDA     #$08                     *EA1C: 86 08          '..'
-        LBSR    ZEB1C                    *EA1E: 17 00 FB       '...'
-        LBSR    ZE822                    *EA21: 17 FD FE       '...'
+        LDA     #$08                     *EA1C: 86 08          '..'    UNKNOWN ERROR
+        LBSR    EPPRMSG                  *EA1E: 17 00 FB       '...'   PRINT "ARRRGH!!!"
+        LBSR    PRWTNXT                  *EA21: 17 FD FE       '...'
         CMPA    #$59                     *EA24: 81 59          '.Y'
         BEQ     ZEA2B                    *EA26: 27 03          ''.'
         LBRA    ZE807                    *EA28: 16 FD DC       '...'
@@ -501,9 +495,9 @@ ZEA30   PSHS    D                        *EA30: 34 06          '4.'
         LEAY    $01,Y                    *EA3E: 31 21          '1!'
         CMPY    M0099                    *EA40: 10 9C 99       '...'
         BNE     ZEA30                    *EA43: 26 EB          '&.'
-        LDA     #$02                     *EA45: 86 02          '..'
-        LBSR    ZEB1C                    *EA47: 17 00 D2       '...'
-ZEA4A   LDA     #$07                     *EA4A: 86 07          '..'    BELL CHAR
+        LDA     #$02                     *EA45: 86 02          '..'    PRINT "EXEEDED SIZE"
+        LBSR    EPPRMSG                  *EA47: 17 00 D2       '...'
+ZEA4A   LDA     #$07                     *EA4A: 86 07          '..'
         LBSR    ZE842                    *EA4C: 17 FD F3       '...'
         LBSR    ZE90B                    *EA4F: 17 FE B9       '...'
         RTS                              *EA52: 39             '9'
@@ -529,7 +523,7 @@ ZEA6C   PSHS    D                        *EA6C: 34 06          '4.'
         BNE     ZEA6C                    *EA7F: 26 EB          '&.'
         LDA     #$02                     *EA81: 86 02          '..'
         LBSR    ZEC59                    *EA83: 17 01 D3       '...'
-        LBSR    ZEB1C                    *EA86: 17 00 93       '...'
+        LBSR    EPPRMSG                  *EA86: 17 00 93       '...'
 ZEA89   RTS                              *EA89: 39             '9'
         LBSR    ZEBF3                    *EA8A: 17 01 66       '..f'
         BCS     ZEADD                    *EA8D: 25 4E          '%N'
@@ -540,7 +534,7 @@ ZEA89   RTS                              *EA89: 39             '9'
 ZEA97   LBSR    ZEB67                    *EA97: 17 00 CD       '...'
         LDA     ,Y                       *EA9A: A6 A4          '..'
         LBSR    ZEB77                    *EA9C: 17 00 D8       '...'
-        LBSR    ZE822                    *EA9F: 17 FD 80       '...'
+        LBSR    PRWTNXT                  *EA9F: 17 FD 80       '...'
         BSR     ZEB13                    *EAA2: 8D 6F          '.o'
         CMPA    #$20                     *EAA4: 81 20          '. '
         BNE     ZEAB1                    *EAA6: 26 09          '&.'
@@ -559,7 +553,7 @@ ZEABE   LBSR    ZEC3C                    *EABE: 17 01 7B       '..{'
         LDB     #$10                     *EAC3: C6 10          '..'
         MUL                              *EAC5: 3D             '='
         PSHS    B                        *EAC6: 34 04          '4.'
-        LBSR    ZE822                    *EAC8: 17 FD 57       '..W'
+        LBSR    PRWTNXT                  *EAC8: 17 FD 57       '..W'
         BSR     ZEB13                    *EACB: 8D 46          '.F'
         LBSR    ZEC3C                    *EACD: 17 01 6C       '..l'
         BCS     ZEADE                    *EAD0: 25 0C          '%.'
@@ -589,29 +583,29 @@ ZEAFA   PSHS    B                        *EAFA: 34 04          '4.'    SAVE B
         LBSR    ZEFA1                    *EB01: 17 04 9D       '...'
         BCC     ZEB0E                    *EB04: 24 08          '$.'
         LDA     #$01                     *EB06: 86 01          '..'
-        BSR     ZEB1C                    *EB08: 8D 12          '..'
+        BSR     EPPRMSG                  *EB08: 8D 12          '..'    PRINT "WRONG HEAD"
         LDA     #$FF                     *EB0A: 86 FF          '..'
-        STA     EPTYPELO                 *EB0C: 97 96          '..'
+        STA     EPLOC                    *EB0C: 97 96          '..'    SET LOC TO END OF BUFFER
 ZEB0E   RTS                              *EB0E: 39             '9'
         JMP     [svec_RST]               *EB0F: 6E 9F FF FE    'n...'
 ZEB13   LBSR    DIGIT2                   *EB13: 17 01 51       '..Q'
         BCS     ZEB1B                    *EB16: 25 03          '%.'
         LBSR    ZE842                    *EB18: 17 FD 27       '..''
 ZEB1B   RTS                              *EB1B: 39             '9'
-ZEB1C   PSHS    X,D                      *EB1C: 34 16          '4.'
-        LEAX    MESSGES,PCR              *EB1E: 30 8D 01 D3    '0...'
+EPPRMSG PSHS    X,D                      *EB1C: 34 16          '4.'
+        LEAX    EPMSG_TBL,PCR            *EB1E: 30 8D 01 D3    '0...'  LOAD POINTER TO MSG TBL INTO X
 ZEB22   CMPA    #$08                     *EB22: 81 08          '..'
         BLS     ZEB28                    *EB24: 23 02          '#.'
         LDA     #$06                     *EB26: 86 06          '..'
-ZEB28   ASLA                             *EB28: 48             'H'
-        LDD     A,X                      *EB29: EC 86          '..'
-        LEAX    D,X                      *EB2B: 30 8B          '0.'
+ZEB28   ASLA                             *EB28: 48             'H'     CONVERT A TO WORD OFFSET (x2)
+        LDD     A,X                      *EB29: EC 86          '..'    GET THE POINTER TO THE MSG
+        LEAX    D,X                      *EB2B: 30 8B          '0.'    GET THE ADDRESS OF THE MSG INTO X
         LBSR    ZEBBE                    *EB2D: 17 00 8E       '...'
-        PULS    PC,X,D                   *EB30: 35 96          '5.'
+        PULS    PC,X,D                   *EB30: 35 96          '5.'    RETURN
 ZEB32   PSHS    X,D                      *EB32: 34 16          '4.'
         BRA     ZEB22                    *EB34: 20 EC          ' .'
 ZEB36   LDX     M0082                    *EB36: 9E 82          '..'
-        LEAY    MEDB4,PCR                *EB38: 31 8D 02 78    '1..x'
+        LEAY    EPCMD_TBL,PCR            *EB38: 31 8D 02 78    '1..x'
 ZEB3C   LDA     ,X+                      *EB3C: A6 80          '..'
         LBSR    DIGIT2                   *EB3E: 17 01 26       '..&'
         BCS     ZEB5A                    *EB41: 25 17          '%.'
@@ -682,11 +676,11 @@ SKIPSP2 LDA     ,X+                      *EBB2: A6 80          '..'
         STX     M0082                    *EBBA: 9F 82          '..'
         PULS    PC,X,A                   *EBBC: 35 92          '5.'
 ZEBBE   PSHS    X,A                      *EBBE: 34 12          '4.'
-ZEBC0   LDA     ,X+                      *EBC0: A6 80          '..'
-        BEQ     ZEBC9                    *EBC2: 27 05          ''.'
+ZEBC0   LDA     ,X+                      *EBC0: A6 80          '..'    GET NEXT MSG LETTER
+        BEQ     ZEBC9                    *EBC2: 27 05          ''.'    CHECK FOR NULL END
         LBSR    ZE842                    *EBC4: 17 FC 7B       '..{'
-        BRA     ZEBC0                    *EBC7: 20 F7          ' .'
-ZEBC9   PULS    PC,X,A                   *EBC9: 35 92          '5.'
+        BRA     ZEBC0                    *EBC7: 20 F7          ' .'    CONTINUE UNTIL NULL
+ZEBC9   PULS    PC,X,A                   *EBC9: 35 92          '5.'    RETURN
 ZEBCB   PSHS    D                        *EBCB: 34 06          '4.'
         BSR     ZEBAE                    *EBCD: 8D DF          '..'
         BSR     ZEBF3                    *EBCF: 8D 22          '."'
@@ -776,11 +770,11 @@ DIGIT3  ANDCC   #$FE                     *EC77: 1C FE          '..'
         RTS                              *EC79: 39             '9'
 RETNO   ORCC    #$01                     *EC7A: 1A 01          '..'
         RTS                              *EC7C: 39             '9'
-ZEC7D   TST     EPTYPELO                 *EC7D: 0D 96          '..'
+ZEC7D   TST     EPLOC                    *EC7D: 0D 96          '..'
         BMI     ZEC82                    *EC7F: 2B 01          '+.'    NEGATIVE?
         RTS                              *EC81: 39             '9'
 ZEC82   LDA     #$03                     *EC82: 86 03          '..'
-        LBSR    ZEB1C                    *EC84: 17 FE 95       '...'
+        LBSR    EPPRMSG                  *EC84: 17 FE 95       '...'   PRINT "EXCEEDED SIZE OF DEVICE..."
         LBRA    ZE807                    *EC87: 16 FB 7D       '..}'
 ZEC8A   PSHS    X,D,CC                   *EC8A: 34 17          '4.'
         LDD     M0084                    *EC8C: DC 84          '..'
@@ -793,7 +787,7 @@ ZEC97   LDB     #$00                     *EC97: C6 00          '..'
         STD     M0082                    *EC9B: DD 82          '..'
         TFR     D,X                      *EC9D: 1F 01          '..'
         CLR     ,-S                      *EC9F: 6F E2          'o.'
-ZECA1   LBSR    ZE822                    *ECA1: 17 FB 7E       '..~'
+ZECA1   LBSR    PRWTNXT                  *ECA1: 17 FB 7E       '..~'
         CMPA    #$08                     *ECA4: 81 08          '..'
         BNE     ZECBF                    *ECA6: 26 17          '&.'
         CMPX    M0082                    *ECA8: 9C 82          '..'
@@ -835,14 +829,15 @@ MECE4   FCB     $00,$87,$01,$0B,$01,$04  *ECE4: 00 87 01 0B 01 04 '......'
         FCB     $01                      *ECF2: 01             '.'
         FCC     "/"                      *ECF3: 2F             '/'
 MECF4   FCB     $FF                      *ECF4: FF             '.'
-MESSGES FCB     $00,$12,$00              *ECF5: 00 12 00       '...'
-        FCC     "2"                      *ECF8: 32             '2'
-        FCB     $00                      *ECF9: 00             '.'
-        FCC     "M"                      *ECFA: 4D             'M'
-        FCB     $00                      *ECFB: 00             '.'
-        FCC     "v"                      *ECFC: 76             'v'
-        FCB     $00,$9D,$00,$A1,$00,$A7  *ECFD: 00 9D 00 A1 00 A7 '......'
-        FCB     $00,$B1,$00,$94          *ED03: 00 B1 00 94    '....'
+EPMSG_TBL FDB     $0012                    *ECF5: 00 12          '..'    #$00. OFFSET TO ED07 STRING "START  END"
+        FDB     $0032                    *ECF7: 00 32          '.2'    #$01. OFFSET TO ED27 STRING "WRONG HEAD"
+        FDB     $004D                    *ECF9: 00 4D          '.M'    #$02. OFFSET TO ED42 STRING "EXEEDED SIZE"
+        FDB     $0076                    *ECFB: 00 76          '.v'    #$03. OFFSET TO ED6B STRING "PLEASE SELECT"
+        FDB     $009D                    *ECFD: 00 9D          '..'    #$04. OFFSET TO ED92 STRING (PROMPT)
+        FDB     $00A1                    *ECFF: 00 A1          '..'    #$05. OFFSET TO ED96 STRING "WHAT?"
+        FDB     $00A7                    *ED01: 00 A7          '..'    #$06. OFFSET TO ED9C STRING "ARRRGH!!!"
+        FDB     $00B1                    *ED03: 00 B1          '..'    #$07. OFFSET TO EDA6 STRING "ADDR PR MM"
+        FDB     $0094                    *ED05: 00 94          '..'    #$09. OFFSET TO ED89 STRING "CHANGE?"
         FCC     "START  END  RAM-ADDR "  *ED07: 53 54 41 52 54 20 20 45 4E 44 20 20 52 41 4D 2D 41 44 44 52 20 'START  END  RAM-ADDR '
         FCC     "ROM-OFFSET"             *ED1C: 52 4F 4D 2D 4F 46 46 53 45 54 'ROM-OFFSET'
         FCB     $00                      *ED26: 00             '.'
@@ -865,91 +860,98 @@ MESSGES FCB     $00,$12,$00              *ECF5: 00 12 00       '...'
         FCB     $00                      *EDA5: 00             '.'
         FCC     "ADDR PR MM   "          *EDA6: 41 44 44 52 20 50 52 20 4D 4D 20 20 20 'ADDR PR MM   '
         FCB     $00                      *EDB3: 00             '.'
-MEDB4   FCC     "PROG"                   *EDB4: 50 52 4F 47    'PROG'
-        FCB     $00,$FC                  *EDB8: 00 FC          '..'
-        FCC     "2STAT"                  *EDBA: 32 53 54 41 54 '2STAT'
-        FCB     $00,$FB,$EC              *EDBF: 00 FB EC       '...'
+EPCMD_TBL FCC     "PROG"                   *EDB4: 50 52 4F 47    'PROG'
+        FCB     $00                      *EDB8: 00             '.'
+        FDB     $FC32                    *EDB9: FC 32          '.2'
+        FCC     "STAT"                   *EDBB: 53 54 41 54    'STAT'
+        FCB     $00                      *EDBF: 00             '.'
+        FDB     $FBEC                    *EDC0: FB EC          '..'
         FCC     "TEST"                   *EDC2: 54 45 53 54    'TEST'
-        FCB     $00,$FB,$D1              *EDC6: 00 FB D1       '...'
+        FCB     $00                      *EDC6: 00             '.'
+        FDB     $FBD1                    *EDC7: FB D1          '..'
         FCC     "VERF"                   *EDC9: 56 45 52 46    'VERF'
-        FCB     $00,$FB                  *EDCD: 00 FB          '..'
-        FCC     "=VIEW"                  *EDCF: 3D 56 49 45 57 '=VIEW'
-        FCB     $00,$FA,$E9              *EDD4: 00 FA E9       '...'
+        FCB     $00                      *EDCD: 00             '.'
+        FDB     $FB3D                    *EDCE: FB 3D          '.='
+        FCC     "VIEW"                   *EDD0: 56 49 45 57    'VIEW'
+        FCB     $00                      *EDD4: 00             '.'
+        FDB     $FAE9                    *EDD5: FA E9          '..'
         FCC     "CLR"                    *EDD7: 43 4C 52       'CLR'
-        FCB     $00,$FA,$CC              *EDDA: 00 FA CC       '...'
+        FCB     $00                      *EDDA: 00             '.'
+        FDB     $FACC                    *EDDB: FA CC          '..'
         FCC     "READ"                   *EDDD: 52 45 41 44    'READ'
-        FCB     $00,$FC                  *EDE1: 00 FC          '..'
-        FCB     $71                      *EDE3: 71             'q'
+        FCB     $00                      *EDE1: 00             '.'
+        FDB     $FC71                    *EDE2: FC 71          '.q'
         FCB     $45                      *EDE4: 45             'E'
-        FCB     $00,$FC,$A4              *EDE5: 00 FC A4       '...'
+        FCB     $00                      *EDE5: 00             '.'
+        FDB     $FCA4                    *EDE6: FC A4          '..'
         FCC     "2716"                   *EDE8: 32 37 31 36    '2716'
-        FCB     $00,$FD,$07              *EDEC: 00 FD 07       '...'
+        FCB     $00                      *EDEC: 00             '.'
+        FDB     $FD07                    *EDED: FD 07          '..'
         FCC     "2516"                   *EDEF: 32 35 31 36    '2516'
-        FCB     $00,$FD,$04              *EDF3: 00 FD 04       '...'
+        FCB     $00                      *EDF3: 00             '.'
+        FDB     $FD04                    *EDF4: FD 04          '..'
         FCC     "2732"                   *EDF6: 32 37 33 32    '2732'
-        FCB     $00,$FC,$F1              *EDFA: 00 FC F1       '...'
+        FCB     $00                      *EDFA: 00             '.'
+        FDB     $FCF1                    *EDFB: FC F1          '..'
         FCC     "2532"                   *EDFD: 32 35 33 32    '2532'
-        FCB     $00,$FC,$DE              *EE01: 00 FC DE       '...'
+        FCB     $00                      *EE01: 00             '.'
+        FDB     $FCDE                    *EE02: FC DE          '..'
         FCC     "2732A"                  *EE04: 32 37 33 32 41 '2732A'
-        FCB     $00,$FC,$E6              *EE09: 00 FC E6       '...'
+        FCB     $00                      *EE09: 00             '.'
+        FDB     $FCE6                    *EE0A: FC E6          '..'
         FCC     "2764"                   *EE0C: 32 37 36 34    '2764'
-        FCB     $00,$FC,$D7              *EE10: 00 FC D7       '...'
+        FCB     $00                      *EE10: 00             '.'
+        FDB     $FCD7                    *EE11: FC D7          '..'
         FCC     "27128"                  *EE13: 32 37 31 32 38 '27128'
-        FCB     $00,$FC,$CB              *EE18: 00 FC CB       '...'
+        FCB     $00                      *EE18: 00             '.'
+        FDB     $FCCB                    *EE19: FC CB          '..'
         FCC     "EXIT"                   *EE1B: 45 58 49 54    'EXIT'
-        FCB     $00,$FC,$EF              *EE1F: 00 FC EF       '...'
+        FCB     $00                      *EE1F: 00             '.'
+        FDB     $FCEF                    *EE20: FC EF          '..'
         FCC     "BYE"                    *EE22: 42 59 45       'BYE'
-        FCB     $00,$FC,$E9,$00          *EE25: 00 FC E9 00    '....'
-MEE29   FCB     $15                      *EE29: 15             '.'
-        FCB     $05                      *EE2A: 05             '.'
-        FCB     $01                      *EE2B: 01             '.'
-        FCB     $0B                      *EE2C: 0B             '.'
-        ASL     M0000                    *EE2D: 08 00          '..'
-        LBSR    Z3438                    *EE2F: 17 46 06       '.F.'
-        FCB     $02                      *EE32: 02             '.'
-        ORB     #$08                     *EE33: CA 08          '..'
-        NEG     M0014                    *EE35: 00 14          '..'
-        FCB     $14                      *EE37: 14             '.'
-        LSR     M0000                    *EE38: 04 00          '..'
-        DEC     M0010                    *EE3A: 0A 10          '..'
-        NEG     NMIVCT                   *EE3C: 00 17          '..'
-        LBRA    Z3548                    *EE3E: 16 47 07       '.G.'
-        ADDB    #$10                     *EE41: CB 10          '..'
-        NEG     M0014                    *EE43: 00 14          '..'
-        LBRA    Z354F                    *EE45: 16 47 07       '.G.'
-        ADDD    -$10,X                   *EE48: E3 10          '..'
-        NEG     M0014                    *EE4A: 00 14          '..'
-        ROR     M6620                    *EE4C: 76 66 20       'vf '
-        ROLA                             *EE4F: 49             'I'
-        BRA     ZEE52                    *EE50: 20 00          ' .'
-ZEE52   FCB     $18                      *EE52: 18             '.'
-        ROR     M6620                    *EE53: 76 66 20       'vf '
-        ROLA                             *EE56: 49             'I'
-        NEGA                             *EE57: 40             '@'
-        NEG     M0018                    *EE58: 00 18          '..'
+        FCB     $00                      *EE25: 00             '.'
+        FDB     $FCE9                    *EE26: FC E9          '..'
+        FCB     $00                      *EE28: 00             '.'
+MEE29   FCB     $15,$05,$01,$0B,$08,$00  *EE29: 15 05 01 0B 08 00 '......'
+        FCB     $17                      *EE2F: 17             '.'
+        FCC     "F"                      *EE30: 46             'F'
+        FCB     $06,$02,$CA,$08,$00,$14  *EE31: 06 02 CA 08 00 14 '......'
+        FCB     $14,$04,$00,$0A,$10,$00  *EE37: 14 04 00 0A 10 00 '......'
+        FCB     $17,$16                  *EE3D: 17 16          '..'
+        FCC     "G"                      *EE3F: 47             'G'
+        FCB     $07,$CB,$10,$00,$14,$16  *EE40: 07 CB 10 00 14 16 '......'
+        FCC     "G"                      *EE46: 47             'G'
+        FCB     $07,$E3,$10,$00,$14      *EE47: 07 E3 10 00 14 '.....'
+        FCC     "vf I "                  *EE4C: 76 66 20 49 20 'vf I '
+        FCB     $00,$18                  *EE51: 00 18          '..'
+        FCC     "vf I@"                  *EE53: 76 66 20 49 40 'vf I@'
+        FCB     $00,$18                  *EE58: 00 18          '..'
 * CLEAR THE PIA I/O ADDRESS STORED AT E81A-E80C
 EP1INIT LEAY    AC1CR_VEC,PCR            *EE5A: 31 8D F9 BE    '1...'  LOAD EFFECTIVE ADDRESS OF AC1CR_VEC
         LDA     #$08                     *EE5E: 86 08          '..'    8 PIA REGISTERS TO CLEAR
 EPINIT0 CLR     [,--Y]                   *EE60: 6F B3          'o.'    DECREMENT EXTENDED ADDRESS
         DECA                             *EE62: 4A             'J'     DEC COUNTER
         BNE     EPINIT0                  *EE63: 26 FB          '&.'    CONTINUE TO CLEAR REGISTERS
+* LOAD HEAD TYPE FROM PIA1, PORTB, BIT 6,7
         LDA     #$0F                     *EE65: 86 0F          '..'    SET 4-7 IN, 0-3 OUT
         STA     [PIA1PRB_VEC,PCR]        *EE67: A7 9D F9 AD    '....'  SAVE TO PIA1 DDRB
-        LDA     #%00110100               *EE6B: 86 34          '.4'    SELECT POR, SET CA/B2-LO
+        LDA     #%00110100               *EE6B: 86 34          '.4'    SELECT POR, SET CB2-LO
         STA     [PIA1CRB_VEC,PCR]        *EE6D: A7 9D F9 A9    '....'  SAVE TO PIA1 CRB
-        LDA     [PIA1PRB_VEC,PCR]        *EE71: A6 9D F9 A3    '....'  LOAD PIA1 PORB
-        CLR     [PIA1CRB_VEC,PCR]        *EE75: 6F 9D F9 A1    'o...'  SELECT PIA1 DDRB
+        LDA     [PIA1PRB_VEC,PCR]        *EE71: A6 9D F9 A3    '....'  SAVE PIA1 PORB
+        CLR     [PIA1CRB_VEC,PCR]        *EE75: 6F 9D F9 A1    'o...'  SELECT PIA1 DDRB, CB2 INPUT
+* CHECK HEAD TYPE
+* CMS 9614, 9617, 9618 AND INIT ACCORDINGLY
         ANDA    #%11000000               *EE79: 84 C0          '..'    CHECK ONLY PB6 AND PB7
         BEQ     EP_IN3                   *EE7B: 27 12          ''.'    IF BOTH,
         CMPA    #%10000000               *EE7D: 81 80          '..'    CHECK IF PB7 HI
         BEQ     EP_IN2                   *EE7F: 27 13          ''.'    IF SO
         CMPA    #%01000000               *EE81: 81 40          '.@'    CHECK IF PB6 HI
         BEQ     EP_IN1                   *EE83: 27 1A          ''.'    IF SO
-        LDA     #%00000001               *EE85: 86 01          '..'
-        LBSR    ZEB1C                    *EE87: 17 FC 92       '...'
+        LDA     #$01                     *EE85: 86 01          '..'
+        LBSR    EPPRMSG                  *EE87: 17 FC 92       '...'   PRINT "WRONG HEAD"
         LDB     #$01                     *EE8A: C6 01          '..'
-        ORCC    #$01                     *EE8C: 1A 01          '..'
-        RTS                              *EE8E: 39             '9'
+        ORCC    #$01                     *EE8C: 1A 01          '..'    SET CARRY FLAG
+        RTS                              *EE8E: 39             '9'     RETURN WITH ERROR IN CARRY
 EP_IN3  LDD     #M1700                   *EE8F: CC 17 00       '...'
         BRA     EP2INIT                  *EE92: 20 0E          ' .'
 EP_IN2  LDA     #%00111111               *EE94: 86 3F          '.?'    SET 6-7 IN, 0-5 OUT
@@ -957,7 +959,7 @@ EP_IN2  LDA     #%00111111               *EE94: 86 3F          '.?'    SET 6-7 I
         LDD     #M1805                   *EE9A: CC 18 05       '...'
         BRA     EP2INIT                  *EE9D: 20 03          ' .'
 EP_IN1  LDD     #M1401                   *EE9F: CC 14 01       '...'
-EP2INIT STA     EPTYPEHI                 *EEA2: 97 9D          '..'
+EP2INIT STA     EPHEAD                   *EEA2: 97 9D          '..'
         LDA     #%11111111               *EEA4: 86 FF          '..'    SET 0-7 OUTPUT
         STA     [PIA1PRA_VEC,PCR]        *EEA6: A7 9D F9 6A    '...j'  SAVE TO PIA1 DDRA
         STA     [PIA2PRA_VEC,PCR]        *EEAA: A7 9D F9 5E    '...^'  SAVE TO PIA2 DDRA
@@ -1013,11 +1015,11 @@ ZEF1B   PSHS    X,D                      *EF1B: 34 16          '4.'
         LDX     M0097                    *EF21: 9E 97          '..'
         LDA     $01,X                    *EF23: A6 01          '..'
         STA     [PIA2PRA_VEC,PCR]        *EF25: A7 9D F8 E3    '....'
-        LDA     #$3A                     *EF29: 86 3A          '.:'
+        LDA     #%00111010               *EF29: 86 3A          '.:'    SELECT DDR
         STA     [PIA2CRB_VEC,PCR]        *EF2B: A7 9D F8 E3    '....'
         LDB     #$FF                     *EF2F: C6 FF          '..'
         STB     [PIA2PRB_VEC,PCR]        *EF31: E7 9D F8 DB    '....'
-        ORA     #$04                     *EF35: 8A 04          '..'
+        ORA     #%00000100               *EF35: 8A 04          '..'    SELECT POR
         STA     [PIA2CRB_VEC,PCR]        *EF37: A7 9D F8 D7    '....'
         LDA     #$64                     *EF3B: 86 64          '.d'
         LBSR    ZEFCB                    *EF3D: 17 00 8B       '...'
@@ -1030,14 +1032,14 @@ ZEF49   PSHS    X,D                      *EF49: 34 16          '4.'
         STA     M0093                    *EF4D: 97 93          '..'
         LDX     M0097                    *EF4F: 9E 97          '..'
         LDA     #$3E                     *EF51: 86 3E          '.>'
-        LDB     EPTYPELO                 *EF53: D6 96          '..'
+        LDB     EPLOC                    *EF53: D6 96          '..'
         CMPB    #$02                     *EF55: C1 02          '..'
         BNE     ZEF5B                    *EF57: 26 02          '&.'
         LDA     #$2E                     *EF59: 86 2E          '..'
-ZEF5B   ANDA    #$FB                     *EF5B: 84 FB          '..'
+ZEF5B   ANDA    #%11111011               *EF5B: 84 FB          '..'    SELECT DDR MASK
         STA     [PIA2CRB_VEC,PCR]        *EF5D: A7 9D F8 B1    '....'
         CLR     [PIA2PRB_VEC,PCR]        *EF61: 6F 9D F8 AB    'o...'
-        ORA     #$04                     *EF65: 8A 04          '..'
+        ORA     #%00000100               *EF65: 8A 04          '..'    SELECT POR MASK
         STA     [PIA2CRB_VEC,PCR]        *EF67: A7 9D F8 A7    '....'
         LDA     $02,X                    *EF6B: A6 02          '..'
         STA     [PIA2PRA_VEC,PCR]        *EF6D: A7 9D F8 9B    '....'
@@ -1050,7 +1052,7 @@ ZEF7B   PSHS    X,A                      *EF7B: 34 12          '4.'    SAVE X,A
         STA     M0093                    *EF7F: 97 93          '..'
         LDA     #%00101011               *EF81: 86 2B          '.+'    SELECT DDR
         STA     [PIA2CRB_VEC,PCR]        *EF83: A7 9D F8 8B    '....'
-        LDB     #$FF                     *EF87: C6 FF          '..'
+        LDB     #$FF                     *EF87: C6 FF          '..'    ALL OUTPUT
         STB     [PIA2PRB_VEC,PCR]        *EF89: E7 9D F8 83    '....'
         ORA     #%00000100               *EF8D: 8A 04          '..'    SELECT POR
         STA     [PIA2CRB_VEC,PCR]        *EF8F: A7 9D F8 7F    '....'
@@ -1061,13 +1063,13 @@ ZEF7B   PSHS    X,A                      *EF7B: 34 12          '4.'    SAVE X,A
         BSR     ZEFCB                    *EF9D: 8D 2C          '.,'
         PULS    PC,X,A                   *EF9F: 35 92          '5.'    restore X,A, RTS
 ZEFA1   PSHS    X,D                      *EFA1: 34 16          '4.'    store X,D
-        STB     EPTYPELO                 *EFA3: D7 96          '..'
+        STB     EPLOC                    *EFA3: D7 96          '..'
         LDA     #$07                     *EFA5: 86 07          '..'
-        MUL                              *EFA7: 3D             '='
-        LEAX    MEE29,PCR                *EFA8: 30 8D FE 7D    '0..}'
+        MUL                              *EFA7: 3D             '='     AxB into D
+        LEAX    MEE29,PCR                *EFA8: 30 8D FE 7D    '0..}'  SAVE POINTER TO TABLE IN X
         LEAX    D,X                      *EFAC: 30 8B          '0.'
         LDA     $06,X                    *EFAE: A6 06          '..'
-        CMPA    EPTYPEHI                 *EFB0: 91 9D          '..'
+        CMPA    EPHEAD                   *EFB0: 91 9D          '..'
         BEQ     ZEFBB                    *EFB2: 27 07          ''.'
         COMB                             *EFB4: 53             'S'
         LDB     #$03                     *EFB5: C6 03          '..'
@@ -1133,7 +1135,7 @@ DIERR   LDA     #$32                     *F026: 86 32          '.2'
 DICM1   STD     M0023                    *F02B: DD 23          '.#'
 DICM2   LDY     #M9F23                   *F02D: 10 8E 9F 23    '...#'
         CLRA                             *F031: 4F             'O'
-        CLR     M0022                    *F032: 0F 22          '."'
+        CLR     BYTCNT                   *F032: 0F 22          '."'
         LBSR    ZF0AE                    *F034: 17 00 77       '..w'
         BRA     DBCMR                    *F037: 20 23          ' #'
 
@@ -1146,18 +1148,18 @@ DBCM1   JSR     HEX4BIN                  *F042: BD FE BF       '...'
         BCS     DIERR                    *F045: 25 DF          '%.'
 DBCM2   PSHS    D                        *F047: 34 06          '4.'
         LDA     #$16                     *F049: 86 16          '..'
-        STA     M0022                    *F04B: 97 22          '."'
+        STA     BYTCNT                   *F04B: 97 22          '."'
 DBCM3   LEAY    ,S                       *F04D: 31 E4          '1.'
         CLRA                             *F04F: 4F             'O'
         LBSR    ZF0AE                    *F050: 17 00 5B       '..['
         STY     ,S                       *F053: 10 AF E4       '...'
-        DEC     M0022                    *F056: 0A 22          '."'
+        DEC     BYTCNT                   *F056: 0A 22          '."'
         BPL     DBCM3                    *F058: 2A F3          '*.'
         PULS    Y                        *F05A: 35 20          '5 '
 DBCMR   STY     M0023                    *F05C: 10 9F 23       '..#'
         RTS                              *F05F: 39             '9'
 TDCMD   LDA     #$16                     *F060: 86 16          '..'
-        STA     M0022                    *F062: 97 22          '."'
+        STA     BYTCNT                   *F062: 97 22          '."'
 XDCMD   JSR     CHKEOL                   *F064: BD FE 2A       '..*'
         BEQ     ZF06D                    *F067: 27 04          ''.'
         CLR     M001E                    *F069: 0F 1E          '..'
@@ -1174,22 +1176,22 @@ SSBK2?X LDA     #$01                     *F07A: 86 01          '..'
         TFR     A,DP                     *F081: 1F 8B          '..'
         STS     M0000                    *F083: 10 DF 00       '...'   SAVE USER STACK
         LEAY    $0A,S                    *F086: 31 6A          '1j'
-        TST     M0008                    *F088: 0D 08          '..'
+        TST     INBKPT                   *F088: 0D 08          '..'
         BNE     ZF0A4                    *F08A: 26 18          '&.'
         LDS     DBUGSP                   *F08C: 10 DE 02       '...'
         LDA     #$FF                     *F08F: 86 FF          '..'
         BSR     ZF0B2                    *F091: 8D 1F          '..'
-        LDA     M0022                    *F093: 96 22          '."'
+        LDA     BYTCNT                   *F093: 96 22          '."'
         BEQ     ZF09C                    *F095: 27 05          ''.'
-        DEC     M0022                    *F097: 0A 22          '."'
+        DEC     BYTCNT                   *F097: 0A 22          '."'
         JMP     ZFDB8                    *F099: 7E FD B8       '~..'
 ZF09C   LDX     #_NSSBK                  *F09C: 8E FD B5       '...'
         STX     NMIVCT                   *F09F: 9F 17          '..'
         JMP     _NCOMAND                 *F0A1: 7E FD AF       '~..'
-ZF0A4   CLR     M0022                    *F0A4: 0F 22          '."'
+ZF0A4   CLR     BYTCNT                   *F0A4: 0F 22          '."'
         LDX     #_NSSBK                  *F0A6: 8E FD B5       '...'
         STX     NMIVCT                   *F0A9: 9F 17          '..'
-        CLR     M0008                    *F0AB: 0F 08          '..'
+        CLR     INBKPT                   *F0AB: 0F 08          '..'
         RTI                              *F0AD: 3B             ';'
 ZF0AE   FCB     $0F,$1E,$0F,$1F          *F0AE: 0F 1E 0F 1F    '....'
 ZF0B2   FCB     $97                      *F0B2: 97             '.'
@@ -1831,8 +1833,8 @@ A1INIT3 LBSR    WRTLIN                   *F86B: 17 05 CA       '...'
 * Command Loop
 COMAND  LDY     #PROMPT                  *F86E: 10 8E FD 2E    '....'  GET PROMPT STRING
         LBSR    CPYSTR                   *F872: 17 06 13       '...'   INPUT COMMAND LINE
-        CLR     M0022                    *F875: 0F 22          '."'
-        CLR     M0008                    *F877: 0F 08          '..'
+        CLR     BYTCNT                   *F875: 0F 22          '."'
+        CLR     INBKPT                   *F877: 0F 08          '..'
         CLR     M0019                    *F879: 0F 19          '..'
         LBSR    RDLIN                    *F87B: 17 05 87       '...'
         BCS     A1INIT3                  *F87E: 25 EB          '%.'    IGNORE IF DELETED LINE
@@ -2040,15 +2042,15 @@ VCMD    LBSR    HEXASE                   *FA18: 17 00 5C       '..\'   GET HEX A
 VCME    LBCS    RPT2ERR                  *FA1B: 10 25 FF 28    '.%.('  ERROR IF NOT 2 HEX ADDRESSES
         PSHS    U,D                      *FA1F: 34 46          '4F'
 VCM2    LBSR    WRTLIN                   *FA21: 17 04 14       '...'
-        LDB     #$10                     *FA24: C6 10          '..'    ADD A SPACE
+        LDB     #$10                     *FA24: C6 10          '..'    SET COUNTER TO 16
         PSHS    B                        *FA26: 34 04          '4.'
         TFR     U,D                      *FA28: 1F 30          '.0'
         LBSR    PRHX2SP                  *FA2A: 17 04 70       '..p'
 VCM3    LDA     ,U+                      *FA2D: A6 C0          '..'    GET THE NEXT VALUE IN MEMORY
         LBSR    PRHXSP                   *FA2F: 17 04 6F       '..o'   PRINT BYTE IN HEX & SPACE
-        DEC     ,S                       *FA32: 6A E4          'j.'
+        DEC     ,S                       *FA32: 6A E4          'j.'    DECREMENT THE COUNTER
         BNE     VCM3                     *FA34: 26 F7          '&.'
-        PULS    B                        *FA36: 35 04          '5.'
+        PULS    B                        *FA36: 35 04          '5.'    RESTORE B FROM STACK
         CMPU    $02,S                    *FA38: 11 A3 62       '..b'
         BCS     VCM4                     *FA3B: 25 05          '%.'
         CMPU    ,S                       *FA3D: 11 A3 E4       '...'
@@ -2311,7 +2313,7 @@ A0INPCH2 LDA     $01,X                    *FC5E: A6 01          '..'    READ ACI
         ANDA    #$7F                     *FC66: 84 7F          '..'    MASK OUT PARITY
         CMPA    #$7F                     *FC68: 81 7F          '..'    CHECK FOR DELETE CHAR
         BEQ     A0INPCH2                 *FC6A: 27 F2          ''.'    IF DELETE GET NEXT CAR
-        ANDCC   #$FE                     *FC6C: 1C FE          '..'
+        ANDCC   #$FE                     *FC6C: 1C FE          '..'    NO ERROR, CLEAR CARRY
         PULS    PC,X                     *FC6E: 35 90          '5.'    RETURN
 ZFC70   LDX     IOBUF                    *FC70: 9E 04          '..'
         BSR     A0INPCHR                 *FC72: 8D E5          '..'
@@ -2346,7 +2348,7 @@ ZFC9E   PULS    PC,A                     *FC9E: 35 82          '5.'    RETURN
 * AND DUMP USER REGISTERS
 BKPT    LDA     #$9F                     *FCA0: 86 9F          '..'    DEBUG DP
         TFR     A,DP                     *FCA2: 1F 8B          '..'
-        COM     M0008                    *FCA4: 03 08          '..'
+        COM     INBKPT                   *FCA4: 03 08          '..'
         STS     M0000                    *FCA6: 10 DF 00       '...'   SAVE USER STACK PTR
         LDD     $0A,S                    *FCA9: EC 6A          '.j'    GET USER'S PC
         SUBD    #M0001                   *FCAB: 83 00 01       '...'   DECREMENT IT
@@ -2381,7 +2383,7 @@ SSBK    LDA     #$01                     *FCD1: 86 01          '..'
 
 * SINGLE STEP COMMAND PROCESSOR (?)
 
-        TST     M0008                    *FCE6: 0D 08          '..'
+        TST     INBKPT                   *FCE6: 0D 08          '..'
         BNE     ZFCF9                    *FCE8: 26 0F          '&.'
         CMPD    M001A                    *FCEA: 10 93 1A       '...'
         LBNE    GOCMD1                   *FCED: 10 26 FE 7A    '.&.z'
@@ -2389,7 +2391,7 @@ SSBK    LDA     #$01                     *FCD1: 86 01          '..'
 _PREGCMD LBSR    DSPREG                   *FCF3: 17 FC D0       '...'   PRINT REGISTERS
         LBRA    COMAND                   *FCF6: 16 FB 75       '..u'   GOTO COMMAND LOOP
 ZFCF9   CLR     M0019                    *FCF9: 0F 19          '..'
-        CLR     M0008                    *FCFB: 0F 08          '..'
+        CLR     INBKPT                   *FCFB: 0F 08          '..'
         LDS     M0000                    *FCFD: 10 DE 00       '...'
         RTI                              *FD00: 3B             ';'
 MFD01   SWI                              *FD01: 3F             '?'
@@ -2757,7 +2759,7 @@ ZFF73   PSHS    D                        *FF73: 34 06          '4.'
         PULS    PC,D                     *FF7D: 35 86          '5.'
         FCB     $FF                      *FF7F: FF             '.'
 
-* ### I/O SPACE
+* ### I/O OVERLAP
         FCB     $FF,$FF,$FF,$FF,$FF,$FF  *FF80: FF FF FF FF FF FF '......'
         FCB     $FF,$FF,$FF,$FF,$FF,$FF  *FF86: FF FF FF FF FF FF '......'
         FCB     $FF,$FF,$FF,$FF,$FF,$FF  *FF8C: FF FF FF FF FF FF '......'
