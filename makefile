@@ -36,7 +36,7 @@ $(warning ${O_SRC} )
 #%.info : %.bin
 	#echo "FILE \"$<\" E000" > $@
 
-%9609.asm : %9609.info U22_9609.bin U23_9609.bin
+%9609.asm : %9609.info U22_9609.bin U23_9609.bin U7_9619.info
 	$(F9DASM) -info $< -out $@
 
 %.asm : %.info %.bin
