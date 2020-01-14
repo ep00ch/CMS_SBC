@@ -1,37 +1,56 @@
 FILE "U7_9619.bin" E000
 
-***** General Info
+comment  .   6809 INTERACTIVE DEBUG PROGRAM
+comment  .FOR CREATIVE MICRO SYSTEMS 9609/19 MODULE
+comment  .(C) 198? MICROWARE SYSTEMS CORPORATION
+comment  .         DES MOINES, IOWA
 comment  .
-comment  ROM LABEL:
-comment  .      Debug 2418
-comment  .      FFFE=A0
-comment  .      11/6/99
-comment  .
-comment  .ORGANIZATION:
-comment  .  E000-E6FF    EMPTY
-*data E000-E6FF
-unused   E000-E6FF
-insert   .        ORG     $E000
-insert   .        FILL    $FF,$700
 
-comment  .  E700-E7FF    RTC DATE/TIME
+***** General Info
+comment  F800 .
+comment  F800 .HARDWARE REQUIREMENTS:
+comment  F800 .
+comment  F800 .  ROM  AT $F800 - $FFFF
+comment  F800 .  RAM  AT $8000 - $9FFF
+comment  F800 .  ACIA AT FFD4
+comment  F800 .  PTM  AT FFD8   (ENABLED TO NMI)
+comment  F800 .
+comment  F800 SW1 jumpers set ACIA_1 BAUD
+comment  F800 .
+comment   E700 .
+comment   E700 ROM LABEL:
+comment   E700 .      Debug 2418
+comment   E700 .      FFFE=A0
+comment   E700 .      11/6/99
+comment   E700 .
+comment   E700 .ORGANIZATION:
+comment   E700 .  E000-E6FF    EMPTY
+
+*data E000-E6FF
+unused    E000-E6FF
+insert    E700 .        ORG     $E000
+insert    E700 .        FILL    $FF,$700
+
+comment   E700 .  E700-E7FF    RTC DATE/TIME
 *unused   E700-E7FF
-comment  .  E800?EFFF    EPROM PROGRAMMER
+comment   E700 .  E800?EFFF    EPROM PROGRAMMER
 *unused   E800-EFFF
-comment  .  F000?F7FF    ASSEMBLER
+comment   E700 .  F000?F7FF    ASSEMBLER
 *unused   F000-F7FF
-comment  .  F800-FF7F    DEBUGGER
+comment   E700 .  F800-FF7F    DEBUGGER
 *unused   F800-FF7F
-comment  .  FF80-FFDF    I/O SPACE
+comment   E700 .  FF80-FFDF    I/O SPACE
 *unused   FF80-FFDF
-comment  .  FFE0-FFFF    VECTORS
+comment   E700 .  FFE0-FFFF    VECTORS
 *unused   FFE0-FFFF
+comment   E700 .
 
 **** Section Info
 
 comment  E700 ### RTC CLOCK UTILITIES
 
 *** Section Format
+*rmb   0000-009D
 data  E7FD-E7FF
 
 *** Section Labels
@@ -636,10 +655,12 @@ label FEE0 _CHEXBIN
 label FEE2 HEXDEC
 label FEF4 _CLRC
 label FEF7 _SETC
+label FEFA GETLN
 
-
-label FF21 _C4HSP
+label FF21 YIN4HS
 label FF23 BIN4HS
+
+label FF27 YIN2HS
 label FF29 BIN2HS
 label FF2B PUTSPC
 label FF33 BIN4HX
@@ -648,21 +669,7 @@ label FF47 HEXCHR
 label FF4D HXCHR2
 
 *** Section Comments
-comment  F800 .   6819 INTERACTIVE DEBUG PROGRAM
-comment  F800 .FOR CREATIVE MICRO SYSTEMS 9619 MODULE
-comment  F800 .(C) 198? MICROWARE SYSTEMS CORPORATION
-comment  F800 .         DES MOINES, IOWA
-comment  F800 .
-comment  F800 .
-comment  F800 .HARDWARE REQUIREMENTS:
-comment  F800 .
-comment  F800 .  THIS ROM AT $F800 - $FFFF
-comment  F800 .  RAM  AT ?
-comment  F800 .  ACIA AT FFD4
-comment  F800 .  PTM  AT FFD8   (ENABLED TO NMI)
-comment  F800 .
-comment  F800 SW1 jumpers set ACIA_1 BAUD
-comment  F800 .
+
 comment  F800 Initialization Entry Point
 
 lcomment F800 DIRECT PAGE ADDR
@@ -755,7 +762,7 @@ lcomment FA1B ERROR IF NOT 2 HEX ADDRESSES
 label FA1B VCME
 label FA21 VCM2
 lcomment FA24 SET COUNTER TO 16
-lcomment FA25 PUSH COUNTER ONTO STACK TO FREE B
+lcomment FA26 PUSH COUNTER ONTO STACK TO FREE B
 lcomment FA32 DECREMENT THE COUNTER
 lcomment FA36 RESTORE B FROM STACK
 label FA2D VCM3
@@ -882,7 +889,7 @@ lcomment FE17 LINE DELETE?
 
 lcomment FE23 WAS IT EOL?
 lcomment FE25 IF NOT GET ANOTHER
-lcomment FE9D PRINT A SPACE B SPACE IN HEX
+comment  FE9D PRINT DREG SPACE IN HEX
 lcomment FEA1 PRINT A BYTE IN HEX & SPACE
 lcomment FEA5 PRINT SPACE
 lcomment FEA8 PRINT BYTE IN HEX
@@ -940,24 +947,37 @@ lcomment FEF2 [A-F] ARE LEFT
 lcomment FEF4 CLEAR CARRY, RETURN
 lcomment FEF7 SET   CARRY, RETURN
 
+lcomment FEFA GET A LINE FROM INPUT, MAX CHARS IN B
+
 comment  FF21 .
 comment  FF21 .     TTL    6809 UTILITY SUBROUTINE PACKAGE
 comment  FF21 .
 comment  FF21 Input Conversion Subroutines
 comment  FF21 These subroutines convert an usnigned binary
-comment  FF21 number (passed in B or D) to an ASCII character
+comment  FF21 number (passed in B or D, or input buffer at Y)
+comment  FF21 to an ASCII character
 comment  FF21 string starting at the address passed in the
 comment  FF21 X register, which will return with the address
 comment  FF21 following the string. All other registers
 comment  FF21 except CC are preserved
 comment  FF21 .
+comment  FF21 Subroutine BIN4HS - Convert word in D reg to
+comment  FF21 four-character hexadecimal followed by a space.
+lcomment FF21 LOAD D FROM INPUT BUFFER
+lcomment FF23 PERFORM CONVERSION
+lcomment FF25 GO OUTPUT SPACE AND RTS
 
-comment  FF29 Subroutine BIN2HS - Convert word in D reg to
-comment  FF29 four-character hexadecimal followed by a space.
-comment  FF2B FALL THROUGH TO PUTSPC
+comment  FF27 .
+comment  FF27 Subroutine BIN2HS - Convert word in B reg to
+comment  FF27 two-character hexadecimal followed by a space.
+lcomment FF27 LOAD B FROM INPUT BUFFER
+lcomment FF29 PERFORM CONVERSION
+comment FF2B FALL THROUGH TO PUTSPC AND RETURN
+
 comment  FF2B .
 comment  FF2B Subroutine PUTSPC - Put a space character in
 comment  FF2B the output buffer and increment pointer (x)
+comment  FF33 .
 comment  FF33 Subroutine BIN4HX - Convert word in D reg to
 comment  FF33 four-character hexadecimal.
 comment  FF39 FALL THROUGH TO CONVERT LOW BYTE
@@ -967,6 +987,7 @@ comment  FF39 two-character hexadecimal.
 
 comment  FF80 .
 comment  FF80 ### I/O OVERLAP
+
 
 data FF80-FFDF
 *unused FF80-FFC3
@@ -978,7 +999,7 @@ label FFD0 ACADDR0
 label FFD4 ACADDR1
 label FFD8 TIMER
 
-comment  FFE0 .
+comment FFE0 .
 comment  FFE0 ### VECTORS
 
 data FFE0-FFFF
