@@ -1,27 +1,17 @@
 * f9dasm: M6800/1/2/3/8/9 / H6309 Binary/OS9/FLEX9 Disassembler V1.76
 * Loaded binary file U7_9619.bin
 
-* ROM LABEL:
-*       Debug 2418
-*       FFFE=A0
-*       11/6/99
+*    6809 INTERACTIVE DEBUG PROGRAM
+* FOR CREATIVE MICRO SYSTEMS 9609/19 MODULE
+* (C) 198? MICROWARE SYSTEMS CORPORATION
+*          DES MOINES, IOWA
 
-* ORGANIZATION:
-*   E000-E6FF    EMPTY
-        ORG     $E000
-        FILL    $FF,$700
-*   E700-E7FF    RTC DATE/TIME
-*   E800?EFFF    EPROM PROGRAMMER
-*   F000?F7FF    ASSEMBLER
-*   F800-FF7F    DEBUGGER
-*   FF80-FFDF    I/O SPACE
-*   FFE0-FFFF    VECTORS
 
 *****************************************************
 ** Used Labels                                      *
 *****************************************************
 
-M0000   EQU     $0000
+USERSP  EQU     $0000
 M0001   EQU     $0001
 DBUGSP  EQU     $0002
 IOBUF   EQU     $0004
@@ -104,6 +94,22 @@ XTAG    EQU     $AA55
 *****************************************************
 
         ORG     $E700
+
+* ROM LABEL:
+*       Debug 2418
+*       FFFE=A0
+*       11/6/99
+
+* ORGANIZATION:
+*   E000-E6FF    EMPTY
+        ORG     $E000
+        FILL    $FF,$700
+*   E700-E7FF    RTC DATE/TIME
+*   E800?EFFF    EPROM PROGRAMMER
+*   F000?F7FF    ASSEMBLER
+*   F800-FF7F    DEBUGGER
+*   FF80-FFDF    I/O SPACE
+*   FFE0-FFFF    VECTORS
 
 * ### RTC CLOCK UTILITIES
 * CB2 is EN' for decoder U33
@@ -703,7 +709,7 @@ ZEBEB   BSR     ZEBF3                    *EBEB: 8D 06          '..'
 ZEBF1   PULS    PC,D                     *EBF1: 35 86          '5.'
 ZEBF3   PSHS    X                        *EBF3: 34 10          '4.'
         LDX     M0082                    *EBF5: 9E 82          '..'
-        LDD     #M0000                   *EBF7: CC 00 00       '...'
+        LDD     #USERSP                  *EBF7: CC 00 00       '...'
         PSHS    D                        *EBFA: 34 06          '4.'
         LDA     ,X                       *EBFC: A6 84          '..'
         CMPA    #$0D                     *EBFE: 81 0D          '..'
@@ -1166,7 +1172,7 @@ XDCMD   JSR     CHKEOL                   *F064: BD FE 2A       '..*'
         CLR     M001F                    *F06B: 0F 1F          '..'
 ZF06D   LDX     #SSBK2?X                 *F06D: 8E F0 7A       '..z'
         STX     NMIVCT                   *F070: 9F 17          '..'
-        JMP     ZFDB8                    *F072: 7E FD B8       '~..'
+        JMP     _NSSCMD                  *F072: 7E FD B8       '~..'
         LDA     #$31                     *F075: 86 31          '.1'
         JMP     _NCMDERR                 *F077: 7E FD B2       '~..'
 SSBK2?X LDA     #$01                     *F07A: 86 01          '..'
@@ -1174,7 +1180,7 @@ SSBK2?X LDA     #$01                     *F07A: 86 01          '..'
         STA     TIMER                    *F07C: B7 FF D8       '...'   STOP TIMER
         LDA     #$9F                     *F07F: 86 9F          '..'
         TFR     A,DP                     *F081: 1F 8B          '..'
-        STS     M0000                    *F083: 10 DF 00       '...'   SAVE USER STACK
+        STS     USERSP                   *F083: 10 DF 00       '...'   SAVE USER STACK
         LEAY    $0A,S                    *F086: 31 6A          '1j'
         TST     INBKPT                   *F088: 0D 08          '..'
         BNE     ZF0A4                    *F08A: 26 18          '&.'
@@ -1184,7 +1190,7 @@ SSBK2?X LDA     #$01                     *F07A: 86 01          '..'
         LDA     BYTCNT                   *F093: 96 22          '."'
         BEQ     ZF09C                    *F095: 27 05          ''.'
         DEC     BYTCNT                   *F097: 0A 22          '."'
-        JMP     ZFDB8                    *F099: 7E FD B8       '~..'
+        JMP     _NSSCMD                  *F099: 7E FD B8       '~..'
 ZF09C   LDX     #_NSSBK                  *F09C: 8E FD B5       '...'
         STX     NMIVCT                   *F09F: 9F 17          '..'
         JMP     _NCOMAND                 *F0A1: 7E FD AF       '~..'
@@ -1256,7 +1262,7 @@ ZF122   CMPA    ,X++                     *F122: A1 81          '..'
 ZF12C   LDB     ,-X                      *F12C: E6 82          '..'
         LDX     #MF7F1                   *F12E: 8E F7 F1       '...'
         BRA     ZF163                    *F131: 20 30          ' 0'
-        JSR     _C4HSP                   *F133: BD FF 21       '..!'
+        JSR     C4HEX                    *F133: BD FF 21       '..!'
         LDA     -$01,Y                   *F136: A6 3F          '.?'
         PSHS    X                        *F138: 34 10          '4.'
         CMPA    #$21                     *F13A: 81 21          '.!'
@@ -1318,7 +1324,7 @@ ZF192   LEAS    $02,S                    *F192: 32 62          '2b'
 ZF1B2   LDX     #M9F87                   *F1B2: 8E 9F 87       '...'
         LDU     #MF47D                   *F1B5: CE F4 7D       '..}'
         LBSR    ZFF73                    *F1B8: 17 0D B8       '...'
-        LDU     M0000                    *F1BB: DE 00          '..'
+        LDU     USERSP                   *F1BB: DE 00          '..'
         LDB     ,U                       *F1BD: E6 C4          '..'
         LDU     #SFLGS                   *F1BF: CE F4 75       '..u'
 ZF1C2   ASLB                             *F1C2: 58             'X'     CHECK FLAG VIA CARRY BIT
@@ -1352,7 +1358,7 @@ ZF1F6   BSR     ZF23D                    *F1F6: 8D 45          '.E'
         LDB     -$01,Y                   *F1FA: E6 3F          '.?'
         STB     M0028                    *F1FC: D7 28          '.('
         JSR     BIN2HS                   *F1FE: BD FF 29       '..)'
-        LDU     M0000                    *F201: DE 00          '..'
+        LDU     USERSP                   *F201: DE 00          '..'
         LDA     $03,U                    *F203: A6 43          '.C'
         STA     M0027                    *F205: 97 27          '.''
 ZF207   LBSR    ZF28D                    *F207: 17 00 83       '...'
@@ -1375,13 +1381,13 @@ ZF22A   TSTB                             *F22A: 5D             ']'
         BNE     ZF223                    *F22B: 26 F6          '&.'
 ZF22D   BRA     ZF219                    *F22D: 20 EA          ' .'
 ZF22F   LDX     $02,S                    *F22F: AE 62          '.b'
-        JSR     _C4HSP                   *F231: BD FF 21       '..!'
+        JSR     C4HEX                    *F231: BD FF 21       '..!'
 ZF234   LDX     #M9F5B                   *F234: 8E 9F 5B       '..['
         LBSR    ZFF73                    *F237: 17 0D 39       '..9'
         LEAX    $01,X                    *F23A: 30 01          '0.'
         RTS                              *F23C: 39             '9'
 ZF23D   LDX     $02,S                    *F23D: AE 62          '.b'
-        JSR     ZFF27                    *F23F: BD FF 27       '..''
+        JSR     C2HEX                    *F23F: BD FF 27       '..''
         BRA     ZF234                    *F242: 20 F0          ' .'
         BSR     ZF23D                    *F244: 8D F7          '..'
         LDU     #MF495                   *F246: CE F4 95       '...'
@@ -1466,10 +1472,10 @@ ZF2DF   BRA     ZF26D                    *F2DF: 20 8C          ' .'
         LEAY    -$01,Y                   *F2E4: 31 3F          '1?'
         LDD     #M2324                   *F2E6: CC 23 24       '.#$'
         STD     ,X++                     *F2E9: ED 81          '..'
-        JSR     ZFF27                    *F2EB: BD FF 27       '..''
+        JSR     C2HEX                    *F2EB: BD FF 27       '..''
         BRA     ZF2DF                    *F2EE: 20 EF          ' .'
 ZF2F0   LDX     ,S                       *F2F0: AE E4          '..'
-        JSR     ZFF27                    *F2F2: BD FF 27       '..''
+        JSR     C2HEX                    *F2F2: BD FF 27       '..''
         LDB     -$01,Y                   *F2F5: E6 3F          '.?'
         STB     M002D                    *F2F7: D7 2D          '.-'
         PSHS    B                        *F2F9: 34 04          '4.'
@@ -1494,7 +1500,7 @@ ZF314   LBSR    ZF1F1                    *F314: 17 FE DA       '...'
         STB     ,X+                      *F322: E7 80          '..'
         STA     M002A                    *F324: 97 2A          '.*'
 ZF326   LBSR    ZF28D                    *F326: 17 FF 64       '..d'
-        LDU     M0000                    *F329: DE 00          '..'
+        LDU     USERSP                   *F329: DE 00          '..'
         LDA     M002A                    *F32B: 96 2A          '.*'
         BNE     ZF335                    *F32D: 26 06          '&.'
         LEAU    $0C,U                    *F32F: 33 4C          '3L'
@@ -1565,7 +1571,7 @@ ZF3B2   LDU     ,S                       *F3B2: EE E4          '..'
         STA     ,X+                      *F3B8: A7 80          '..'
         BSR     ZF41C                    *F3BA: 8D 60          '.`'
         STB     ,X+                      *F3BC: E7 80          '..'
-        LDU     M0000                    *F3BE: DE 00          '..'
+        LDU     USERSP                   *F3BE: DE 00          '..'
         LDA     M0029                    *F3C0: 96 29          '.)'
         BPL     ZF3CB                    *F3C2: 2A 07          '*.'
         NEGA                             *F3C4: 40             '@'
@@ -1624,7 +1630,7 @@ ZF41C   LDA     #$2C                     *F41C: 86 2C          '.,'
         STD     ,X++                     *F42F: ED 81          '..'
         BRA     ZF3D3                    *F431: 20 A0          ' .'
 ZF433   LDU     $02,S                    *F433: EE 62          '.b'
-        JSR     ZFF27                    *F435: BD FF 27       '..''
+        JSR     C2HEX                    *F435: BD FF 27       '..''
         BSR     ZF408                    *F438: 8D CE          '..'
         LDB     -$01,Y                   *F43A: E6 3F          '.?'
         STB     M0028                    *F43C: D7 28          '.('
@@ -1652,7 +1658,7 @@ ZF462   LBSR    ZF1F1                    *F462: 17 FD 8C       '...'
         BRA     ZF44B                    *F46A: 20 DF          ' .'
 ZF46C   LDD     ,Y                       *F46C: EC A4          '..'
         STD     M0027                    *F46E: DD 27          '.''
-        JSR     _C4HSP                   *F470: BD FF 21       '..!'
+        JSR     C4HEX                    *F470: BD FF 21       '..!'
         BRA     ZF408                    *F473: 20 93          ' .'
 SFLGS   FCC     "EFHINZVC"               *F475: 45 46 48 49 4E 5A 56 43 'EFHINZVC' CONDITION CODE LABELS
 MF47D   FCC     "CC= "                   *F47D: 43 43 3D 20    'CC= '
@@ -1764,29 +1770,24 @@ MF7D5   FCC     "SWI2CMPDCMPYLDY STY L"  *F7D5: 53 57 49 32 43 4D 50 44 43 4D 50
 MF7F1   FCC     "SWI3CMPUCMPS"           *F7F1: 53 57 49 33 43 4D 50 55 43 4D 50 53 'SWI3CMPUCMPS'
         FCB     $FF,$FF,$FF              *F7FD: FF FF FF       '...'
 
-* ### DEBUGGER
-*    6819 INTERACTIVE DEBUG PROGRAM
-* FOR CREATIVE MICRO SYSTEMS 9619 MODULE
-* (C) 198? MICROWARE SYSTEMS CORPORATION
-*          DES MOINES, IOWA
-
-
 * HARDWARE REQUIREMENTS:
 
-*   THIS ROM AT $F800 - $FFFF
-*   RAM  AT ?
+*   ROM  AT $F800 - $FFFF
+*   RAM  AT $8000 - $9FFF
 *   ACIA AT FFD4
 *   PTM  AT FFD8   (ENABLED TO NMI)
 
 * SW1 jumpers set ACIA_1 BAUD
 
+
+* ### DEBUGGER
 * Initialization Entry Point
 hdlr_RST LDA     #$9F                     *F800: 86 9F          '..'    DIRECT PAGE ADDR
         LDB     #$FF                     *F802: C6 FF          '..'    START AT TOP OF DP
         TFR     A,DP                     *F804: 1F 8B          '..'    GET DP ADDRESS
         TFR     D,S                      *F806: 1F 04          '..'    ALLOCATE USER STACK
         LEAS    -12,S                    *F808: 32 74          '2t'    MAKE ROOM FOR REGS
-        STS     M0000                    *F80A: 10 DF 00       '...'   SAVE INITIAL USER SP
+        STS     USERSP                   *F80A: 10 DF 00       '...'   SAVE INITIAL USER SP
         LDX     #MFD01                   *F80D: 8E FD 01       '...'
         STX     $0A,S                    *F810: AF 6A          '.j'    DEFAULT USER PC
         LDA     #$80                     *F812: 86 80          '..'
@@ -1832,25 +1833,25 @@ A1INIT3 LBSR    WRTLIN                   *F86B: 17 05 CA       '...'
 * FALL THROUGH TO COMMAND LOOP
 * Command Loop
 COMAND  LDY     #PROMPT                  *F86E: 10 8E FD 2E    '....'  GET PROMPT STRING
-        LBSR    CPYSTR                   *F872: 17 06 13       '...'   INPUT COMMAND LINE
+        LBSR    CPYSTR                   *F872: 17 06 13       '...'
         CLR     BYTCNT                   *F875: 0F 22          '."'
         CLR     INBKPT                   *F877: 0F 08          '..'
         CLR     M0019                    *F879: 0F 19          '..'
-        LBSR    RDLIN                    *F87B: 17 05 87       '...'
+        LBSR    RDLIN                    *F87B: 17 05 87       '...'   INPUT COMMAND LINE
         BCS     A1INIT3                  *F87E: 25 EB          '%.'    IGNORE IF DELETED LINE
         LDX     IOBUF                    *F880: 9E 04          '..'
-        LEAY    CMDTBL,PCR               *F882: 31 8D 04 C4    '1...'
+        LEAY    CMDTBL,PCR               *F882: 31 8D 04 C4    '1...'  GET TABLE ADDR
         BSR     _CMDSRC                  *F886: 8D 2D          '.-'
         TSTA                             *F888: 4D             'M'     COMPARE TO TEXT
-        BNE     ZF89E                    *F889: 26 13          '&.'
+        BNE     CMND2                    *F889: 26 13          '&.'
         LDY     XTAGLOC                  *F88B: 10 BE E8 00    '....'
         CMPY    #XTAG                    *F88F: 10 8C AA 55    '...U'  CHECK FOR EPROM PROGRAM ROM
-        BNE     ILLCMD                   *F893: 26 0D          '&.'    IF NOT THERE, EXIT
+        BNE     ILLCMD                   *F893: 26 0D          '&.'    EXIT IF TABLE END
         LDY     XCMDTBL_VEC              *F895: 10 BE E8 02    '....'  START ADDR OF EXTENDED CMD TABLE
         BSR     _CMDSRC                  *F899: 8D 1A          '..'
         TSTA                             *F89B: 4D             'M'
         BEQ     ILLCMD                   *F89C: 27 04          ''.'    EXIT IF NOT IN EXTENDED CMD TABLE
-ZF89E   JSR     ,Y                       *F89E: AD A4          '..'
+CMND2   JSR     ,Y                       *F89E: AD A4          '..'    CALL COMMAND ROUTINE
         BRA     COMAND                   *F8A0: 20 CC          ' .'    GO FOR ANOTHER
 * UNRECOGNIZED COMMAND HANDLER
 ILLCMD  LDA     #$31                     *F8A2: 86 31          '.1'
@@ -1898,15 +1899,23 @@ ZF8F2   TST     ,Y                       *F8F2: 6D A4          'm.'
         LEAX    -$01,X                   *F8F9: 30 1F          '0.'
 ZF8FB   LEAS    $02,S                    *F8FB: 32 62          '2b'
         RTS                              *F8FD: 39             '9'
+
+* "A" COMMAND: EXAMINE/CHANGE A REGISTER
 ACMD    LDB     #$01                     *F8FE: C6 01          '..'
-        BRA     ZF90B                    *F900: 20 09          ' .'
+        BRA     REG08CMD                 *F900: 20 09          ' .'
+
+* "B" COMMAND: EXAMINE/CHANGE B REGISTER
 BCMD    LDB     #$02                     *F902: C6 02          '..'
-        BRA     ZF90B                    *F904: 20 05          ' .'
+        BRA     REG08CMD                 *F904: 20 05          ' .'
+
+* "CC" COMMAND: EXAMINE/CHANGE CC REGISTER
 CCCMD   CLRB                             *F906: 5F             '_'
-        BRA     ZF90B                    *F907: 20 02          ' .'
+        BRA     REG08CMD                 *F907: 20 02          ' .'
+
+* "DP" COMMAND: EXAMINE/CHANGE DP REGISTER
 DPCMD   LDB     #$03                     *F909: C6 03          '..'
-ZF90B   PSHS    X                        *F90B: 34 10          '4.'
-        LDX     M0000                    *F90D: 9E 00          '..'
+REG08CMD PSHS    X                        *F90B: 34 10          '4.'
+        LDX     USERSP                   *F90D: 9E 00          '..'
         ABX                              *F90F: 3A             ':'
         TFR     X,Y                      *F910: 1F 12          '..'
         PULS    X                        *F912: 35 10          '5.'
@@ -1917,7 +1926,7 @@ ZF90B   PSHS    X                        *F90B: 34 10          '4.'
 ZF91E   LDA     ,Y                       *F91E: A6 A4          '..'
         LBSR    PRHXSP                   *F920: 17 05 7E       '..~'
         LDB     #$02                     *F923: C6 02          '..'
-        LBSR    ZFEFA                    *F925: 17 05 D2       '...'
+        LBSR    GETLN                    *F925: 17 05 D2       '...'
         BCC     ZF936                    *F928: 24 0C          '$.'
         CMPA    #$20                     *F92A: 81 20          '. '
         BEQ     ZF94C                    *F92C: 27 1E          ''.'
@@ -1942,39 +1951,51 @@ ZF953   ORCC    #$01                     *F953: 1A 01          '..'
         RTS                              *F955: 39             '9'
 ZF956   ANDCC   #$FE                     *F956: 1C FE          '..'
         LBRA    WRTLIN                   *F958: 16 04 DD       '...'
+
+* "SP" COMMAND: EXAMINE/CHANGE SP REGISTER
 SPCMD   LDY     #M9F00                   *F95B: 10 8E 9F 00    '....'
         BRA     ZF978                    *F95F: 20 17          ' .'
+
+* "U" COMMAND: EXAMINE/CHANGE U REGISTER
 UCMD    LDB     #$08                     *F961: C6 08          '..'
-        BRA     ZF96F                    *F963: 20 0A          ' .'
+        BRA     REG16CMD                 *F963: 20 0A          ' .'
+
+* "X" COMMAND: EXAMINE/CHANGE X REGISTER
 XCMD    LDB     #$04                     *F965: C6 04          '..'
-        BRA     ZF96F                    *F967: 20 06          ' .'
+        BRA     REG16CMD                 *F967: 20 06          ' .'
+
+* "Y" COMMAND: EXAMINE/CHANGE Y REGISTER
 YCMD    LDB     #$06                     *F969: C6 06          '..'
-        BRA     ZF96F                    *F96B: 20 02          ' .'
+        BRA     REG16CMD                 *F96B: 20 02          ' .'
+
+* "PC" COMMAND: EXAMINE/CHANGE PC REGISTER
 PCCMD   LDB     #$0A                     *F96D: C6 0A          '..'
-ZF96F   PSHS    X                        *F96F: 34 10          '4.'
-        LDX     M0000                    *F971: 9E 00          '..'
+REG16CMD PSHS    X                        *F96F: 34 10          '4.'
+        LDX     USERSP                   *F971: 9E 00          '..'
         ABX                              *F973: 3A             ':'
         TFR     X,Y                      *F974: 1F 12          '..'
         PULS    X                        *F976: 35 10          '5.'
-ZF978   LBSR    CHKEOL                   *F978: 17 04 AF       '...'
-        BNE     ZF994                    *F97B: 26 17          '&.'
-        LDA     #$3D                     *F97D: 86 3D          '.='
+ZF978   LBSR    CHKEOL                   *F978: 17 04 AF       '...'   CHECK FOR PARAMETER
+        BNE     REGCM3                   *F97B: 26 17          '&.'    IF NOT, GET NEW ADDR
+* DISPLAY REGISTER CONTENTS
+        LDA     #$3D                     *F97D: 86 3D          '.='    OUTPUT "="
         LBSR    A1OUTCHR                 *F97F: 17 04 F7       '...'
         LDD     ,Y                       *F982: EC A4          '..'
         LBSR    PRHX2SP                  *F984: 17 05 16       '...'
         LDB     #$04                     *F987: C6 04          '..'
-        LBSR    ZFEFA                    *F989: 17 05 6E       '..n'
+        LBSR    GETLN                    *F989: 17 05 6E       '..n'
         BCC     ZF992                    *F98C: 24 04          '$.'
         CMPA    #$0D                     *F98E: 81 0D          '..'
         BEQ     ZF99E                    *F990: 27 0C          ''.'
 ZF992   LDX     IOBUF                    *F992: 9E 04          '..'
-ZF994   LBSR    HEX4BIN                  *F994: 17 05 28       '..('
-        BCS     ECME                     *F997: 25 0E          '%.'
+* CHANGE REGISTER CONTENTS
+REGCM3  LBSR    HEX4BIN                  *F994: 17 05 28       '..('   CHECK FOR PARAMETER
+        BCS     ECME                     *F997: 25 0E          '%.'    EXIT IF ERROR
         STD     ,Y                       *F999: ED A4          '..'
         LBSR    WRTLIN                   *F99B: 17 04 9A       '...'
 ZF99E   RTS                              *F99E: 39             '9'
 
-* "E" COMMAND: EDIT MEMORY?
+* "E" COMMAND: EDIT MEMORY
 ECMD    LBSR    CHKEOL                   *F99F: 17 04 88       '...'
         BEQ     RPT2ERR                  *F9A2: 27 A3          ''.'
         LBSR    HEX4BIN                  *F9A4: 17 05 18       '...'
@@ -1994,9 +2015,12 @@ ECM4    CMPA    #$20                     *F9B9: 81 20          '. '
         BRA     ECM3                     *F9C3: 20 EE          ' .'
 ECMR    RTS                              *F9C5: 39             '9'
 
+* "R" COMMAND: DISPLAY
+* USER REGISTER CONTENTS
+
 * SUBROUTINE DSPREG - DISPLAY
 * USER REGISTER CONTENTS
-DSPREG  LDY     M0000                    *F9C6: 10 9E 00       '...'
+RCMD    LDY     USERSP                   *F9C6: 10 9E 00       '...'
         LDX     #REGSTR                  *F9C9: 8E F9 F3       '...'
         BSR     DSPRG4                   *F9CC: 8D 1B          '..'
         TFR     Y,D                      *F9CE: 1F 20          '. '
@@ -2038,12 +2062,12 @@ REGSTR  FCC     " SP="                   *F9F3: 20 53 50 3D    ' SP='
 
 * "V" COMMAND: VIEW FORMATTED HEX
 * AND ASCII(?) DUMP OF MEMORY RANGE
-VCMD    LBSR    HEXASE                   *FA18: 17 00 5C       '..\'   GET HEX ADDR START END
+VCMD    LBSR    BEGEND                   *FA18: 17 00 5C       '..\'   GET HEX ADDR START END
 VCME    LBCS    RPT2ERR                  *FA1B: 10 25 FF 28    '.%.('  ERROR IF NOT 2 HEX ADDRESSES
         PSHS    U,D                      *FA1F: 34 46          '4F'
 VCM2    LBSR    WRTLIN                   *FA21: 17 04 14       '...'
         LDB     #$10                     *FA24: C6 10          '..'    SET COUNTER TO 16
-        PSHS    B                        *FA26: 34 04          '4.'
+        PSHS    B                        *FA26: 34 04          '4.'    PUSH COUNTER ONTO STACK TO FREE B
         TFR     U,D                      *FA28: 1F 30          '.0'
         LBSR    PRHX2SP                  *FA2A: 17 04 70       '..p'
 VCM3    LDA     ,U+                      *FA2D: A6 C0          '..'    GET THE NEXT VALUE IN MEMORY
@@ -2061,161 +2085,187 @@ VCMR    LBSR    WRTLIN                   *FA44: 17 03 F1       '...'
 
 * "C" COMMAND: CLEAR AND TEST MEMORY
 * COPIES THE BYTE STORED IN $8008
-CCMD    BSR     HEXASE                   *FA48: 8D 2D          '.-'    GET HEX ADDR START END
-        BCS     VCME                     *FA4A: 25 CF          '%.'
-        PSHS    D                        *FA4C: 34 06          '4.'
-CCM1    CMPU    ,S                       *FA4E: 11 A3 E4       '...'
-        BLS     CCM2                     *FA51: 23 02          '#.'
-        PULS    PC,D                     *FA53: 35 86          '5.'
-CCM2    LDD     #M8008                   *FA55: CC 80 08       '...'
-        STA     ,U                       *FA58: A7 C4          '..'
-CCM3    CMPA    ,U                       *FA5A: A1 C4          '..'
-        BNE     CCM4                     *FA5C: 26 08          '&.'
-        LSRA                             *FA5E: 44             'D'
-        LSR     ,U                       *FA5F: 64 C4          'd.'
-        DECB                             *FA61: 5A             'Z'
-        BNE     CCM3                     *FA62: 26 F6          '&.'
-        BRA     CCM5                     *FA64: 20 0D          ' .'
-CCM4    LDA     #$2D                     *FA66: 86 2D          '.-'    INDICATE ERROR CLEARING MEMORY
-        LBSR    A1OUTCHR                 *FA68: 17 04 0E       '...'
-        TFR     U,D                      *FA6B: 1F 30          '.0'
-        LBSR    PRHX2SP                  *FA6D: 17 04 2D       '..-'
-        LBSR    WRTLIN                   *FA70: 17 03 C5       '...'
-CCM5    LEAU    $01,U                    *FA73: 33 41          '3A'
-        BRA     CCM1                     *FA75: 20 D7          ' .'
-* GET 2 HEX ADDRESS: START, END IN U, D
-HEXASE  LBSR    CHKEOL                   *FA77: 17 03 B0       '...'
-        BEQ     HEXSE1                   *FA7A: 27 11          ''.'
-        LBSR    HEX4BIN                  *FA7C: 17 04 40       '..@'
-        BCS     HEXSE1                   *FA7F: 25 0C          '%.'
-        TFR     D,U                      *FA81: 1F 03          '..'
+CCMD    BSR     BEGEND                   *FA48: 8D 2D          '.-'    GET ADDR PARAMETERS
+        BCS     VCME                     *FA4A: 25 CF          '%.'    EXIT IF ERROR
+        PSHS    D                        *FA4C: 34 06          '4.'    SAVE END ADDRESS ON STACK
+CCMD2   CMPU    ,S                       *FA4E: 11 A3 E4       '...'   DONE YET?
+        BLS     CCMD3                    *FA51: 23 02          '#.'    CONTINUE IF NOT
+        PULS    PC,D                     *FA53: 35 86          '5.'    ELSE POP TEMP + RTS
+CCMD3   LDD     #M8008                   *FA55: CC 80 08       '...'   LOAD COUNT AND PATTERN
+        STA     ,U                       *FA58: A7 C4          '..'    STORE PATTERN
+CCMD4   CMPA    ,U                       *FA5A: A1 C4          '..'    COMPARE PATTERN TO MEM
+        BNE     CCMD5                    *FA5C: 26 08          '&.'    ERROR IF NO MATCH
+        LSRA                             *FA5E: 44             'D'     ROTATE PATTERN
+        LSR     ,U                       *FA5F: 64 C4          'd.'    ROTATE MEMORY
+        DECB                             *FA61: 5A             'Z'     ALL BITS TESTED?
+        BNE     CCMD4                    *FA62: 26 F6          '&.'    LOOP IF NOT
+        BRA     CCMD6                    *FA64: 20 0D          ' .'    ELSE CONTINUE
+CCMD5   LDA     #$2D                     *FA66: 86 2D          '.-'    OUTPUT "-"
+        LBSR    A1OUTCHR                 *FA68: 17 04 0E       '...'   REPORT BAD LOCATION
+        TFR     U,D                      *FA6B: 1F 30          '.0'    COPY CURRENT ADDR
+        LBSR    PRHX2SP                  *FA6D: 17 04 2D       '..-'   CONVERT TO HEXT
+        LBSR    WRTLIN                   *FA70: 17 03 C5       '...'   OUTPUT THIS LINE
+CCMD6   LEAU    $01,U                    *FA73: 33 41          '3A'    INCREMENT CURRENT ADDRESS
+        BRA     CCMD2                    *FA75: 20 D7          ' .'    BOTTOM OF LOOP
+
+* SUBROUTINE BEGEND: GET BEGIN AND
+* END ADDRESS PARAMETERS
+* 2 HEX ADDRESS: BEGIN IN U, END IN D
+BEGEND  LBSR    CHKEOL                   *FA77: 17 03 B0       '...'   NO PARAMETER?
+        BEQ     BGND1                    *FA7A: 27 11          ''.'    EXIT WITH ERROR
+        LBSR    HEX4BIN                  *FA7C: 17 04 40       '..@'   FIRST PARAMETER
+        BCS     BGND1                    *FA7F: 25 0C          '%.'    EXIT IF ERROR
+        TFR     D,U                      *FA81: 1F 03          '..'    COPY RESULT TO U
         LBSR    CHKEOL                   *FA83: 17 03 A4       '...'
-        BEQ     HEXSE1                   *FA86: 27 05          ''.'
-        LBSR    HEX4BIN                  *FA88: 17 04 34       '..4'
-        BCC     HEXSE2                   *FA8B: 24 02          '$.'
-HEXSE1  ORCC    #$01                     *FA8D: 1A 01          '..'
-HEXSE2  RTS                              *FA8F: 39             '9'
+        BEQ     BGND1                    *FA86: 27 05          ''.'
+        LBSR    HEX4BIN                  *FA88: 17 04 34       '..4'   SECOND PARAMETER
+        BCC     BGND2                    *FA8B: 24 02          '$.'
+BGND1   ORCC    #$01                     *FA8D: 1A 01          '..'
+BGND2   RTS                              *FA8F: 39             '9'
 
 * "M" COMMAND: MOVE MEMORY VALUES
-MCMD    LBSR    CHKEOL                   *FA90: 17 03 97       '...'
-MCME    LBEQ    RPT2ERR                  *FA93: 10 27 FE B0    '.'..'
-        LBSR    HEX4BIN                  *FA97: 17 04 25       '..%'
-MCM2    LBCS    RPT2ERR                  *FA9A: 10 25 FE A9    '.%..'
-        TFR     D,Y                      *FA9E: 1F 02          '..'
-        LBSR    HEXASE                   *FAA0: 17 FF D4       '...'
-        BCS     MCM2                     *FAA3: 25 F5          '%.'
-        ADDD    #M0000                   *FAA5: C3 00 00       '...'
-        BEQ     MCME                     *FAA8: 27 E9          ''.'
-        TFR     D,X                      *FAAA: 1F 01          '..'
-MCM3    LDA     ,Y+                      *FAAC: A6 A0          '..'
-        STA     ,U+                      *FAAE: A7 C0          '..'
-        LEAX    -$01,X                   *FAB0: 30 1F          '0.'
-        BNE     MCM3                     *FAB2: 26 F8          '&.'
-        RTS                              *FAB4: 39             '9'
-GCMD    LBSR    CHKEOL                   *FAB5: 17 03 72       '..r'
-        BEQ     GCMD1                    *FAB8: 27 0A          ''.'
-        LBSR    HEX4BIN                  *FABA: 17 04 02       '...'
-        BCS     MCM2                     *FABD: 25 DB          '%.'
-        LDY     M0000                    *FABF: 10 9E 00       '...'
-        STD     $0A,Y                    *FAC2: ED 2A          '.*'
-GCMD1   LDY     BKPTBL                   *FAC4: 10 9E 06       '...'
-        LDB     #$07                     *FAC7: C6 07          '..'
-GCMD2   LDU     ,Y                       *FAC9: EE A4          '..'
-        BEQ     GCMD3                    *FACB: 27 08          ''.'
-        LDA     ,U                       *FACD: A6 C4          '..'
-        STA     $02,Y                    *FACF: A7 22          '."'
-        LDA     #$3F                     *FAD1: 86 3F          '.?'
-        STA     ,U                       *FAD3: A7 C4          '..'
-GCMD3   LEAY    $03,Y                    *FAD5: 31 23          '1#'
-        DECB                             *FAD7: 5A             'Z'
-        BNE     GCMD2                    *FAD8: 26 EF          '&.'
-        LDS     M0000                    *FADA: 10 DE 00       '...'
-        RTI                              *FADD: 3B             ';'
-JCMD    LBSR    CHKEOL                   *FADE: 17 03 49       '..I'
-        BEQ     MCME                     *FAE1: 27 B0          ''.'
-        LBSR    HEX4BIN                  *FAE3: 17 03 D9       '...'
-        BCS     MCM2                     *FAE6: 25 B2          '%.'
-        TFR     D,X                      *FAE8: 1F 01          '..'
-        JSR     ,X                       *FAEA: AD 84          '..'
+MCMD    LBSR    CHKEOL                   *FA90: 17 03 97       '...'   CHECK FOR NO PARAMETERS
+MCME2   LBEQ    RPT2ERR                  *FA93: 10 27 FE B0    '.'..'  IF SO, REPORT ERROR
+        LBSR    HEX4BIN                  *FA97: 17 04 25       '..%'   SCAN FOR 4 DIGIT HEX PARAMETER INTO D
+MCME    LBCS    RPT2ERR                  *FA9A: 10 25 FE A9    '.%..'  IF NOT, REPORT ERROR
+        TFR     D,Y                      *FA9E: 1F 02          '..'    SAVE SOURCE ADDRESS IN Y
+        LBSR    BEGEND                   *FAA0: 17 FF D4       '...'   SCAN FOR 2 4 DIGIT HEX PARAMETERS INTO U, D
+        BCS     MCME                     *FAA3: 25 F5          '%.'    IF NOT, REPORT ERROR
+        ADDD    #$0000                   *FAA5: C3 00 00       '...'   CHECK IF LENGTH IS ZERO
+        BEQ     MCME2                    *FAA8: 27 E9          ''.'    IF SO, REPORT ERROR
+        TFR     D,X                      *FAAA: 1F 01          '..'    SAVE LENGTH IN X
+MCM3    LDA     ,Y+                      *FAAC: A6 A0          '..'    LOAD SOURCE VALUE INTO A
+        STA     ,U+                      *FAAE: A7 C0          '..'    SAVE IT TO THE DESTINATION
+        LEAX    -$01,X                   *FAB0: 30 1F          '0.'    DECREMENT X
+        BNE     MCM3                     *FAB2: 26 F8          '&.'    CONTINUE IF NOT ZERO
+        RTS                              *FAB4: 39             '9'     RETURN
+
+* "G" COMMAND: GO TO USER PROGRAM
+* EXECUTE AT PC ADDRESS OR UPDATE
+* PC IF PARAMETER IN COMMAND LINE.
+GCMD    LBSR    CHKEOL                   *FAB5: 17 03 72       '..r'   FIRST CHAR=RETURN?
+        BEQ     GCMD2                    *FAB8: 27 0A          ''.'    SKIP IF SO
+        LBSR    HEX4BIN                  *FABA: 17 04 02       '...'   ELSE GET PARAM
+        BCS     MCME                     *FABD: 25 DB          '%.'    EXIT IF ERROR
+        LDY     USERSP                   *FABF: 10 9E 00       '...'   GET SP ADDR
+        STD     $0A,Y                    *FAC2: ED 2A          '.*'    MAKE PC=PARAM RESULT
+* INSERT BREAKPOINTS
+GCMD2   LDY     BKPTBL                   *FAC4: 10 9E 06       '...'   GET BREAKPOINT TABLE ADDR
+        LDB     #$07                     *FAC7: C6 07          '..'    MAX COUNT
+GCMD3   LDU     ,Y                       *FAC9: EE A4          '..'    GET ADDRESS
+        BEQ     GCMD4                    *FACB: 27 08          ''.'    EXIT IF NOT ACTIVE
+        LDA     ,U                       *FACD: A6 C4          '..'    GET INSTR OPCODE
+        STA     $02,Y                    *FACF: A7 22          '."'    SAVE IN TABLE
+        LDA     #$3F                     *FAD1: 86 3F          '.?'    INSERT SWI
+        STA     ,U                       *FAD3: A7 C4          '..'    IN PGM
+GCMD4   LEAY    $03,Y                    *FAD5: 31 23          '1#'    MOVE TO NEXT TABLE ENTRY
+        DECB                             *FAD7: 5A             'Z'     DONE YET?
+        BNE     GCMD3                    *FAD8: 26 EF          '&.'    LOOP IF NOT
+        LDS     USERSP                   *FADA: 10 DE 00       '...'   ELSE RESTORE USER SP
+        RTI                              *FADD: 3B             ';'     AND GO...
+
+* "J" COMMAND: JUMP TO ADDRESS
+JCMD    LBSR    CHKEOL                   *FADE: 17 03 49       '..I'   FIRST CHAR=RET?
+        BEQ     MCME2                    *FAE1: 27 B0          ''.'    REPORT ERROR
+        LBSR    HEX4BIN                  *FAE3: 17 03 D9       '...'   ELSE GET PARAM
+        BCS     MCME                     *FAE6: 25 B2          '%.'    EXIT IF ERROR
+        TFR     D,X                      *FAE8: 1F 01          '..'    SAVE ADDRESS
+        JSR     ,X                       *FAEA: AD 84          '..'    JUMP TO THE ADDRESS
         RTS                              *FAEC: 39             '9'
-BKCMD   LBSR    CHKEOL                   *FAED: 17 03 3A       '..:'
-        BNE     BKCM3                    *FAF0: 26 1C          '&.'
-        LBSR    WRTLIN                   *FAF2: 17 03 43       '..C'
-        LDY     BKPTBL                   *FAF5: 10 9E 06       '...'
-        LDB     #$07                     *FAF8: C6 07          '..'
-        PSHS    B                        *FAFA: 34 04          '4.'
-BKCM1   LDD     ,Y                       *FAFC: EC A4          '..'
-        BEQ     BKCM2                    *FAFE: 27 03          ''.'
-        LBSR    PRHX2SP                  *FB00: 17 03 9A       '...'
-BKCM2   LEAY    $03,Y                    *FB03: 31 23          '1#'
-        DEC     ,S                       *FB05: 6A E4          'j.'
-        BNE     BKCM1                    *FB07: 26 F3          '&.'
-        LEAS    $01,S                    *FB09: 32 61          '2a'
-        LBRA    WRTLIN                   *FB0B: 16 03 2A       '..*'
-BKCM3   LBSR    HEX4BIN                  *FB0E: 17 03 AE       '...'
-BKCME   LBCS    RPT2ERR                  *FB11: 10 25 FE 32    '.%.2'
-        PSHS    D                        *FB15: 34 06          '4.'
-        BSR     FNDBKP                   *FB17: 8D 37          '.7'
-        BEQ     BKCM6                    *FB19: 27 0E          ''.'
-        LDD     #M0000                   *FB1B: CC 00 00       '...'
-        BSR     FNDBKP                   *FB1E: 8D 30          '.0'
-        BEQ     BKCM6                    *FB20: 27 07          ''.'
-        LDA     #$35                     *FB22: 86 35          '.5'
-        LEAS    $02,S                    *FB24: 32 62          '2b'
-BKCM5   LBRA    CMDERR                   *FB26: 16 FD 7F       '...'
-BKCM6   PULS    D                        *FB29: 35 06          '5.'
-        STD     ,Y                       *FB2B: ED A4          '..'
-        RTS                              *FB2D: 39             '9'
-KBCMD   LBSR    CHKEOL                   *FB2E: 17 02 F9       '...'
-        BEQ     ZFB45                    *FB31: 27 12          ''.'
-        LBSR    HEX4BIN                  *FB33: 17 03 89       '...'
-        BCS     BKCME                    *FB36: 25 D9          '%.'
-        BSR     FNDBKP                   *FB38: 8D 16          '..'
-        BEQ     ZFB40                    *FB3A: 27 04          ''.'
-        LDA     #$34                     *FB3C: 86 34          '.4'
-        BRA     BKCM5                    *FB3E: 20 E6          ' .'
-ZFB40   CLRA                             *FB40: 4F             'O'
+
+* "BK" COMMAND - SET OR DISPLAY BREAKPOINTS
+BKCMD   LBSR    CHKEOL                   *FAED: 17 03 3A       '..:'   IS NEXT CHAR RETURN?
+        BNE     BKCM2                    *FAF0: 26 1C          '&.'    IF NOT, CONTINUE
+        LBSR    WRTLIN                   *FAF2: 17 03 43       '..C'   ELSE GET OUTPUT READY
+        LDY     BKPTBL                   *FAF5: 10 9E 06       '...'   GET BKPT TABLE ADDRESS
+        LDB     #$07                     *FAF8: C6 07          '..'    MAX NUMBER OF BREAKPOINTS
+        PSHS    B                        *FAFA: 34 04          '4.'    PUSH COUNT
+* BREAKPOINT DISPLAY LOOP
+BKCM1   LDD     ,Y                       *FAFC: EC A4          '..'    GET NEXT ADDR
+        BEQ     BKCM1A                   *FAFE: 27 03          ''.'    SKIP IF NOT ACTIVE
+        LBSR    PRHX2SP                  *FB00: 17 03 9A       '...'   ELSE CONVERT TO HEX
+BKCM1A  LEAY    $03,Y                    *FB03: 31 23          '1#'    MOVE TO NEXT ENTRY
+        DEC     ,S                       *FB05: 6A E4          'j.'    DECREMENT COUNT
+        BNE     BKCM1                    *FB07: 26 F3          '&.'    LOOP IF MORE TO DO
+        LEAS    $01,S                    *FB09: 32 61          '2a'    CLEAN UP STACK
+        LBRA    WRTLIN                   *FB0B: 16 03 2A       '..*'   OUTPUT LINE +RTS
+* SET BREAKPOINT
+BKCM2   LBSR    HEX4BIN                  *FB0E: 17 03 AE       '...'   PROCESS PARAM
+BKCME   LBCS    RPT2ERR                  *FB11: 10 25 FE 32    '.%.2'  EXIT IF ERROR
+        PSHS    D                        *FB15: 34 06          '4.'    SAVE RESULT
+        BSR     FNDBKP                   *FB17: 8D 37          '.7'    SEARCH TABLE FOR THIS ADDR
+        BEQ     BKCM2A                   *FB19: 27 0E          ''.'    SKIP IF ALREADY IN TABLE
+        LDD     #$0000                   *FB1B: CC 00 00       '...'   SEARCH FOR EMPTY ENTRY
+        BSR     FNDBKP                   *FB1E: 8D 30          '.0'    
+        BEQ     BKCM2A                   *FB20: 27 07          ''.'    SKIP IF FOUND
+        LDA     #$35                     *FB22: 86 35          '.5'    ELSE TABLE FULL ERROR
+        LEAS    $02,S                    *FB24: 32 62          '2b'    CLEAN UP STACK
+BKCMER  LBRA    CMDERR                   *FB26: 16 FD 7F       '...'
+BKCM2A  PULS    D                        *FB29: 35 06          '5.'    POP ADDR
+        STD     ,Y                       *FB2B: ED A4          '..'    PUT IN TABLE
+        RTS                              *FB2D: 39             '9'     DONE
+
+* "KB" COMMAND: KILL ONE OR ALL
+* BREAKPOINTS
+KBCMD   LBSR    CHKEOL                   *FB2E: 17 02 F9       '...'   NEXT CHAR=RET?
+        BEQ     KBCM2                    *FB31: 27 12          ''.'    IF SO, GO CLEAR ALL
+        LBSR    HEX4BIN                  *FB33: 17 03 89       '...'   ELSE GET PARAMETERS
+        BCS     BKCME                    *FB36: 25 D9          '%.'    EXIT IF ERROR
+        BSR     FNDBKP                   *FB38: 8D 16          '..'    FIND BREAKPOINT
+        BEQ     KBCM1                    *FB3A: 27 04          ''.'    CONTINUE IF FOUND
+        LDA     #$34                     *FB3C: 86 34          '.4'    SET ERROR CODE
+        BRA     BKCMER                   *FB3E: 20 E6          ' .'    ERROR IF NOT FOUND
+KBCM1   CLRA                             *FB40: 4F             'O'
         CLRB                             *FB41: 5F             '_'
-        STD     ,Y                       *FB42: ED A4          '..'
-        RTS                              *FB44: 39             '9'
-ZFB45   LDY     BKPTBL                   *FB45: 10 9E 06       '...'
-        LDB     #$15                     *FB48: C6 15          '..'
-ZFB4A   CLR     ,Y+                      *FB4A: 6F A0          'o.'
-        DECB                             *FB4C: 5A             'Z'
-        BNE     ZFB4A                    *FB4D: 26 FB          '&.'
+        STD     ,Y                       *FB42: ED A4          '..'    CLEAR THIS ONE
+        RTS                              *FB44: 39             '9'     DONE
+KBCM2   LDY     BKPTBL                   *FB45: 10 9E 06       '...'   CLEAR ALL BREAKPOINTS
+        LDB     #$15                     *FB48: C6 15          '..'    TABLE SIZE
+KBCM2A  CLR     ,Y+                      *FB4A: 6F A0          'o.'    CLEAR LOOP
+        DECB                             *FB4C: 5A             'Z'     DECR COUNT
+        BNE     KBCM2A                   *FB4D: 26 FB          '&.'    LOOP TIL DONE
         RTS                              *FB4F: 39             '9'
-FNDBKP  PSHS    U                        *FB50: 34 40          '4@'
-        TFR     D,U                      *FB52: 1F 03          '..'
-        LDB     #7                       *FB54: C6 07          '..'
-        LDY     BKPTBL                   *FB56: 10 9E 06       '...'
-FNDBK2  CMPU    ,Y                       *FB59: 11 A3 A4       '...'
-        BEQ     FNDBK3                   *FB5C: 27 09          ''.'
-        LEAY    $03,Y                    *FB5E: 31 23          '1#'
-        DECB                             *FB60: 5A             'Z'
-        BNE     FNDBK2                   *FB61: 26 F6          '&.'
-        LDB     #$0C                     *FB63: C6 0C          '..'
-        ANDCC   #$FB                     *FB65: 1C FB          '..'
+
+* SUBROUTINE FNDBKP - SEARCH BREAKPOINT
+* TABLE FOR ADDRESS
+*  D = ADDRESS OF BREAKPOINT
+* RETURNS TABLE ADDRESS IN Y AND Z BIT SET
+* FOUND, ELSE Z BIT CLEARED
+FNDBKP  PSHS    U                        *FB50: 34 40          '4@'    U IS LOCAL
+        TFR     D,U                      *FB52: 1F 03          '..'    COPY BKPT ADDRESS
+        LDB     #7                       *FB54: C6 07          '..'    MAX TABLE ENTRIES
+        LDY     BKPTBL                   *FB56: 10 9E 06       '...'   GET TABLE ADDRESS
+FNDBK2  CMPU    ,Y                       *FB59: 11 A3 A4       '...'   DOES THIS ONE MATCH?
+        BEQ     FNDBK3                   *FB5C: 27 09          ''.'    IF SO, WE'RE DONE
+        LEAY    $03,Y                    *FB5E: 31 23          '1#'    ELSE MOVE Y TO NEXT ENTRY
+        DECB                             *FB60: 5A             'Z'     DECR COUNT
+        BNE     FNDBK2                   *FB61: 26 F6          '&.'    LOOP IF NOT DONE
+        LDB     #$0C                     *FB63: C6 0C          '..'    BKPT NOT FOUND ERROR
+        ANDCC   #$FB                     *FB65: 1C FB          '..'    ELSE CLEAR Z BIT
 FNDBK3  PULS    PC,U                     *FB67: 35 C0          '5.'
-NCMD    CLR     M0019                    *FB69: 0F 19          '..'
-GOCMD1  LDS     M0000                    *FB6B: 10 DE 00       '...'
-        CLR     TIMER                    *FB6E: 7F FF D8       '...'
-        RTI                              *FB71: 3B             ';'
-GTCMD   LBSR    CHKEOL                   *FB72: 17 02 B5       '...'
-        BEQ     GOCMD2                   *FB75: 27 09          ''.'
-        LBSR    HEX4BIN                  *FB77: 17 03 45       '..E'
-        LBCS    RPT2ERR                  *FB7A: 10 25 FD C9    '.%..'
-        STD     M001A                    *FB7E: DD 1A          '..'
-GOCMD2  LDD     M001A                    *FB80: DC 1A          '..'
-        BNE     GOCMD3                   *FB82: 26 04          '&.'
-        LDA     #$37                     *FB84: 86 37          '.7'
-        BRA     BKCM5                    *FB86: 20 9E          ' .'
-GOCMD3  COM     M0019                    *FB88: 03 19          '..'
-        BRA     GOCMD1                   *FB8A: 20 DF          ' .'
+
+* "N" COMMAND: NEXT SINGLE STEP
+* SINGLE STEP COMMAND PROCESSOR
+SSCMD   CLR     M0019                    *FB69: 0F 19          '..'
+SSCM2   LDS     USERSP                   *FB6B: 10 DE 00       '...'   LOAD USER STACK PTR
+        CLR     TIMER                    *FB6E: 7F FF D8       '...'   START THE TIMER
+        RTI                              *FB71: 3B             ';'     GO TO PROGRAM
+GTCMD   LBSR    CHKEOL                   *FB72: 17 02 B5       '...'   NEXT CHAR=RET?
+        BEQ     GTCM2                    *FB75: 27 09          ''.'    IF SO, CONTINUE
+        LBSR    HEX4BIN                  *FB77: 17 03 45       '..E'   ELSE GET PARAMETER
+        LBCS    RPT2ERR                  *FB7A: 10 25 FD C9    '.%..'  REPORT PARSE ERROR
+        STD     M001A                    *FB7E: DD 1A          '..'    STORE ADDRESS
+GTCM2   LDD     M001A                    *FB80: DC 1A          '..'    LOAD  ADDRESS
+        BNE     GTCM3                    *FB82: 26 04          '&.'    CHECK IF ZERO
+        LDA     #$37                     *FB84: 86 37          '.7'    REPORT COMMAND ERROR
+        BRA     BKCMER                   *FB86: 20 9E          ' .'
+GTCM3   COM     M0019                    *FB88: 03 19          '..'
+        BRA     SSCM2                    *FB8A: 20 DF          ' .'
 VLCMD   LDA     #$FF                     *FB8C: 86 FF          '..'
         STA     M002B                    *FB8E: 97 2B          '.+'
         BRA     LCM1                     *FB90: 20 02          ' .'
 LCMD    CLR     M002B                    *FB92: 0F 2B          '.+'
-LCM1    LDD     #M0000                   *FB94: CC 00 00       '...'
+LCM1    LDD     #USERSP                  *FB94: CC 00 00       '...'
         PSHS    D                        *FB97: 34 06          '4.'
         PSHS    D                        *FB99: 34 06          '4.'
         PSHS    D                        *FB9B: 34 06          '4.'
@@ -2349,25 +2399,26 @@ ZFC9E   PULS    PC,A                     *FC9E: 35 82          '5.'    RETURN
 BKPT    LDA     #$9F                     *FCA0: 86 9F          '..'    DEBUG DP
         TFR     A,DP                     *FCA2: 1F 8B          '..'
         COM     INBKPT                   *FCA4: 03 08          '..'
-        STS     M0000                    *FCA6: 10 DF 00       '...'   SAVE USER STACK PTR
+        STS     USERSP                   *FCA6: 10 DF 00       '...'   SAVE USER STACK PTR
         LDD     $0A,S                    *FCA9: EC 6A          '.j'    GET USER'S PC
         SUBD    #M0001                   *FCAB: 83 00 01       '...'   DECREMENT IT
         STD     $0A,S                    *FCAE: ED 6A          '.j'    REPLACE IT
         LDS     DBUGSP                   *FCB0: 10 DE 02       '...'   LOAD DEBUG STACK
         LBSR    FNDBKP                   *FCB3: 17 FE 9A       '...'   ADDR IN TABLE?
         BEQ     BKPT2                    *FCB6: 27 05          ''.'    SKIP IF SO
-        LDA     #$36                     *FCB8: 86 36          '.6'
+        LDA     #$36                     *FCB8: 86 36          '.6'    ELSE REPORT ILLEGAL BREAKPOINT
         LBSR    CMDERR                   *FCBA: 17 FB EB       '...'
+* REMOVE BREAKPOINTS FROM PGM
 BKPT2   LDY     BKPTBL                   *FCBD: 10 9E 06       '...'
-        LDB     #$07                     *FCC0: C6 07          '..'    ELSE REPORT ILLEGAL BREAKPOINT
-BKPT3   LDX     ,Y                       *FCC2: AE A4          '..'
-        BEQ     BKPT4                    *FCC4: 27 04          ''.'
+        LDB     #$07                     *FCC0: C6 07          '..'    MAX COUNT
+BKPT3   LDX     ,Y                       *FCC2: AE A4          '..'    GET ADDR OF BKPT
+        BEQ     BKPT4                    *FCC4: 27 04          ''.'    SKIP IF NOT ACTIVE
         LDA     $02,Y                    *FCC6: A6 22          '."'    GET SAVED OPCODE
         STA     ,X                       *FCC8: A7 84          '..'    RESTORE IT
 BKPT4   LEAY    $03,Y                    *FCCA: 31 23          '1#'    MOVE TO NEXT ENTRY
         DECB                             *FCCC: 5A             'Z'     DONE YET?
         BNE     BKPT3                    *FCCD: 26 F3          '&.'    LOOP IF NOT
-        BRA     _PREGCMD                 *FCCF: 20 22          ' "'    PRINT REGS (?)
+        BRA     DSPREG                   *FCCF: 20 22          ' "'    PRINT REGISTERS
 
 * SINGLE STEP SERVICE ROUTINE
 
@@ -2375,24 +2426,22 @@ SSBK    LDA     #$01                     *FCD1: 86 01          '..'
         STA     TIMER                    *FCD3: B7 FF D8       '...'   STOP TIMER
         LDA     #$9F                     *FCD6: 86 9F          '..'    GET DEBUGGER DIRECT PAGE
         TFR     A,DP                     *FCD8: 1F 8B          '..'
-        STS     M0000                    *FCDA: 10 DF 00       '...'   SAVE USER STACK
+        STS     USERSP                   *FCDA: 10 DF 00       '...'   SAVE USER STACK
         LDD     $0A,S                    *FCDD: EC 6A          '.j'
         LDS     DBUGSP                   *FCDF: 10 DE 02       '...'   LOAD DEBUGGER STACK
         TST     M0019                    *FCE2: 0D 19          '..'
-        BEQ     _PREGCMD                 *FCE4: 27 0D          ''.'
-
-* SINGLE STEP COMMAND PROCESSOR (?)
+        BEQ     DSPREG                   *FCE4: 27 0D          ''.'
 
         TST     INBKPT                   *FCE6: 0D 08          '..'
         BNE     ZFCF9                    *FCE8: 26 0F          '&.'
         CMPD    M001A                    *FCEA: 10 93 1A       '...'
-        LBNE    GOCMD1                   *FCED: 10 26 FE 7A    '.&.z'
+        LBNE    SSCM2                    *FCED: 10 26 FE 7A    '.&.z'
         CLR     M0019                    *FCF1: 0F 19          '..'
-_PREGCMD LBSR    DSPREG                   *FCF3: 17 FC D0       '...'   PRINT REGISTERS
+DSPREG  LBSR    RCMD                     *FCF3: 17 FC D0       '...'   PRINT REGISTERS
         LBRA    COMAND                   *FCF6: 16 FB 75       '..u'   GOTO COMMAND LOOP
 ZFCF9   CLR     M0019                    *FCF9: 0F 19          '..'
         CLR     INBKPT                   *FCFB: 0F 08          '..'
-        LDS     M0000                    *FCFD: 10 DE 00       '...'
+        LDS     USERSP                   *FCFD: 10 DE 00       '...'
         RTI                              *FD00: 3B             ';'
 MFD01   SWI                              *FD01: 3F             '?'
 hdlr_SWI3 JMP     [RAM_SW3_VEC]            *FD02: 6E 9F 9F 0D    'n...'
@@ -2414,8 +2463,9 @@ OK_MSG  FCC     "OK "                    *FD30: 4F 4B 20       'OK '
 BADMSG  FCC     "BAD "                   *FD34: 42 41 44 20    'BAD '
         FCB     $00                      *FD38: 00             '.'
 VRFMSG  FCC     "VERF PROBLEMS"          *FD39: 56 45 52 46 20 50 52 4F 42 4C 45 4D 53 'VERF PROBLEMS'
-        FCB     $07,$00,$F0,$00          *FD46: 07 00 F0 00    '....'
+        FCB     $07,$00,$F0              *FD46: 07 00 F0       '...'
 * COMMAND DISPATCH TABLE
+        FCB     $00                      *FD49: 00             '.'
 CMDTBL  FCC     "A"                      *FD4A: 41             'A'
         FCB     $00                      *FD4B: 00             '.'
         FDB     ACMD                     *FD4C: F8 FE          '..'
@@ -2433,7 +2483,7 @@ CMDTBL  FCC     "A"                      *FD4A: 41             'A'
         FDB     PCCMD                    *FD5F: F9 6D          '.m'
         FCC     "R"                      *FD61: 52             'R'
         FCB     $00                      *FD62: 00             '.'
-        FDB     DSPREG                   *FD63: F9 C6          '..'
+        FDB     RCMD                     *FD63: F9 C6          '..'
         FCC     "SP"                     *FD65: 53 50          'SP'
         FCB     $00                      *FD67: 00             '.'
         FDB     SPCMD                    *FD68: F9 5B          '.['
@@ -2472,7 +2522,7 @@ CMDTBL  FCC     "A"                      *FD4A: 41             'A'
         FDB     KBCMD                    *FD96: FB 2E          '..'
         FCC     "N"                      *FD98: 4E             'N'
         FCB     $00                      *FD99: 00             '.'
-        FDB     NCMD                     *FD9A: FB 69          '.i'
+        FDB     SSCMD                    *FD9A: FB 69          '.i'
         FCC     "GT"                     *FD9C: 47 54          'GT'
         FCB     $00                      *FD9E: 00             '.'
         FDB     GTCMD                    *FD9F: FB 72          '.r'
@@ -2481,12 +2531,13 @@ CMDTBL  FCC     "A"                      *FD4A: 41             'A'
         FDB     LCMD                     *FDA3: FB 92          '..'
         FCC     "VL"                     *FDA5: 56 4C          'VL'
         FCB     $00                      *FDA7: 00             '.'
-        FDB     VLCMD,M0000,$16FB        *FDA8: FB 8C 00 00 16 FB '......'
-        FCB     $1E                      *FDAE: 1E             '.'
+        FDB     VLCMD                    *FDA8: FB 8C          '..'
+        FCB     $00,$00                  *FDAA: 00 00          '..'
+_N???   FCB     $16,$FB,$1E              *FDAC: 16 FB 1E       '...'
 _NCOMAND LBRA    COMAND                   *FDAF: 16 FA BC       '...'
 _NCMDERR LBRA    CMDERR                   *FDB2: 16 FA F3       '...'
 _NSSBK  LBRA    SSBK                     *FDB5: 16 FF 19       '...'
-ZFDB8   LBRA    NCMD                     *FDB8: 16 FD AE       '...'
+_NSSCMD LBRA    SSCMD                    *FDB8: 16 FD AE       '...'
         LBRA    LCMD                     *FDBB: 16 FD D4       '...'
         LBRA    LCM2                     *FDBE: 16 FD ED       '...'
 MFDC1   FCC     "?"                      *FDC1: 3F             '?'
@@ -2555,6 +2606,10 @@ RDLN4   STA     ,X+                      *FE21: A7 80          '..'
         BNE     RDLN2                    *FE25: 26 E1          '&.'    IF NOT GET ANOTHER
         LEAX    -$01,X                   *FE27: 30 1F          '0.'
         RTS                              *FE29: 39             '9'
+* SUBROUTINE CHKEOL
+* SKIP SPACES IN INPUT BUFFER
+* THEN CHECK IF NEXT CHARACTER
+* IS A CARRIAGE RETURN
 CHKEOL  BSR     SKIPSP                   *FE2A: 8D 03          '..'
         CMPA    #$0D                     *FE2C: 81 0D          '..'
         RTS                              *FE2E: 39             '9'
@@ -2611,7 +2666,8 @@ CPYST2  LDA     ,Y+                      *FE8A: A6 A0          '..'
 CPYST3  BSR     A1OUTCHR                 *FE97: 8D E0          '..'
         BRA     CPYST2                   *FE99: 20 EF          ' .'
 CPYST4  PULS    PC,D                     *FE9B: 35 86          '5.'
-PRHX2SP BSR     PR2HX                    *FE9D: 8D 09          '..'    PRINT A SPACE B SPACE IN HEX
+* PRINT DREG SPACE IN HEX
+PRHX2SP BSR     PR2HX                    *FE9D: 8D 09          '..'
         TFR     B,A                      *FE9F: 1F 98          '..'
 PRHXSP  BSR     PR2HX                    *FEA1: 8D 05          '..'    PRINT A BYTE IN HEX & SPACE
         LDA     #$20                     *FEA3: 86 20          '. '
@@ -2652,6 +2708,7 @@ HEX2DEC BSR     _CHEXBIN                 *FECB: 8D 13          '..'    CONVERT N
         LEAS    $01,S                    *FEDD: 32 61          '2a'
 ZFEDF   RTS                              *FEDF: 39             '9'
 _CHEXBIN LDA     ,X+                      *FEE0: A6 80          '..'
+
 * Subroutine HEXDEC - convert hexadecimal
 * ASCII char to decimal
 HEXDEC  SUBA    #$30                     *FEE2: 80 30          '.0'    CONVERT FROM ASCII
@@ -2667,7 +2724,7 @@ _CLRC   ANDCC   #$FE                     *FEF4: 1C FE          '..'    CLEAR CAR
         RTS                              *FEF6: 39             '9'
 _SETC   ORCC    #$01                     *FEF7: 1A 01          '..'    SET   CARRY, RETURN
         RTS                              *FEF9: 39             '9'
-ZFEFA   LDX     A1IOBUF                  *FEFA: BE 9F 04       '...'
+GETLN   LDX     A1IOBUF                  *FEFA: BE 9F 04       '...'   GET A LINE FROM INPUT, MAX CHARS IN B
 ZFEFD   LBSR    A1INPCHR                 *FEFD: 17 FF 4C       '..L'
         STA     ,X+                      *FF00: A7 80          '..'
         LBSR    HEXDEC                   *FF02: 17 FF DD       '...'
@@ -2691,20 +2748,30 @@ ZFF1E   ORCC    #$01                     *FF1E: 1A 01          '..'
 
 * Input Conversion Subroutines
 * These subroutines convert an usnigned binary
-* number (passed in B or D) to an ASCII character
+* number (passed in B or D, or input buffer at Y)
+* to an ASCII character
 * string starting at the address passed in the
 * X register, which will return with the address
 * following the string. All other registers
 * except CC are preserved
 
-_C4HSP  LDD     ,Y++                     *FF21: EC A1          '..'
-BIN4HS  BSR     BIN4HX                   *FF23: 8D 0E          '..'
-        BRA     PUTSPC                   *FF25: 20 04          ' .'
-ZFF27   LDB     ,Y+                      *FF27: E6 A0          '..'
-* Subroutine BIN2HS - Convert word in D reg to
+* SUBROUTINES C2HEX AND C4HEX -
+* LOAD AUTOINCRMENT FROM Y AND
+* CONVERT TO HEX
+C4HEX   LDD     ,Y++                     *FF21: EC A1          '..'    LOAD D FROM INPUT BUFFER
+
+* Subroutine BIN4HS - Convert word in D reg to
 * four-character hexadecimal followed by a space.
-BIN2HS  BSR     BIN2HX                   *FF29: 8D 0E          '..'
-* FALL THROUGH TO PUTSPC
+BIN4HS  BSR     BIN4HX                   *FF23: 8D 0E          '..'    PERFORM CONVERSION
+        BRA     PUTSPC                   *FF25: 20 04          ' .'    GO OUTPUT SPACE AND RTS
+
+C2HEX   LDB     ,Y+                      *FF27: E6 A0          '..'
+
+* Subroutine BIN2HS - Convert word in B reg to
+* two-character hexadecimal followed by a space.
+BIN2HS  BSR     BIN2HX                   *FF29: 8D 0E          '..'    LOAD B FROM INPUT BUFFER
+                                         * PERFORM CONVERSION
+* FALL THROUGH TO PUTSPC AND RETURN
 
 * Subroutine PUTSPC - Put a space character in
 * the output buffer and increment pointer (x)
@@ -2712,6 +2779,7 @@ PUTSPC  PSHS    A                        *FF2B: 34 02          '4.'
         LDA     #$20                     *FF2D: 86 20          '. '
         STA     ,X+                      *FF2F: A7 80          '..'
         PULS    PC,A                     *FF31: 35 82          '5.'
+
 * Subroutine BIN4HX - Convert word in D reg to
 * four-character hexadecimal.
 BIN4HX  EXG     A,B                      *FF33: 1E 89          '..'
