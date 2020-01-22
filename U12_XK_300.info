@@ -3,42 +3,277 @@ option 6802
 
 ***** General Info
 comment  .
+comment  .D5BUG
+comment  .
 comment  ROM LABEL:
 comment  .      ELENCO
 comment  .      ADVENT
 comment  .      ELECTRONICS
 comment  .      (312) 297-6200
 
-***** Program Addresses
-label F000  RESET
-label F024  PROMPT
-label F04E  GET
-label F0BB  PUT
-label F120  DYSCOD
-label F169  DLY25
-label F171  DLY1
-label F179  DLYX
-label F183  ADDAX
-label F195  CLRDS
-label F1AA  ROLL2
-label F1CC  ROLL4
-label F1EF  RDKEY
-label F533  TIN
-label F608  PNCHB
-label F630  PUNCH
-label F69C  LOAD
-
 ***** Scratch RAM Addresses
 label E419  MNPTR
 label E41B  KEY
 label E41C  KEYFLG
 label E41D  DISBUF
+label E41E  DISBUF+1
+label E41F  DISBUF+2
+label E420  DISBUF+3
+label E421  DISBUF+4
+label E422  DISBUF+5
 label E423  ROLPAS
+label E42A  MEMSAV
+label E42B  MEMSAV+1
 label E42C  HEXBUF
 label E42D  HEXBU1
 label E42E  HEXBU2
 label E42F  USP
+label E430  UCC-1
 label E431  UCC
+label E432  UB
+label E433  UA
+label E434  UX
+label E436  UPC
+label E43C  UIRQV
+label E43E  FNCFL
+label E43F  FNCPNT
+label E459  BYTE
+label E45A  CYCNT
+label E45B  CYCNT+1
+label E45C  GOOD1S
+label E45D  OLD
+label E460  BEGAD
+label E462  ENDAD
+label E484  PIADP
+label E485  PIACR
+
+label E424  XSAVD
+label E425  XSAVD+1
+label E426  XSAV1
+
+insert F000 .        NAM RESET
+insert F000 .        OPT CREF,LLEN=80
+
+***** Program Addresses
+comment F000 -------------------------------------------------------
+comment F000 RESET - COLD START ROUTINE
+comment F000 -------------------------------------------------------
+label F000 RESET
+label F005  CLRLOP
+
+comment F024 -------------------------------------------------------
+comment F024 PROMPT - ROUTINE TO SET UP PROMPT CONDITIONS
+comment F024 -------------------------------------------------------
+label F024 PROMPT
+
+comment F04E -------------------------------------------------------
+comment F04E GET - ROUTINE TO READ A KEY
+comment F04E -------------------------------------------------------
+label F04E GET
+label F057  LPCOL
+label F063  COLFND
+label F06A  LPROW
+label F079  ROWFND
+label F07A  LPFND
+label F080  DUNROW
+comment F088 A-REG NOW CONTAINS OFFSET FOR KEY LOOK-UP
+label F088  CLOP
+label F0A2  DIDDLE
+comment F0A2 THIS RTS IS USED AS A DO-NOTHING SUB
+comment F0A2 SO SYST CAN BE DISABLED EXCEPT DISPLAY
+
+comment F0A3 -------------------------------------------------------
+comment F0A3 KYTBL - KEY VALUE TABLE
+comment F0A3 -------------------------------------------------------
+label F0A3 KYTBL
+data  F0A3-F0BA
+
+comment F0BB -------------------------------------------------------
+comment F0BB PUT - DISPLAYS DATA IN DISBUF & CALLS THE
+comment F0BB FUNCTIONING SUBROUTINE
+comment F0BB -------------------------------------------------------
+label F0BB PUT
+label F0BD  LP1P
+label F0C1  LP2P
+
+comment F0E5 -------------------------------------------------------
+comment F0E5 FUNSEL - ROUTINE TO SELECT A FUNCTION FROM A KEY INPUT
+comment F0E5 -------------------------------------------------------
+label F0E5 FUNSEL
+label F0EB  KEYNOW
+label F100  UFNK
+label F105  FUNKY
+label F108  HASH
+label F110  SYSFNC
+word  F110-F11E
+comment F120 -------------------------------------------------------
+comment F120 MISC - MISC ROUTINES
+comment F120 -------------------------------------------------------
+comment F120 DECODE HEX TO 7-SEGMENT
+label F120 DYSCOD
+label F128  LPOl
+label F13E  LPO2
+label F159  DYSTBL
+bin   F159-F168
+comment F169 DELAY SUBS
+label F169 DLY25
+const F16D-F16E
+label F171 DLY1
+const F175-F176
+label F179 DLYX
+label F17C  DLYLP
+comment F183 SUBROUTINE TO ADD X=X+A
+label F183 ADDAX
+label F191  ARND
+comment F195 CLEAR DISPLAY PER A-REG
+label F195 CLRDS
+label F19B  CLRLP
+label F1A0  ARNCLR
+label F1AA ROLL2
+label F1BC  ARNCL2
+label F1C4  R2OUT
+comment F1CC ROLL 4 HEX INTO HEXBUF
+label F1CC ROLL4
+label F1DD  ARNCL4
+label F1E3  RO4LP
+label F1ED  R4OUT
+label F1EF RDKEY
+comment F1F6 -------------------------------------------------------
+comment F1F6 MEMCH - MEMORY CHANGE/DISPLAY/OFFSET ROUTINE
+comment F1F6 -------------------------------------------------------
+label F1F6 MEMBEG
+label F205  MEMCH
+label F20B  MEMNOW
+label F21E  OFFOUT
+const F222
+label F221  OFFEND
+label F227  OFFRET
+label F228  OFFUN
+bin   F24D
+label F243  ARNINC
+label F257  BADOFF
+const F258
+bin   F261
+label F26B  CALDUN
+label F281  BADCAL
+label F288  MEMBAK
+label F28D  NORMAL
+label F297  NXMl
+label F29E  NXM2
+label F2B5  NUM
+label F2BA  NEWMEM
+label F2BF  MEMOUT
+comment F2CA REGDIS - REGISTER DISPLAY/CHANGE ROUTINE
+label F2CA REGBEG
+label F2D5  NOTVRF
+label F2EE  REGDIS
+label F2F4  REGNOW
+label F2FE  REGFNC
+label F30A  ARNRl
+label F30F  NXRl
+label F31C  ARNR2
+label F31F  NEWREG
+label F324  RUNONE
+label F32E  REGOUT
+label F350  NOTNEW
+label F365  ARNR3
+label F36A  ONLYl
+label F370  REGTBL
+word F370-F387
+bin F372-F373
+bin F376-F377
+bin F37A-F37B
+bin F37E-F37F
+bin F382-F383
+bin F386-F387
+bin F37A-F37B
+comment F388 -------------------------------------------------------
+comment F388 BRKBEG - BREAKPOINT EDITOR
+comment F388 -------------------------------------------------------
+label F388 BRKBEG
+label F38E BRKEDT
+label F39C BRKPNT
+label F3A2 BRKTST
+label F3AF NOTHEX
+label F3B5 CKFC
+label F3BC CKGO
+comment F3C0 DISBRK - DISPLAY NEXT BREAKPOINT
+label F3C0 DISBRK
+label F3CB BKLOOP
+label F3D7 NOTEND
+label F3E3 BACK
+label F3F0 DISDUN
+comment F3F1 BKTOTB-ENTER A BREAKPOINT FROM HEXBUF INTO
+comment F3F1 .       THE TABLE & UPDATE BRKNO
+label F3F1 BKTOTB
+comment F3FF CHECK FOR RAM
+comment F40E ENTER BKPT INTO TABLE
+label F428 FULL
+comment F3Fl BKFMTB - REMOVE A BREAKPOINT FROM BUFFER
+comment F3Fl .         & UPDATE BRKNO
+label F42E BKFMTB
+label F43E BKNO
+label F444 BKLOP
+label F44D NEXT1
+label F450 ISBKPT
+comment F45F INBKS - INSERT BREAKPOINTS FROM TABLE TO MEM
+label F45F INBKS
+label F467 CKBPT
+label F47B NEXT2
+label F484 NOBPT
+comment F485 OUTBKS - REMOVE BREAKPOINTS FROM MEM
+label F485 OUTBKS
+label F488 REMOV1
+label F496 NEXT3
+comment F4A0 FDBRI - FIND BREAKPOINT (HEXBUF) IN BRKTAB
+comment F4A0 .        BKPNTR POINTS AT BREAKPOINT & CARRY
+comment F4A0 .        IS SET IF BREKPOINT EXISTS,ELSE C IS ="0"
+label F4A0 FNDBRK
+label F4A9 BRKLOP
+label F4AD NEXT
+label F4B8 CKLSB
+comment F4C5 FSET - SET FUNCTION FLAG & DISPLAY "FS"
+label F4C5 FSET
+label F4CA FOUT
+comment F4D1 FCLR - CLEAR FUNCTION FLAG & LAST 2 DIGITS
+label F4D1 FCLR
+const F4D3
+
+label F4D7 TAPBEG
+label F4DC LDTAP
+label F4E2 PCH
+label F4EC BEGEND
+label F4F2 ADNOW
+label F4FC FUNK
+label F509 CONOUT
+label F512 DYSOUT
+label F515 DOPCH
+label F521 FEDGE
+label F527 LOOPF
+
+
+label F533 TIN
+label F546 NOTSH
+label F552 LOOPS
+label F569 LPOUT
+label F56D LPMID
+label F576 LPIN
+label F578 LOOP1
+label F579 SYNCIN
+label F58E SHRT
+label F593 WITHIN
+label F5A6 CHKOVR
+label F5AA NOTOVR
+label F5B4 BITOVR
+label F5C4 TINDUN
+
+
+
+label F608 PNCHB
+label F630 PUNCH
+label F69C LOAD
+
+
 
 
 
