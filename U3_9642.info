@@ -7,16 +7,44 @@ comment  .      9642 [ILLEG]
 comment  .      (c) 1985 CMS INC.
 comment  .      30 [ILLEG] 07-02     2.[ILLEG] / [ILLEG]
 comment  .
-comment  .ORGANIZATION:
-comment  .  E000-EFFF    EMPTY
+comment  .
+comment  ORGANIZATION:
+comment  . E000-EFFF   EMPTY
 unused E000-EFFF
 insert   .        ORG     $E000
 insert   .        FILL    $FF,$1000
+comment  . F000-FF7F   CMS 9642 I/O Processor firmware V2.0
 
-
-
-comment  .  FF80-FFDF    I/O SPACE?
+comment  . FF80-FFDF   I/O SPACE?
 data   FF2B-FFEF
 word   FFF0
-comment  .  FFE0-FFFF    VECTORS
+comment  . FFE0-FFFF   VECTORS
 
+data F000-F04B
+data F2EE-F393
+data F401-F435
+*data F7AB-F7C4
+
+data FAB4-FAD3
+data FECC-FEEB
+const F74B
+
+label F022 TITL_MSG
+label F401 BAUD_MSG
+label F2EE TEST_MSG
+label F2CC PUT_TEST
+label F2CF PUT_CHR
+label FAB4 X_TBL
+
+comment  F04C Initialization Entry Point
+lcomment F04C CLEAR CARRY, ZERO FLAGS
+comment  F04E CLEAR RAM FROM $0000<-$4000
+lcomment F04E RAM ENDS AT $4000
+lcomment F053 D, X = 0
+lcomment F055 CLEAR 4 BYTES AND DECREMENT U
+lcomment F05B LOOP TIL CLEAR
+lcomment F05F SET THE DIRECT PAGE TO $3F
+
+comment  FA9B There is an apparent bug in lwasm that is causing this to be
+comment  FA9B forced extended addressing, when it is clearly direct addressed.
+comment  FA9B Change below to LEAX    <X_TBL,PCR to ressemble properly
