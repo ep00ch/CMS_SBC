@@ -1203,9 +1203,10 @@ ZFA77   PSHS    A                        *FA77: 34 02          '4.'
         STB     $0C,U                    *FA94: E7 4C          '.L'
         LBSR    ZFB5B                    *FA96: 17 00 C2       '...'
         BSR     ZFAD4                    *FA99: 8D 39          '.9'
-* There is an apparent bug in lwasm that is causing this to be
-* forced extended addressing, when it is clearly direct addressed.
-* Change below to LEAX    <X_TBL,PCR to ressemble properly
+* lwasm does not realize that this forward reference
+* should be ddirect addressed.
+* To re-assemble properly, change below to:
+*        LEAX    <X_TBL,PCR
         LEAX    X_TBL,PCR                *FA9B: 30 8C 16       '0..'
         LDA     $0A,U                    *FA9E: A6 4A          '.J'
         ANDA    #$F0                     *FAA0: 84 F0          '..'

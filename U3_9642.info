@@ -45,6 +45,8 @@ lcomment F055 CLEAR 4 BYTES AND DECREMENT U
 lcomment F05B LOOP TIL CLEAR
 lcomment F05F SET THE DIRECT PAGE TO $3F
 
-comment  FA9B There is an apparent bug in lwasm that is causing this to be
-comment  FA9B forced extended addressing, when it is clearly direct addressed.
-comment  FA9B Change below to LEAX    <X_TBL,PCR to ressemble properly
+comment  FA9B lwasm does not realize that this forward reference
+comment  FA9B should be direct addressed.
+comment  FA9B To re-assemble properly, change below to:
+comment  FA9B .       LEAX    <X_TBL,PCR
+*insert   FA9B .        LEAX    <X_TBL,PCR

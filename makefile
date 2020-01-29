@@ -43,7 +43,7 @@ $(warning ${O_SRC} )
 	$(F9DASM) -info $< -out $@
 
 %.raw %.raw.bin : %.asm
-	lwasm -f raw -o $@ $<
+	lwasm --pragma=noforwardrefmax -9 -f raw -o $@ $<
 
 # Compare before and after disassembly and reassembly.
 %.diff : %.dbgdmp %.raw.dbgdmp
@@ -77,8 +77,8 @@ help :
 
 all : U22_U23_9609.asm U7_9619.asm U26_9639.asm U3_9642.asm
 
-# This sets up for a git commit with the viewable U7_9619.asm file.
-clean-git : | clean U7_9619.asm U26_9639.asm
+# This sets up for a git commit with a few viewable asm files for convenience.
+clean-git : | clean U7_9619.asm U26_9639.asm U3_9642.asm
 	git status
 
 clean:
