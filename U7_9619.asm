@@ -2642,8 +2642,8 @@ WRTLIN  PSHS    D                        *FE38: 34 06          '4.'
 WRTLN2  LDX     A1IOBUF                  *FE47: BE 9F 04       '...'
         PULS    PC,D                     *FE4A: 35 86          '5.'
 A1INPCHR PSHS    X                        *FE4C: 34 10          '4.'    SAVE XREG
-        LDX     A1CVECT                  *FE4E: BE 9F 0B       '...'   GET ACAI ADDRESS
-A1INPCH2 LDA     $01,X                    *FE51: A6 01          '..'    READ ACAI STATUS REGISTER
+        LDX     A1CVECT                  *FE4E: BE 9F 0B       '...'   GET ACIA ADDRESS
+A1INPCH2 LDA     $01,X                    *FE51: A6 01          '..'    READ ACIA STATUS REGISTER
         ANDA    #$08                     *FE53: 84 08          '..'    MASK READY BIT
         BEQ     A1INPCH2                 *FE55: 27 FA          ''.'    WAIT TIL READY
         LDA     ,X                       *FE57: A6 84          '..'    GET CHAR
@@ -2665,10 +2665,10 @@ _ENDLN  TST     USECRLF                  *FE6D: 7D 9F 0A       '}..'
 ZFE78   RTS                              *FE78: 39             '9'
 A1OUTCHR PSHS    X,D                      *FE79: 34 16          '4.'    SAVE REGISTERS
         LDX     A1CVECT                  *FE7B: BE 9F 0B       '...'   GET FE7B ADDRESS
-OUTCH2  LDB     $01,X                    *FE7E: E6 01          '..'    GET THE CHAR
-        ANDB    #$10                     *FE80: C4 10          '..'    LINEFEED?
-        BEQ     OUTCH2                   *FE82: 27 FA          ''.'    IF SO GET NEXT
-        STA     ,X                       *FE84: A7 84          '..'
+OUTCH2  LDB     $01,X                    *FE7E: E6 01          '..'    GET THE ACIA STATUS
+        ANDB    #$10                     *FE80: C4 10          '..'    BUSY?
+        BEQ     OUTCH2                   *FE82: 27 FA          ''.'    IF SO, TRY AGAIN
+        STA     ,X                       *FE84: A7 84          '..'    SEND A
         PULS    PC,X,D                   *FE86: 35 96          '5.'    RESTORE REGISTERS
 CPYSTR  PSHS    D                        *FE88: 34 06          '4.'
 CPYST2  LDA     ,Y+                      *FE8A: A6 A0          '..'
@@ -2779,12 +2779,11 @@ C4HEX   LDD     ,Y++                     *FF21: EC A1          '..'    LOAD D FR
 BIN4HS  BSR     BIN4HX                   *FF23: 8D 0E          '..'    PERFORM CONVERSION
         BRA     PUTSPC                   *FF25: 20 04          ' .'    GO OUTPUT SPACE AND RTS
 
-C2HEX   LDB     ,Y+                      *FF27: E6 A0          '..'
+C2HEX   LDB     ,Y+                      *FF27: E6 A0          '..'    LOAD B FROM INPUT BUFFER
 
 * Subroutine BIN2HS - Convert word in B reg to
 * two-character hexadecimal followed by a space.
-BIN2HS  BSR     BIN2HX                   *FF29: 8D 0E          '..'    LOAD B FROM INPUT BUFFER
-                                         * PERFORM CONVERSION
+BIN2HS  BSR     BIN2HX                   *FF29: 8D 0E          '..'    PERFORM CONVERSION
 * FALL THROUGH TO PUTSPC AND RETURN
 
 * Subroutine PUTSPC - Put a space character in
@@ -2801,7 +2800,7 @@ BIN4HX  EXG     A,B                      *FF33: 1E 89          '..'
         TFR     A,B                      *FF37: 1F 89          '..'
 * FALL THROUGH TO CONVERT LOW BYTE
 
-* Subroutine BIN2HX - convert byte in D reg to
+* Subroutine BIN2HX - convert byte in B reg to
 * two-character hexadecimal.
 BIN2HX  PSHS    B                        *FF39: 34 04          '4.'
         ANDB    #$F0                     *FF3B: C4 F0          '..'

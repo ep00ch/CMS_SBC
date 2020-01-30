@@ -1382,8 +1382,8 @@ lcomment FEB0 SHIFT HI NIBBLE TO LO
 lcomment FEB4 PRINT HEX LO NIBBLE
 
 lcomment FE4C SAVE XREG
-lcomment FE4E GET ACAI ADDRESS
-lcomment FE51 READ ACAI STATUS REGISTER
+lcomment FE4E GET ACIA ADDRESS
+lcomment FE51 READ ACIA STATUS REGISTER
 lcomment FE53 MASK READY BIT
 lcomment FE55 WAIT TIL READY
 lcomment FE57 GET CHAR
@@ -1402,9 +1402,10 @@ lcomment FE6C ELSE RETURN
 lcomment FE74 SEND LF
 lcomment FE79 SAVE REGISTERS
 lcomment FE7B GET FE7B ADDRESS
-lcomment FE7E GET THE CHAR
-lcomment FE80 LINEFEED?
-lcomment FE82 IF SO GET NEXT
+lcomment FE7E GET THE ACIA STATUS
+lcomment FE80 BUSY?
+lcomment FE82 IF SO, TRY AGAIN
+lcomment FE84 SEND A
 lcomment FE86 RESTORE REGISTERS
 lcommnet FEA1 PRINT MEM HX VALUE & SPACE
 
@@ -1463,7 +1464,7 @@ comment  FF27 .
 comment  FF29 .
 comment  FF29 Subroutine BIN2HS - Convert word in B reg to
 comment  FF29 two-character hexadecimal followed by a space.
-lcomment FF29 LOAD B FROM INPUT BUFFER
+lcomment FF27 LOAD B FROM INPUT BUFFER
 lcomment FF29 PERFORM CONVERSION
 comment FF2B FALL THROUGH TO PUTSPC AND RETURN
 
@@ -1475,7 +1476,7 @@ comment  FF33 Subroutine BIN4HX - Convert word in D reg to
 comment  FF33 four-character hexadecimal.
 comment  FF39 FALL THROUGH TO CONVERT LOW BYTE
 comment  FF39 .
-comment  FF39 Subroutine BIN2HX - convert byte in D reg to
+comment  FF39 Subroutine BIN2HX - convert byte in B reg to
 comment  FF39 two-character hexadecimal.
 
 comment  FF80 .
