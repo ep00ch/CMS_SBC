@@ -1,4 +1,5 @@
 FILE "U26_9639.bin" E000
+option os9
 
 ***** General Info
 comment  .
@@ -12,15 +13,38 @@ comment  .
 comment  .ORGANIZATION:
 comment  .  E000-EFFF    EMPTY
 unused E000-EFFF
+unused FF5C-FFDF
 insert   .        ORG     $E000
 insert   .        FILL    $FF,$1000
 
+data F000-F02C
+comment F000 --------------------------------------------------
+comment F000 Boot module header.
+comment F000 --------------------------------------------------
 
-
+lcomment F00D "Boot"
 comment  .  FF80-FFDF    I/O SPACE?
 data   FF5C-FFEF
 word   FFF0
 comment  .  FFE0-FFFF    VECTORS
+
+comment F139 --------------------------------------------------
+comment F139 Delay25msec.@2MHz
+comment F139 --------------------------------------------------
+label F139 DLY25MS
+label F13E DLY25M2
+const F13C
+const F13F
+
+comment F145 --------------------------------------------------
+comment F145  ModEntrB
+comment F145  OS9p1 calls the Boot module at this entry point.
+comment F145  IN:U
+comment F145 --------------------------------------------------
+
+lcomment F147 reserve space on stack for temporary variables
+lcomment F14A request system memory to use for sector buffer
+lcomment F1D0 return space on stack used for temporary
 
 *DMAC DATA CHAIN REGISTER
 label FFD6 DMC_DCREG
@@ -65,4 +89,6 @@ label FFA8 ACADDR2
 label FFA4 PIADDR
 *POSTBYTE REGISTER
 label FFA0 PB_REG
-
+label FF81 EXTDEVD
+label FF80 EXTDEVC
+label FF60 EXTRNIO

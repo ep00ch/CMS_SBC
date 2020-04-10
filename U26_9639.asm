@@ -31,14 +31,12 @@ M000C   EQU     $000C
 M000D   EQU     $000D
 M0010   EQU     $0010
 M0020   EQU     $0020
-M0021   EQU     $0021
 M0022   EQU     $0022
 M0024   EQU     $0024
 Z0026   EQU     $0026
 M002F   EQU     $002F
 M0030   EQU     $0030
 M0031   EQU     $0031
-M0035   EQU     $0035
 M0039   EQU     $0039
 M0040   EQU     $0040
 M0042   EQU     $0042
@@ -55,7 +53,7 @@ M0058   EQU     $0058
 M005A   EQU     $005A
 M0066   EQU     $0066
 M00A9   EQU     $00A9
-M00AD   EQU     $00AD
+M00B6   EQU     $00B6
 M00C0   EQU     $00C0
 M00C1   EQU     $00C1
 M00C2   EQU     $00C2
@@ -80,7 +78,6 @@ M00FF   EQU     $00FF
 M0100   EQU     $0100
 M012D   EQU     $012D
 M03DA   EQU     $03DA
-M0502   EQU     $0502
 M05B8   EQU     $05B8
 M068C   EQU     $068C
 M0706   EQU     $0706
@@ -94,24 +91,34 @@ M0FE3   EQU     $0FE3
 M0FFF   EQU     $0FFF
 M1000   EQU     $1000
 M1703   EQU     $1703
-M1BE6   EQU     $1BE6
 M1FE0   EQU     $1FE0
 M2000   EQU     $2000
-M200F   EQU     $200F
-M2406   EQU     $2406
-Z253D   EQU     $253D
 M3201   EQU     $3201
 M4F53   EQU     $4F53
 M6E98   EQU     $6E98
-M6E9F   EQU     $6E9F
 M8000   EQU     $8000
+M801A   EQU     $801A
 M8021   EQU     $8021
 M87CD   EQU     $87CD
 M9E50   EQU     $9E50
 MAD0A   EQU     $AD0A
 MB10C   EQU     $B10C
 MB242   EQU     $B242
-MEFE8   EQU     $EFE8
+EXTDEVC EQU     $FF80
+EXTDEVD EQU     $FF81
+PB_REG  EQU     $FFA0
+DMA_STREG EQU     $FFB8
+DMA_DTREG EQU     $FFB9
+OS_TREG EQU     $FFBA
+USER_TREG EQU     $FFBB
+CTRL_SW EQU     $FFBC
+DMC_SADREG EQU     $FFC0
+DMC_SBCREG EQU     $FFC2
+DMC_DACREG EQU     $FFC4
+DMC_DBCREG EQU     $FFC6
+DMC_SCCREG EQU     $FFD0
+DMC_DCCREG EQU     $FFD1
+DMC_PCREG EQU     $FFD4
 
 *****************************************************
 ** Program Code / Data Areas                        *
@@ -119,45 +126,41 @@ MEFE8   EQU     $EFE8
 
         ORG     $F000
 
-MF000   FCB     $87                      *F000: 87             '.'
-        FCB     $CD                      *F001: CD             '.'
-MF002   FCB     $01                      *F002: 01             '.'
-        EORB    M0000                    *F003: D8 00          '..'
-        TST     M00C1                    *F005: 0D C1          '..'
-        CMPA    #$21                     *F007: 81 21          '.!'
+* --------------------------------------------------
+* Boot module header.
+* --------------------------------------------------
+MF000   FCB     $87,$CD                  *F000: 87 CD          '..'
+MF002   FCB     $01,$D8,$00,$0D,$C1,$81  *F002: 01 D8 00 0D C1 81 '......'
+        FCC     "!"                      *F008: 21             '!'
         FCB     $01                      *F009: 01             '.'
-        FCB     $45                      *F00A: 45             'E'
-        NEG     M0000                    *F00B: 00 00          '..'
-        FCB     $42                      *F00D: 42             'B'
-        CLR     $0F,S                    *F00E: 6F 6F          'oo'
-MF010   ANDB    M0502                    *F010: F4 05 02       '...'
-        NEG     M0021                    *F013: 00 21          '.!'
-        FCB     $01                      *F015: 01             '.'
-        FCB     $01                      *F016: 01             '.'
-        LSR     M0002                    *F017: 04 02          '..'
-        LSR     $02,X                    *F019: 64 02          'd.'
-        FCB     $65                      *F01B: 65             'e'
+        FCC     "E"                      *F00A: 45             'E'
+        FCB     $00,$00                  *F00B: 00 00          '..'
+        FCC     "Boo"                    *F00D: 42 6F 6F       'Boo'   "Boot"
+MF010   FCB     $F4,$05                  *F010: F4 05          '..'
+MF012   FCB     $02,$00                  *F012: 02 00          '..'
+        FCC     "!"                      *F014: 21             '!'
+        FCB     $01,$01,$04,$02          *F015: 01 01 04 02    '....'
+        FCC     "d"                      *F019: 64             'd'
+        FCB     $02                      *F01A: 02             '.'
+        FCC     "e"                      *F01B: 65             'e'
         FCB     $02                      *F01C: 02             '.'
-        FCB     $65                      *F01D: 65             'e'
-        NEG     M0000                    *F01E: 00 00          '..'
-MF020   NEG     M0000                    *F020: 00 00          '..'
-        BRN     ZF025                    *F022: 21 01          '!.'
-        FCB     $01                      *F024: 01             '.'
-ZF025   FCB     $02                      *F025: 02             '.'
-        STU     MFFFF                    *F026: FF FF FF       '...'
-        STU     MFFFF                    *F029: FF FF FF       '...'
-        NEG     M0000                    *F02C: 00 00          '..'
-ZF02E   LDA     MFF80                    *F02E: B6 FF 80       '...'
+        FCC     "e"                      *F01D: 65             'e'
+        FCB     $00,$00                  *F01E: 00 00          '..'
+MF020   FCB     $00,$00                  *F020: 00 00          '..'
+        FCC     "!"                      *F022: 21             '!'
+        FCB     $01,$01,$02,$FF,$FF,$FF  *F023: 01 01 02 FF FF FF '......'
+        FCB     $FF,$FF,$FF,$00,$00      *F029: FF FF FF 00 00 '.....'
+ZF02E   LDA     EXTDEVC                  *F02E: B6 FF 80       '...'
         ORCC    #$01                     *F031: 1A 01          '..'
         BITA    #$40                     *F033: 85 40          '.@'
         BNE     ZF046                    *F035: 26 0F          '&.'
         STX     $18,U                    *F037: AF C8 18       '...'
         STY     $1A,U                    *F03A: 10 AF C8 1A    '....'
         STB     $1D,U                    *F03E: E7 C8 1D       '...'
-        STB     MFF80                    *F041: F7 FF 80       '...'
+        STB     EXTDEVC                  *F041: F7 FF 80       '...'
         ANDCC   #$FE                     *F044: 1C FE          '..'
 ZF046   RTS                              *F046: 39             '9'
-ZF047   LDA     MFF80                    *F047: B6 FF 80       '...'
+ZF047   LDA     EXTDEVC                  *F047: B6 FF 80       '...'
         BMI     ZF052                    *F04A: 2B 06          '+.'
         BITA    #$40                     *F04C: 85 40          '.@'
         BNE     ZF047                    *F04E: 26 F7          '&.'
@@ -185,38 +188,38 @@ MF074   FCB     $1B                      *F074: 1B             '.'
         ORCC    #$46                     *F07A: 1A 46          '.F'
         LDX     $18,U                    *F07C: AE C8 18       '...'
 ZF07F   LDA     ,X+                      *F07F: A6 80          '..'
-        STA     MFF81                    *F081: B7 FF 81       '...'
+        STA     EXTDEVD                  *F081: B7 FF 81       '...'
 ZF084   BRN     ZF084                    *F084: 21 FE          '!.'
-        CMPB    MFF80                    *F086: F1 FF 80       '...'
+        CMPB    EXTDEVC                  *F086: F1 FF 80       '...'
         BEQ     ZF07F                    *F089: 27 F4          ''.'
         STX     $18,U                    *F08B: AF C8 18       '...'
         RTS                              *F08E: 39             '9'
         LDX     $1A,U                    *F08F: AE C8 1A       '...'
 ZF092   LDA     ,X+                      *F092: A6 80          '..'
-        STA     MFF81                    *F094: B7 FF 81       '...'
+        STA     EXTDEVD                  *F094: B7 FF 81       '...'
 ZF097   BRN     ZF097                    *F097: 21 FE          '!.'
-        CMPB    MFF80                    *F099: F1 FF 80       '...'
+        CMPB    EXTDEVC                  *F099: F1 FF 80       '...'
         BEQ     ZF092                    *F09C: 27 F4          ''.'
         STX     $1A,U                    *F09E: AF C8 1A       '...'
         RTS                              *F0A1: 39             '9'
         LDX     $1A,U                    *F0A2: AE C8 1A       '...'
-ZF0A5   LDA     MFF81                    *F0A5: B6 FF 81       '...'
+ZF0A5   LDA     EXTDEVD                  *F0A5: B6 FF 81       '...'
         STA     ,X+                      *F0A8: A7 80          '..'
-        CMPB    MFF80                    *F0AA: F1 FF 80       '...'
+        CMPB    EXTDEVC                  *F0AA: F1 FF 80       '...'
         BEQ     ZF0A5                    *F0AD: 27 F6          ''.'
         STX     $1A,U                    *F0AF: AF C8 1A       '...'
         RTS                              *F0B2: 39             '9'
-        LDA     MFF81                    *F0B3: B6 FF 81       '...'
+        LDA     EXTDEVD                  *F0B3: B6 FF 81       '...'
         STA     $1C,U                    *F0B6: A7 C8 1C       '...'
         RTS                              *F0B9: 39             '9'
-        TST     MFF81                    *F0BA: 7D FF 81       '}..'
+        TST     EXTDEVD                  *F0BA: 7D FF 81       '}..'
         CLR     $1D,U                    *F0BD: 6F C8 1D       'o..'
         RTS                              *F0C0: 39             '9'
 ZF0C1   PSHS    Y,X,D                    *F0C1: 34 36          '46'
         STA     $14,U                    *F0C3: A7 C8 14       '...'
         STX     $12,U                    *F0C6: AF C8 12       '...'
         CLRB                             *F0C9: 5F             '_'
-        LDA     MFF80                    *F0CA: B6 FF 80       '...'
+        LDA     EXTDEVC                  *F0CA: B6 FF 80       '...'
         BITA    #$10                     *F0CD: 85 10          '..'
         BNE     ZF0D3                    *F0CF: 26 02          '&.'
         LDB     #$40                     *F0D1: C6 40          '.@'
@@ -262,23 +265,30 @@ ZF112   LEAX    $10,U                    *F112: 30 C8 10       '0..'
         BRA     ZF137                    *F133: 20 02          ' .'
 ZF135   STB     $01,S                    *F135: E7 61          '.a'
 ZF137   PULS    PC,U,Y,X,D               *F137: 35 F6          '5.'
-ZF139   PSHS    D,CC                     *F139: 34 07          '4.'
-        LDD     #M1BE6                   *F13B: CC 1B E6       '...'
-ZF13E   SUBD    #M0001                   *F13E: 83 00 01       '...'
-        BNE     ZF13E                    *F141: 26 FB          '&.'
+* --------------------------------------------------
+* Delay25msec.@2MHz
+* --------------------------------------------------
+DLY25MS PSHS    D,CC                     *F139: 34 07          '4.'
+        LDD     #$1BE6                   *F13B: CC 1B E6       '...'
+DLY25M2 SUBD    #$0001                   *F13E: 83 00 01       '...'
+        BNE     DLY25M2                  *F141: 26 FB          '&.'
         PULS    PC,D,CC                  *F143: 35 87          '5.'
+* --------------------------------------------------
+* ModEntrB
+* OS9p1 calls the Boot module at this entry point.
+* IN:U
+* --------------------------------------------------
         PSHS    U,Y,X,D                  *F145: 34 76          '4v'
-        LEAS    -$20,S                   *F147: 32 E8 E0       '2..'
-        LDD     #M0100                   *F14A: CC 01 00       '...'
-        SWI2                             *F14D: 10 3F          '.?'
-        BVC     ZF161                    *F14F: 28 10          '(.'
-        BCS     ZF153                    *F151: 25 00          '%.'
-ZF153   ROL     MEFE8                    *F153: 79 EF E8       'y..'
-        LBRA    Z253D                    *F156: 16 33 E4       '.3.'
+        LEAS    -$20,S                   *F147: 32 E8 E0       '2..'   reserve space on stack for temporary variables
+        LDD     #M0100                   *F14A: CC 01 00       '...'   request system memory to use for sector buffer
+        OS9 F$SRqMem                     *F14D: 10 3F 28       '.?('
+        LBCS    ZF1CD                    *F150: 10 25 00 79    '.%.y'
+        STU     $16,S                    *F154: EF E8 16       '...'
+        LEAU    ,S                       *F157: 33 E4          '3.'
         LDA     #$10                     *F159: 86 10          '..'
-        STA     MFF80                    *F15B: B7 FF 80       '...'
-        BSR     ZF139                    *F15E: 8D D9          '..'
-        LDA     MFF80                    *F160: B6 FF 80       '...'
+        STA     EXTDEVC                  *F15B: B7 FF 80       '...'
+        BSR     DLY25MS                  *F15E: 8D D9          '..'
+        LDA     EXTDEVC                  *F160: B6 FF 80       '...'
         LEAY    MF012,PCR                *F163: 31 8D FE AB    '1...'
         CLRB                             *F167: 5F             '_'
         CLR     $1F,U                    *F168: 6F C8 1F       'o..'
@@ -308,13 +318,11 @@ ZF175   STB     $11,U                    *F175: E7 C8 11       '...'
         LDX     $16,X                    *F1A9: AE 88 16       '...'
         PSHS    Y,X,B                    *F1AC: 34 34          '44'
         LDD     #M0100                   *F1AE: CC 01 00       '...'
-        SWI2                             *F1B1: 10 3F          '.?'
-        BVS     ZF1A1                    *F1B3: 29 EC          ').'
-        COM     -$10,X                   *F1B5: 63 10          'c.'
-        SWI                              *F1B7: 3F             '?'
-        BVC     ZF1EF                    *F1B8: 28 35          '(5'
-        PSHS    PC,U,Y,DP,D,CC           *F1BA: 34 EF          '4.'
-        EORB    -$0A,X                   *F1BC: E8 16          '..'
+        OS9 F$SRtMem                     *F1B1: 10 3F 29       '.?)'
+        LDD     $03,S                    *F1B4: EC 63          '.c'
+        OS9 F$SRqMem                     *F1B6: 10 3F 28       '.?('
+        PULS    Y,X,B                    *F1B9: 35 34          '54'
+        STU     $16,S                    *F1BB: EF E8 16       '...'
         STU     $22,S                    *F1BE: EF E8 22       '.."'
         LEAU    ,S                       *F1C1: 33 E4          '3.'
         LBSR    ZF0FD                    *F1C3: 17 FF 37       '..7'
@@ -323,7 +331,7 @@ ZF175   STB     $11,U                    *F175: E7 C8 11       '...'
 ZF1CA   COMB                             *F1CA: 53             'S'
         LDB     #$F9                     *F1CB: C6 F9          '..'
 ZF1CD   STB     $21,S                    *F1CD: E7 E8 21       '..!'
-ZF1D0   LEAS    $20,S                    *F1D0: 32 E8 20       '2. '
+ZF1D0   LEAS    $20,S                    *F1D0: 32 E8 20       '2. '   return space on stack used for temporary
         PULS    PC,U,Y,X,D               *F1D3: 35 F6          '5.'
         DEC     $05,X                    *F1D5: 6A 05          'j.'
         STX     MFFFF                    *F1D7: BF FF FF       '...'
@@ -334,7 +342,7 @@ ZF1D0   LEAS    $20,S                    *F1D0: 32 E8 20       '2. '
         STU     MFFFF                    *F1E6: FF FF FF       '...'
         STU     MFFFF                    *F1E9: FF FF FF       '...'
         STU     MFFFF                    *F1EC: FF FF FF       '...'
-ZF1EF   STU     MFFFF                    *F1EF: FF FF FF       '...'
+        STU     MFFFF                    *F1EF: FF FF FF       '...'
         STU     MFFFF                    *F1F2: FF FF FF       '...'
         STU     MFFFF                    *F1F5: FF FF FF       '...'
         STU     MFFFF                    *F1F8: FF FF FF       '...'
@@ -533,21 +541,21 @@ ZF386   TFR     X,D                      *F386: 1F 10          '..'
 ZF39B   LEAX    $01,X                    *F39B: 30 01          '0.'
         CMPX    M0042                    *F39D: 9C 42          '.B'
         BCS     ZF341                    *F39F: 25 A0          '%.'
-        LEAX    MF457,PCR                *F3A1: 30 8D 00 B2    '0...'
+ZF3A1   LEAX    MF457,PCR                *F3A1: 30 8D 00 B2    '0...'
         BSR     ZF3C5                    *F3A5: 8D 1E          '..'
         BCC     ZF3B0                    *F3A7: 24 07          '$.'
-        SWI2                             *F3A9: 10 3F          '.?'
-        PULS    Y,B                      *F3AB: 35 24          '5$'
-        ADDD    M200F                    *F3AD: F3 20 0F       '. .'
+        OS9 F$Boot                       *F3A9: 10 3F 35       '.?5'
+        BCC     ZF3A1                    *F3AC: 24 F3          '$.'
+        BRA     ZF3BF                    *F3AE: 20 0F          ' .'
 ZF3B0   STU     M0024                    *F3B0: DF 24          '.$'
-        LEAX    MF45B,PCR                *F3B2: 30 8D 00 A5    '0...'
+ZF3B2   LEAX    MF45B,PCR                *F3B2: 30 8D 00 A5    '0...'
         BSR     ZF3C5                    *F3B6: 8D 0D          '..'
         BCC     ZF3C3                    *F3B8: 24 09          '$.'
-        SWI2                             *F3BA: 10 3F          '.?'
-        PULS    Y,B                      *F3BC: 35 24          '5$'
-        ADDD    M6E9F                    *F3BE: F3 6E 9F       '.n.'
-        STU     MFE6E                    *F3C1: FF FE 6E       '..n'
-        ANDA    -$01,U                   *F3C4: A4 5F          '._'
+        OS9 F$Boot                       *F3BA: 10 3F 35       '.?5'
+        BCC     ZF3B2                    *F3BD: 24 F3          '$.'
+ZF3BF   JMP     [svec_RST]               *F3BF: 6E 9F FF FE    'n...'
+ZF3C3   JMP     ,Y                       *F3C3: 6E A4          'n.'
+ZF3C5   CLRB                             *F3C5: 5F             '_'
 ZF3C6   INCB                             *F3C6: 5C             '\'
         LDA     ,X+                      *F3C7: A6 80          '..'
         BPL     ZF3C6                    *F3C9: 2A FB          '*.'
@@ -563,9 +571,8 @@ ZF3D6   LDA     ,-Y                      *F3D6: A6 A2          '..'
         DECB                             *F3DA: 5A             'Z'
         BPL     ZF3D6                    *F3DB: 2A F9          '*.'
         LDA     #$C0                     *F3DD: 86 C0          '..'
-        SWI2                             *F3DF: 10 3F          '.?'
-        NEG     M0035                    *F3E1: 00 35          '.5'
-        FCB     $02                      *F3E3: 02             '.'
+        OS9 F$Link                       *F3DF: 10 3F 00       '.?.'
+        PULS    A                        *F3E2: 35 02          '5.'
         LEAS    A,S                      *F3E4: 32 E6          '2.'
         RTS                              *F3E6: 39             '9'
 ZF3E7   PSHS    Y,X,D                    *F3E7: 34 36          '46'
@@ -946,8 +953,7 @@ ZF6DC   PSHS    U,Y,X                    *F6DC: 34 70          '4p'
         SEX                              *F6F4: 1D             '.'
         BSR     ZF705                    *F6F5: 8D 0E          '..'
         BCC     ZF703                    *F6F7: 24 0A          '$.'
-        SWI2                             *F6F9: 10 3F          '.?'
-        FCB     $52                      *F6FB: 52             'R'
+        OS9 F$GCMDir                     *F6F9: 10 3F 52       '.?R'
         LDU     #M0000                   *F6FC: CE 00 00       '...'
         STU     $05,S                    *F6FF: EF 65          '.e'
         BSR     ZF705                    *F701: 8D 02          '..'
@@ -1015,9 +1021,8 @@ ZF782   TSTB                             *F782: 5D             ']'
         BNE     ZF78F                    *F783: 26 0A          '&.'
         PSHS    X                        *F785: 34 10          '4.'
         LDX     #M0001                   *F787: 8E 00 01       '...'
-        SWI2                             *F78A: 10 3F          '.?'
-        DEC     M0035                    *F78C: 0A 35          '.5'
-        FCB     $10                      *F78E: 10             '.'
+        OS9 F$Sleep                      *F78A: 10 3F 0A       '.?.'
+        PULS    X                        *F78D: 35 10          '5.'
 ZF78F   LBSR    ZFC45                    *F78F: 17 04 B3       '...'
         BSR     ZF7AE                    *F792: 8D 1A          '..'
         LDD     $03,S                    *F794: EC 63          '.c'
@@ -1446,10 +1451,9 @@ ZFACA   LDD     ,X                       *FACA: EC 84          '..'
         SUBD    ,S                       *FAD4: A3 E4          '..'
         TFR     D,X                      *FAD6: 1F 01          '..'
         TFR     Y,D                      *FAD8: 1F 20          '. '
-        SWI2                             *FADA: 10 3F          '.?'
-        BGT     ZFB12                    *FADC: 2E 34          '.4'
-        LSR     M00EC                    *FADE: 04 EC          '..'
-        FCB     $61                      *FAE0: 61             'a'
+        OS9 F$VModul                     *FADA: 10 3F 2E       '.?.'
+        PSHS    B                        *FADD: 34 04          '4.'
+        LDD     $01,S                    *FADF: EC 61          '.a'
         LEAX    D,X                      *FAE1: 30 8B          '0.'
         PULS    B                        *FAE3: 35 04          '5.'
         BCC     ZFAEB                    *FAE5: 24 04          '$.'
@@ -1905,7 +1909,7 @@ ZFE58   BITA    #$02                     *FE58: 85 02          '..'
         LEAS    -$0C,S                   *FE67: 32 74          '2t'
         LEAU    ,S                       *FE69: 33 E4          '3.'
         LBSR    ZF4B6                    *FE6B: 17 F6 48       '..H'
-MFE6E   LDA     $19,X                    *FE6E: A6 88 19       '...'
+        LDA     $19,X                    *FE6E: A6 88 19       '...'
         STA     $02,U                    *FE71: A7 42          '.B'
         LDD     $1A,X                    *FE73: EC 88 1A       '...'
         BEQ     ZFE9C                    *FE76: 27 24          ''$'
@@ -1932,14 +1936,13 @@ ZFE9C   LDA     $0C,X                    *FE9C: A6 0C          '..'
         ANDCC   #$AF                     *FEA6: 1C AF          '..'
         LDB     $19,X                    *FEA8: E6 88 19       '...'
         CLR     $19,X                    *FEAB: 6F 88 19       'o..'
-        SWI2                             *FEAE: 10 3F          '.?'
-        ROR     M00AD                    *FEB0: 06 AD          '..'
-        STX     M0000                    *FEB2: 9F 00          '..'
-        LDU     #M2406                   *FEB4: CE 24 06       '.$.'
+        OS9 F$Exit                       *FEAE: 10 3F 06       '.?.'
+MFEB1   JSR     [Z00CE]                  *FEB1: AD 9F 00 CE    '....'
+        BCC     ZFEBD                    *FEB5: 24 06          '$.'
         LDB     ,S                       *FEB7: E6 E4          '..'
         ORB     #$50                     *FEB9: CA 50          '.P'
         STB     ,S                       *FEBB: E7 E4          '..'
-        RTI                              *FEBD: 3B             ';'
+ZFEBD   RTI                              *FEBD: 3B             ';'
 ZFEBE   LDX     M004A                    *FEBE: 9E 4A          '.J'
         LBSR    ZFD14                    *FEC0: 17 FE 51       '..Q'
         LEAS    ,U                       *FEC3: 32 C4          '2.'
@@ -2014,30 +2017,9 @@ hdlr_NMI LDB     #$FC                     *FF55: C6 FC          '..'
         BRA     ZFF47                    *FF57: 20 EE          ' .'
         FCB     $45                      *FF59: 45             'E'
         ADCB    M0066                    *FF5A: D9 66          '.f'
-        FCC     "999999999999999999999"  *FF5C: 39 39 39 39 39 39 39 39 39 39 39 39 39 39 39 39 39 39 39 39 39 '999999999999999999999'
-        FCC     "999999999999999"        *FF71: 39 39 39 39 39 39 39 39 39 39 39 39 39 39 39 '999999999999999'
-MFF80   FCC     "9"                      *FF80: 39             '9'
-MFF81   FCC     "999999999999999999999"  *FF81: 39 39 39 39 39 39 39 39 39 39 39 39 39 39 39 39 39 39 39 39 39 '999999999999999999999'
-        FCC     "9999999999"             *FF96: 39 39 39 39 39 39 39 39 39 39 '9999999999'
-PB_REG  FCC     "9999"                   *FFA0: 39 39 39 39    '9999'
-PIADDR  FCC     "9999"                   *FFA4: 39 39 39 39    '9999'
-ACADDR2 FCC     "9999"                   *FFA8: 39 39 39 39    '9999'
-ACADDR1 FCC     "9999"                   *FFAC: 39 39 39 39    '9999'
-PTADDR  FCC     "99999999"               *FFB0: 39 39 39 39 39 39 39 39 '99999999'
-DMA_STREG FCC     "9"                      *FFB8: 39             '9'
-DMA_DTREG FCC     "9"                      *FFB9: 39             '9'
-OS_TREG FCC     "9"                      *FFBA: 39             '9'
-USER_TREG FCC     "9"                      *FFBB: 39             '9'
-CTRL_SW FCC     "9999"                   *FFBC: 39 39 39 39    '9999'
-DMC_SADREG FCC     "99"                     *FFC0: 39 39          '99'
-DMC_SBCREG FCC     "99"                     *FFC2: 39 39          '99'
-DMC_DACREG FCC     "99"                     *FFC4: 39 39          '99'
-DMC_DBCREG FCC     "9999999999"             *FFC6: 39 39 39 39 39 39 39 39 39 39 '9999999999'
-DMC_SCCREG FCC     "9"                      *FFD0: 39             '9'
-DMC_DCCREG FCC     "999"                    *FFD1: 39 39 39       '999'
-DMC_PCREG FCC     "9"                      *FFD4: 39             '9'
-DMC_ICREG FCC     "9"                      *FFD5: 39             '9'
-DMC_DCREG FCC     "9999999999"             *FFD6: 39 39 39 39 39 39 39 39 39 39 '9999999999'
+
+        ORG     $FFE0 
+
 MFFE0   FCB     $FD,$87,$F4              *FFE0: FD 87 F4       '...'
         FCC     "g"                      *FFE3: 67             'g'
         FCB     $F4                      *FFE4: F4             '.'

@@ -2695,7 +2695,11 @@ PRHINB  LSRA                             *FEB0: 44             'D'     SHIFT HI 
         LSRA                             *FEB3: 44             'D'
 PRLONB  ANDA    #$0F                     *FEB4: 84 0F          '..'    PRINT HEX LO NIBBLE
         ADDA    #$90                     *FEB6: 8B 90          '..'
-        DAA                              *FEB8: 19             '.'
+        DAA                              *FEB8: 19             '.'     Bug here.
+                                         * If entered PRHX2SP with Half-carry set
+                                         * (due to ASLA's in HEX2DEC called @ $F938), the first HEX DIGIT
+                                         * could erroneously have bit 5 set.
+                                         * So, E command value entry with odd HI nibble can cause this.
         ADCA    #$40                     *FEB9: 89 40          '.@'
         DAA                              *FEBB: 19             '.'
         BSR     A1OUTCHR                 *FEBC: 8D BB          '..'

@@ -1413,6 +1413,11 @@ lcomment FEA5 PRINT SPACE
 lcomment FEA8 PRINT BYTE IN HEX
 lcomment FEB0 SHIFT HI NIBBLE TO LO
 lcomment FEB4 PRINT HEX LO NIBBLE
+lcomment FEB8 Bug here in v09?.
+lcomment FEB8 If entered PRHX2SP with Half-carry set
+lcomment FEB8 (due to ASLA's in HEX2DEC called @ $F938), the first HEX DIGIT
+lcomment FEB8 could erroneously have bit 5 set.
+lcomment FEB8 So, E command value entry with odd HI nibble can cause this.
 
 lcomment FE4C SAVE XREG
 lcomment FE4E GET ACIA ADDRESS

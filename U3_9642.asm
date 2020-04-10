@@ -1204,7 +1204,7 @@ ZFA77   PSHS    A                        *FA77: 34 02          '4.'
         LBSR    ZFB5B                    *FA96: 17 00 C2       '...'
         BSR     ZFAD4                    *FA99: 8D 39          '.9'
 * lwasm does not realize that this forward reference
-* should be ddirect addressed.
+* should be direct addressed.
 * To re-assemble properly, change below to:
 *        LEAX    <X_TBL,PCR
         LEAX    X_TBL,PCR                *FA9B: 30 8C 16       '0..'

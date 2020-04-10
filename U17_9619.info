@@ -5,5 +5,7 @@ comment  E700 FFFE=A0
 comment  E700 11/6/99
 
 *unused A800-BFFF
+data A800-BFFF
 data A286-A2EF
 data B138-B158
+
