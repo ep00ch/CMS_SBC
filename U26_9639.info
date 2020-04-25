@@ -25,8 +25,10 @@ comment F000 --------------------------------------------------
 lcomment F00D "Boot"
 comment  .  FF80-FFDF    I/O SPACE?
 data   FF5C-FFEF
-word   FFF0
+data   F3F6-F456
+word   FFE0-FFF0
 comment  .  FFE0-FFFF    VECTORS
+
 
 comment F139 --------------------------------------------------
 comment F139 Delay25msec.@2MHz
@@ -43,8 +45,296 @@ comment F145  IN:U
 comment F145 --------------------------------------------------
 
 lcomment F147 reserve space on stack for temporary variables
+const F14B
 lcomment F14A request system memory to use for sector buffer
+lcomment F154 store starting address of memory area
+
 lcomment F1D0 return space on stack used for temporary
+
+comment F28C  Initialize user interupt vectors
+
+lcomment F28C Get SWI2 (os9 command) service routine pointer
+lcomment F28E Save it as user service routine pointer
+lcomment F290 Get IRQ service routine pointer
+lcomment F292 Save it as user IRQ routine pointer
+
+comment  F294 .
+lcomment F294 Setup System service routine entry vector
+
+comment  F29C .
+lcomment F29C Setup system IRQ service vector
+
+comment F2A4 .
+lcomment F2A4 Setup in system IRQ service vector
+lcomment F2AA Setup interrupt polling vector
+lcomment F2B0 load y with address of table, below
+lcomment F2B4 copy table below into dispatch table
+
+comment  F2B7 Initialize system process descriptor
+lcomment F2B7 get process table pointer
+lcomment F2B9 get system process pointer
+comment  F2BB These overlap because it is quicker than trying to strip hi byte from X
+lcomment F2BB save it as first process in table
+lcomment F2BD save it as the second as well
+
+comment  F3A1 See if init module is in memory already
+lcomment F3A1 point to 'Init' module name
+lcomment F3A5 try & link it
+lcomment F3A7 no error, go on
+lcomment F3A9 error linking init, try & load boot file
+lcomment F3AC got it, try init again
+lcomment F3AE error, re-booting do Reset
+
+comment  F3B0 So far, so good. Save pointer to init module and execute krnp2
+lcomment F3B0 Save init module pointer
+lcomment F3B2 Point to its name
+lcomment F3B6 Try to link it
+lcomment F3B8 It worked, execute it
+lcomment F3BA It doesn't exist try re-booting
+lcomment F3BD No errors, let's try to link it again
+lcomment F3BF obviously can't do it, restart machine
+lcomment F3C3 execute krnp2
+
+label   F3A1 L01B0
+label   F3B0 L01BF
+label   F3B2 L01C1
+label   F3BF L01CE
+label   F3C3 L01D0
+
+label   0024 D.Init
+
+comment F3C5 Link module pointed to by X
+label   F3C5 link
+label   F3F6 SysCalls
+
+data   F456-F466
+label   F457 init
+label   F45B krnp2
+label   F4EB SysCall
+label   F4FC L033B
+label   F464 DisTable
+
+label   FECA S.Poll
+label   FF47 SWICal
+
+rmb     0000-001E
+label   D.Clock0000 D.WDAddr
+
+rmb     0020-0037
+
+label 0020 D.Tasks
+label 0022 D.TmpDAT
+label 0024 D.Init
+label 0026 D.Poll
+label 0028 D.Time
+label 0028 D.Year
+label 0029 D.Month
+label 002A D.Day
+label 002B D.Hour
+label 002C D.Min
+label 002D D.Sec
+label 002E D.Tick
+label 002F D.Slice
+label 0030 D.TSlice
+label 0031 D.Boot
+label 0032 D.MotOn
+label 0033 D.ErrCod
+label 0034 D.Daywk
+label 0035 D.TkCnt
+label 0036 D.BtPtr
+label 0037 D.BtSz
+
+
+
+rmb     0040-0060
+*dec    0040-0060
+label 0040 D.BlkMap
+label 0042 D.BlkMap#2
+label 0044 D.ModDir
+label 0046 D.ModDir#2
+
+label 0048 D.PrcDBT
+label 004A D.SysPrc
+label 004C D.SysDAT
+label 004E D.SysMem
+label 0050 D.Proc
+label 0052 D.AProcQ
+label 0054 D.WProcQ
+label 0056 D.SProcQ
+label 0058 D.ModEnd
+label 005A D.ModDAT
+label 005C D.CldRes
+label D.BtBug
+label D.Pipe
+
+
+label   0050 D.Proc
+
+rmb     00C0-00FF
+
+label 00C0 D.SysSvc
+label 00C2 D.SysDis
+label 00C4 D.SysIRQ
+label 00C6 D.UsrSvc
+label 00C8 D.UsrDis
+label 00CA D.UsrIRQ
+label 00CC D.SysStk
+label 00CE D.SvcIRQ
+label 00D0 D.SysTsk
+
+label 00E0 D.Clock
+label 00E2 D.XSWI3
+label 00E4 D.XSWI2
+label 00E6 D.XFIRQ
+label 00E8 D.XIRQ
+label 00EA D.XSWI
+label 00EC D.XNMI
+label 00EE D.ErrRst
+label 00F0 D.SysVec
+label 00F2 D.SWI3
+label 00F4 D.SWI2
+label 00F6 D.FIRQ
+label 00F8 D.IRQ
+label 00FA D.SWI
+label 00FC D.NMI
+
+
+
+label   00C0 D.SysSvc
+label   00C4 D.SysIRQ
+label   00CE D.SvcIRQ
+label   00E4 D.XSWI2
+label   00E8 D.XIRQ
+label   00FE IOEntry
+
+label   2000
+lcomment F232  D = $0100
+lcomment F233  set Task Structure pointer to $0100
+lcomment F237  set Task image table pointer to $0180
+
+comment  F23A  .********************************************************************
+comment  F23A  The memory block map is a data structure that is used to manage
+comment  F23A  physical memory. Physical memory is assigned in 8Kbyte "blocks".
+comment  F23A  256 bytes are reserved for the map and so the maximum physical
+comment  F23A  memory size is 256*8Kbyte=2Mbyte. D.BlkMap is a pointer to the
+comment  F23A  start of the map (set to $0200, below). D.BlkMap+2 is a pointer
+comment  F23A  to the end of the map. Rather than simply setting it to $0300,
+comment  F23A  the end pointer is set by the memory sizing routine at L0111.
+comment  F23A  (Presumably) this makes it faster to search for unused pages
+comment  F23A  and also acts as the mechanism to avoid assigning non-existent
+comment  F23A  memory. A value of 0 indicates an unused block and since the
+comment  F23A  system block has been initialised to 0 (above) every block starts
+comment  F23A  off marked as unused. Initial reservation of blocks occurs
+comment  F23A  below, after the memory sizing.
+comment  F23A  See "Level 2 flags" in os9.d for other byte values.
+
+lcomment F23B set block map pointer to $0200
+lcomment F23F set second block map pointer to $0300
+
+lcomment F241 set system service dispatch table pointer to to $0300
+lcomment F244 set user dispatch table pointer to $0400
+lcomment F247 set process descriptor block pointer to $0500
+lcomment F24A set system process descriptor pointer to $0600
+lcomment F24C set user process descriptor pointer to $0600
+lcomment F250 set stack pointer to $0800
+
+lcomment F253 set system stack base pointer to $0900
+lcomment F255 set system memory map ptr $0900
+lcomment F258 set module directory start ptr to $0a00
+lcomment F25A set module directory end ptr to $0a00
+lcomment F25E set secondary module directory start to $1000
+lcomment F260 set module directory DAT pointer to $1000
+lcomment set pointer to beginning of global memory to $1000
+
+comment  F266 Initialize secondary interrupt vectors to all point to Vectors for now
+
+label    F26B L0065
+lcomment F26B Set all IRQ vectors to go to Vectors for now
+comment F272 .
+
+comment  F2B0 Setup System calls
+lcomment F2DA initialize 1st block to 0 (for this DP)
+lcomment F3DD Attempt to link system module
+
+comment  F4EB Process software interupts from system state
+comment  F4EB Entry: U=Register stack pointer
+lcomment F4EB get pointer to register stack
+lcomment F4F0 Restore callers CC register (R$CC=$00)
+lcomment F4F2 make it current
+lcomment
+lcomment
+lcomment
+
+lcomment F4FC is it a I/O call? (Also multiplys by 2 for offset)
+lcomment F4FD no, go get normal vector
+lcomment
+lcomment F500 get IOMan vector
+comment  F506 Execute regular system calls
+lcomment F506 clear MSB of offset
+lcomment F507 get vector to call
+lcomment F509 it's initialized, go execute it
+lcomment F50B set carry for error
+lcomment F50C get error code
+lcomment F50E return with it
+
+comment  F510 Execute the system call
+lcomment F510 preserve register stack pointer
+lcomment F512 perform a vectored system call
+lcomment F514 restore pointer
+lcomment F516 move CC to A for stack update
+lcomment F518 go update it if no error from call
+lcomment F51A save error code to caller's B
+lcomment F51C get callers CC, R$CC=$00
+
+lcomment F51E [B]=E,F,I
+lcomment F522 [A]=H,N,Z,V,C
+lcomment F524 merge them together
+lcomment F526 return it to caller
+
+label   F506 L0345
+label   F510 L034F
+label   F516 L0355
+label   F51C L035B
+label   F540 SysSvc
+
+
+
+
+label   FC9F L0C28
+
+comment FDEC System IRQ service routine
+label   FDEC XIRQ
+lcomment FDEC get current process pointer
+lcomment FDEE save the stack pointer
+lcomment FDF1 get system stack pointer
+lcomment FDF4 set system service routine to current
+lcomment FDF8 set system IRQ routine to current
+lcomment FDFC execute irq service
+lcomment FE02 get current process pointer
+lcomment FE06 get it's stack pointer
+lcomment FE0B disable it's IRQs
+lcomment FE0D save it back
+lcomment FE10 shut down IRQ's
+
+
+label   FE10 L0D5B
+label   FEB1 S.SysIRQ
+label   FEBD L0E28
+label   FEC6 S.SvcIRQ
+
+comment  FF33 Execute SWI3 vector (called from $FEEE)
+
+lcomment FF33 disable IRQ's
+lcomment FF35 get DP offset of vector
+lcomment FF37 go execute it
+
+comment  FF39 Execute SWI2 vector (called from $FEF1)
+lcomment FF39 disasble IRQ's
+
+*lcomment FF3B  get DP offset of vector
+lcomment FF4B   set DP  to zero
+lcomment FF4D   set X to zero
+lcomment FF5A   The end of the kernel module is here
 
 *DMAC DATA CHAIN REGISTER
 label FFD6 DMC_DCREG
@@ -70,14 +360,14 @@ label FFC0 DMC_SADREG
 *CONTROL SWITCHES
 label FFBC CTRL_SW
 *USER TASK REGISTER
-label FFBB USER_TREG
+label FFBB USER_TASK
 *OS TASK REGISTER
-label FFBA OS_TREG
+label FFBA OS_TASK
 
 *DMA DESTINATION TASK REGISTER
-label FFB9 DMA_DTREG
+label FFB9 DMA_DTASK
 *DMA SOURCE TASK REGISTER
-label FFB8 DMA_STREG
+label FFB8 DMA_STASK
 
 *MC68B40 PTM
 label FFB0 PTADDR
