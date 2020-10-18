@@ -139,7 +139,7 @@ _RTC_WR PSHS    D                        *E71D: 34 06          '4.'    SAVE A&B 
         STB     $03,U                    *E731: E7 43          '.C'    SAVE TO PIA0 CRB
         LBSR    _RTC_SSR                 *E733: 17 00 A5       '...'
         PULS    PC,D                     *E736: 35 86          '5.'    RESTORE A&B, RTS
-* Set the RTC ADDR from B Reg
+* Set the RTC ADDR from B Reg. PB4,5 stay low for RTC-ADDR write.
 _RTCADDRWR PSHS    D                        *E738: 34 06          '4.'    SAVE A&B REGISTERS
         LDB     #%00111000               *E73A: C6 38          '.8'    SELECT DDR, SET CB2-HI
         STB     $03,U                    *E73C: E7 43          '.C'    SAVE TO PIA0 CRB
@@ -2608,7 +2608,7 @@ RDLN2   BSR     A1INPCHR                 *FE08: 8D 42          '.B'
         BLS     RDLN2                    *FE11: 23 F5          '#.'    PAST BEG OF LINE
         LEAX    -$01,X                   *FE13: 30 1F          '0.'
         BRA     RDLN2                    *FE15: 20 F1          ' .'
-RDLN3   CMPA    #$18                     *FE17: 81 18          '..'    LINE DELETE?
+RDLN3   CMPA    #$18                     *FE17: 81 18          '..'    CTRL-X, CANCEL
         BNE     RDLN4                    *FE19: 26 06          '&.'
         LDX     >IOBUF                   *FE1B: BE 9F 04       '...'
         ORCC    #$01                     *FE1E: 1A 01          '..'
@@ -2695,7 +2695,7 @@ PRHINB  LSRA                             *FEB0: 44             'D'     SHIFT HI 
         LSRA                             *FEB3: 44             'D'
 PRLONB  ANDA    #$0F                     *FEB4: 84 0F          '..'    PRINT HEX LO NIBBLE
         ADDA    #$90                     *FEB6: 8B 90          '..'
-        DAA                              *FEB8: 19             '.'     Bug here.
+        DAA                              *FEB8: 19             '.'     Bug here in v09?.
                                          * If entered PRHX2SP with Half-carry set
                                          * (due to ASLA's in HEX2DEC called @ $F938), the first HEX DIGIT
                                          * could erroneously have bit 5 set.

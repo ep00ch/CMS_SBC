@@ -4,6 +4,7 @@ option 6802
 ***** General Info
 comment  .
 comment  .D5BUG
+comment  .(SAME AS USED IN MEK6802D5)
 comment  .
 comment  ROM LABEL:
 comment  .      ELENCO
@@ -46,86 +47,274 @@ label E460  BEGAD
 label E462  ENDAD
 label E484  PIADP
 label E485  PIACR
+label E486  PIAROW
 
 label E424  XSAVD
 label E425  XSAVD+1
 label E426  XSAV1
 
+
 insert F000 .        NAM RESET
 insert F000 .        OPT CREF,LLEN=80
 
 ***** Program Addresses
+comment F000
 comment F000 -------------------------------------------------------
 comment F000 RESET - COLD START ROUTINE
 comment F000 -------------------------------------------------------
 label F000 RESET
+lcomment F000  SET INTERRUPT MASK
+lcomment F002  CLEAR RAM
 label F005  CLRLOP
+lcomment F00D  INITIALIZE SYSTEM PIA
+lcomment F01E  DEFAULT USER STACK
 
+comment F024
 comment F024 -------------------------------------------------------
 comment F024 PROMPT - ROUTINE TO SET UP PROMPT CONDITIONS
 comment F024 -------------------------------------------------------
 label F024 PROMPT
-
+lcomment F024  INIT SYSTEM STACK
+lcomment F027  SET FIRST PASS
+lcomment F02C  INIT FLAGS
+lcomment F038  DISPLAY PROMPT
+lcomment F042  EXECUTE FUNCTION SELECT
+lcomment F048  ENABLE NMI
+lcomment F04B  & GO
+comment F04E
 comment F04E -------------------------------------------------------
 comment F04E GET - ROUTINE TO READ A KEY
 comment F04E -------------------------------------------------------
 label F04E GET
+lcomment F04E  POINT AT PIA
+lcomment F053  TO TURN OFF DISPLAYS
+lcomment F055  COL 0, ALL ROWS
 label F057  LPCOL
-label F063  COLFND
-label F06A  LPROW
-label F079  ROWFND
-label F07A  LPFND
-label F080  DUNROW
-comment F088 A-REG NOW CONTAINS OFFSET FOR KEY LOOK-UP
-label F088  CLOP
-label F0A2  DIDDLE
-comment F0A2 THIS RTS IS USED AS A DO-NOTHING SUB
-comment F0A2 SO SYST CAN BE DISABLED EXCEPT DISPLAY
+lcomment F057  STORE INFO TO KEY MATRIX
+lcomment F059  MSB IS MUX BIT
+lcomment F05B  BIT-7 LOW MEANS COL FOUND
+lcomment F05D  INC COL BITS TO MUX
+lcomment F05G  CONTINUE FOR  ALL COLS
+lcomment F061  KEY BOUNCED , START OVER
+label F063     COLFND
+lcomment F063  MASK TO SAVE ONLY COL
+lcomment F065  WILL UPDATE LATER; JUST TEMP SAV
+lcomment F068  ROW5
+label F06A     LPROW
+lcomment F06A  COPY ROW INFO ROW A-REG
+lcomment F06B  COMBINE WITH COL INFO
+lcomment F06E  DRIVE KEY MATRIX
+lcomment F070  MSB LOW = CLOSURE
+lcomment F074  NEXT LOWER ROW BIT
+lcomment F075  LOOP TILL ALL ROWS TRIED
+lcomment F077  KEY BOUNCED; START OVER
+label F079     ROWFND
+lcomment F079  PREPARE TO FIND BINARY ROW #
+label F07A     LPFND
+lcomment F07A  LOOP BUILDS BINARY ROW #
+lcomment F07B  WHEN BIT FALLS OFF; A-REG HAS #
+label F080     DUNROW
+lcomment F087  A-REG IS 000RRRCC
+comment F088   A-REG NOW CONTAINS OFFSET FOR KEY LOOK-UP
+label F088     CLOP
+lcomment F088  SEE IF KEY STILL DOWN
+lcomment F08A  WAIT TILL LET UP
+lcomment F08C  DELAY TO DEBOUNCE
+lcomment F08F  POINT AT TOP OF TABLE
+lcomment F095  GET KEY CODE
+lcomment F097  SAVE KEY VALUE
+lcomment F09C  INDICATE KEY PENDING
+lcomment F09F  TO CLEAR NMI
 
+label F0A2  DIDDLE
+comment F0A3 THIS RTS IS USED AS A DO-NOTHING SUB
+comment F0A3 SO SYST CAN BE DISABLED EXCEPT DISPLAY
+comment F0A3
 comment F0A3 -------------------------------------------------------
 comment F0A3 KYTBL - KEY VALUE TABLE
 comment F0A3 -------------------------------------------------------
 label F0A3 KYTBL
 data  F0A3-F0BA
 
+comment F0BB
 comment F0BB -------------------------------------------------------
 comment F0BB PUT - DISPLAYS DATA IN DISBUF & CALLS THE
 comment F0BB FUNCTIONING SUBROUTINE
 comment F0BB -------------------------------------------------------
-label F0BB PUT
-label F0BD  LP1P
-label F0C1  LP2P
+lcomment F0B3  'FS' FUNCTION SET
+lcomment F0B4  'FC' FUNCTION CLEAR
+lcomment F0B5  'P/L' PUNCH/LOAD
+lcomment F0B6  'T/B' TRACE/BREAK
+lcomment F0B7  'MD' MEMORY DISPLAY
+lcomment F0B8  'EX' ESCAPE
+lcomment F0B9  'RD' REGISTER DISPLAY
+lcomment F0BA  'GO' GO
 
+label F0BB PUT
+lcomment F0BB  INIT DIG ENABLE PATTERN
+label F0BD  LP1P
+lcomment F0BD  #DISBUF-3 POINT AT DISPLAY BUFFER
+lcomment F0C0  MAKE EXTRA COPY
+label F0C1  LP2P
+lcomment F0C1  POINT AT NXT DIGIT INFO
+lcomment F0C2  ADD 1 TO 'X' FOR EACH SHIFT
+lcomment F0C3  LOOP DEVELOPS DIGIT INFO ADDR
+lcomment F0C5  GET SEG INFO
+lcomment F0C7  ANODE DRIVERS ARE GND TRUE
+lcomment F0C8  STORE ANODE INFO TO PIA
+lcomment F0CB  ENABLE DIGIT CATHODE
+lcomment F0CE  ON FOR 1 MILLISECOND
+lcomment F0D1  1'S TURN OFF SEGS
+lcomment F0D3  TURN OFF ALL SEGS
+lcomment F0D6  ENABLE ALL KPD ROWS
+lcomment F0D9  HAS ROTATING DIGIT ENABLE
+lcomment F0DA  GET ADDRESS OF ACTIVE MAIN PROG
+lcomment F0DD  EXECUTE IT
+comment F0DF  SEE MANUAL
+lcomment F0DF  RECOVER DIGIT ENABLE
+lcomment F0E0  NEXT DIGIT
+lcomment F0E1  NOT THRU WHOLE CYCLE
+lcomment F0E3  PAST LAST DIGIT
+comment F0E5
 comment F0E5 -------------------------------------------------------
 comment F0E5 FUNSEL - ROUTINE TO SELECT A FUNCTION FROM A KEY INPUT
 comment F0E5 -------------------------------------------------------
 label F0E5 FUNSEL
+lcomment F0E5  KEY PENDING?
 label F0EB  KEYNOW
+lcomment F0EA  RETURN NO KEY PENDING
+lcomment F0EB  GET & ACKNOWLEDGE KEY
+lcomment F0EE  IF FUNCTION KEY
+lcomment F0F5  # ENTRY SO ROLL IT IN
+lcomment F0F8  CONVERT TO 7-SEG
+lcomment F0FD  BLANK LAST 2 DIGITS
 label F100  UFNK
+lcomment F100  POINT AT USER FUNCTION TBL
 label F105  FUNKY
+lcomment F105  POINT AT SYSTEM FUNCTION TBL
 label F108  HASH
+lcomment F108  2 BYTES PER ENTRY
+lcomment F109  DEVELOP POINTER
+lcomment F10C  GET JMP ADDR
+lcomment F10E  GO THERE
+
 label F110  SYSFNC
 word  F110-F11E
+lcomment F110  'MD'
+lcomment F112  'EX'
+lcomment F114  'RD'
+lcomment F116  'GO'
+lcomment F117  'FS'
+lcomment F11A  'FC'
+lcomment F11C  'P/L'
+lcomment F11E  'T/B'
+comment F120
 comment F120 -------------------------------------------------------
 comment F120 MISC - MISC ROUTINES
 comment F120 -------------------------------------------------------
 comment F120 DECODE HEX TO 7-SEGMENT
 label F120 DYSCOD
+lcomment F120  SAVE REGS
+lcomment F125  POINT AT HEX INFO
+lcomment F128  GET HEX BYTE
+lcomment F12A  MAKE EXTRA COPY
+lcomment F12B  RIGHT JUSTIFY HIGH NIBBLE
+lcomment F12E  HIGH ORDER DIGIT IN B-REG
+lcomment F12F  LOW ORDER DIGIT IN A-REG
+lcomment F131  SAVE ON STACK
+lcomment F133  NEXT HEX BYTE
+lcomment F134  DONE ?
+lcomment F137  LOOP 3 TIMES
+lcomment F139  LAST DISPLAY BUFFER DIGIT
+lcomment F13C  LOOP INDEX
+lcomment F13E  SAVE TEMPORARILY
+lcomment F141  POINT AT LOOK-UP TABLE
+lcomment F144  GET A HEX DIGIT TO CONVERT
+lcomment F145  POINT AT 7-SEG EQUIV
+lcomment F148  GET IT
+lcomment F14A  RECOVER POINTER TO DISP BUFFER
+lcomment F14D  STORE CONVERTED DIG
+lcomment F14F  NEXT DISPLAY POS
+lcomment F150  LOOP INDEX
+lcomment F151  CONTINUE FOR 6 DIGITS
+lcomment F153  RECOVER ENTRY STATUS
+lcomment F158  RETURN
+comment F159  . 
+comment F159  . 
+
 label F128  LPOl
 label F13E  LPO2
 label F159  DYSTBL
 bin   F159-F168
+lcomment F159  '0'
+lcomment F15A  '1'
+lcomment F15B  '2'
+lcomment F15C  '3'
+lcomment F15D  '4'
+lcomment F15E  '5'
+lcomment F15F  '6'
+lcomment F160  '7'
+lcomment F161  '8'
+lcomment F162  '9'
+lcomment F163  'A'
+lcomment F164  'B'
+lcomment F165  'C'
+lcomment F166  'D'
+lcomment F167  'E'
+lcomment F168  'F'
+
+comment F169 . 
 comment F169 DELAY SUBS
+lcomment F169  SAVE X ENTRY VALUE
+lcomment F16C  25 MS ENTRY POINT
+lcomment F171  SAVE ENTRY VAL
+lcomment F174  1 MS COUNT
+lcomment F179  REQUIRED FOR SIMILARITY TO DLYl/25
+lcomment F17D  LOOP TILL X=0
+lcomment F17F  RECOVER ENTRY VALUE
+lcomment F182  RETURN
+
+comment F183 .
+comment F183 SUBROUTINE TO ADD X=X+A
+lcomment F183  TO ALLOW CALCS
+lcomment F186  ADD LOW BYTES
+lcomment F189  UPDATE
+lcomment F18C  IF NO CARRY; YOU'RE DONE
+lcomment F18E  ADD CARRY TO HIGH BYTE
+lcomment F191  RESULT TO X-REG
+lcomment F194  RETURN
+comment F194  . 
+comment F194  CLEAR DISPLAY PER A-REG
+lcomment F195  SAVE ENTRY VALUE
+lcomment F198  RIGHTMOST DIGIT
+lcomment F19C  IF BIT IN A-REG NOT SET
+lcomment F1AO  NEXT DISPLAY
+
+lcomment F1Al  DONE ?
+
+lcomment F1A4  CONTINUE 6 TIMES
+lcomment F1A6  RECOVER ENTRY VALUE
+lcomment F1A9  RETURN
+lcomment F1A9   .
+lcomment F1AA  SAVE ENTRY VALUE
+lcomment F1AD  ADDR TO ROLL
+lcomment F1B0  FIRST PASS ?
+lcomment F1B5  THIS WAS PASS 1
+lcomment F1B8  CLEAR LOC ON FIRST PASS
+lcomment F1C2  SHIFT ROLL BYTE 4 PLACES
+lcomment F1C4  COMBINE NEW DATA
+lcomment F1C6  UPDATE LOC
+lcomment F1C8  RECOVER ENTRY VAL
+lcomment F1CB  RETURN
+
 label F169 DLY25
 const F16D-F16E
 label F171 DLY1
 const F175-F176
 label F179 DLYX
 label F17C  DLYLP
-comment F183 SUBROUTINE TO ADD X=X+A
 label F183 ADDAX
 label F191  ARND
-comment F195 CLEAR DISPLAY PER A-REG
 label F195 CLRDS
 label F19B  CLRLP
 label F1A0  ARNCLR
@@ -138,9 +327,50 @@ label F1DD  ARNCL4
 label F1E3  RO4LP
 label F1ED  R4OUT
 label F1EF RDKEY
+comment F1F6
 comment F1F6 -------------------------------------------------------
 comment F1F6 MEMCH - MEMORY CHANGE/DISPLAY/OFFSET ROUTINE
 comment F1F6 -------------------------------------------------------
+
+lcomment F26B  IF IT WAS $FF IT'S NOW 0
+lcomment F26C  OFFSET WAS BAD
+lcomment F26E  RECOVER MEM ADDR
+lcomment F271  FUNCTION CLEAR KEY ?
+lcomment F273  YES,DONT SAVE OFFSET
+lcomment F275  'GO' ?
+lcomment F277  'GO' IS ONLY VALID KEY HERE
+lcomment F279  GET CALC'D OFFSET
+lcomment F27C  STORE TO MEM
+lcomment F27E  ADV TO NEXT MEM ADDR
+lcomment F27F  BACK TO MEM CHANGE
+lcomment F281  'MD' ?
+lcomment F283  'MD' IS THE ONLY VALID KEY HERE
+lcomment F285  RECOVER MEM ADDRESS
+lcomment F288  SIGNAL NOT IN OFFSET MODE
+lcomment F28B  RE-ENTER MEM CHANGE
+lcomment F28D  SET COND CODES
+lcomment F28E  IF NUMBER KEY
+lcomment F290  'MD' ?
+lcomment F292  NO,CHECK FOR "GO"
+lcomment F294  YES,BACK UP
+lcomment F297  'GO' ?
+lcomment F299  NO,CHECK FOR "FS"
+lcomment F29B  YES,ADVANCE
+lcomment F29E  'FS' ?
+lcomment F2A0  NO MORE VALID KEYS
+lcomment F2A9  SET OFFSET MODE
+lcomment F2AC  SET FIRST PASS
+lcomment F2AF  SAVE MEM CHG POINTER
+lcomment F2B5  ENTER NEW DIGIT
+lcomment F2B8  DON'T SET FIRST PASS
+lcomment F2BC  SET FIRST PASS FLAG
+lcomment F2BF  GET DATA TO DISPLAY
+lcomment F2C1  UPDATE HEX BUFFER
+lcomment F2C4  UPDATE ADDR
+lcomment F2C7  CONV TO 7-SEG
+
+
+
 label F1F6 MEMBEG
 label F205  MEMCH
 label F20B  MEMNOW
@@ -163,7 +393,42 @@ label F29E  NXM2
 label F2B5  NUM
 label F2BA  NEWMEM
 label F2BF  MEMOUT
+comment F2CA
+comment F2CA -------------------------------------------------------
 comment F2CA REGDIS - REGISTER DISPLAY/CHANGE ROUTINE
+comment F2CA -------------------------------------------------------
+lcomment F2CA  SEE IF IN VERIFY
+lcomment F2CF  SIGNAL VERIFY
+lcomment F2D2  GO VERIFY TAPE
+lcomment F2D8  INIT MAIN POINTER
+lcomment F2BD  SET SO RTS...
+lcomment F2DE  WILL BE TO PUT
+lcomment F2E1  INIT STACKPOINTER
+lcomment F2E4  INIT REG # = UPC
+lcomment F2E9  INDICATE FIRST PASS
+lcomment F2EC  TO UPDATE DISPLAY
+lcomment F2EE  SEE IF ANY KEY PENDING
+lcomment F2F3  RETURN -- NO KEY
+lcomment F2F4  GET & ACKNOWLEDGE KEY
+lcomment F2F7  IF FUNCTION KEY
+lcomment F2FC  UPDATE DISPLAY & EXIT
+lcomment F2FE  'MD' ?
+lcomment F308  WRAP AROUND
+lcomment F30A  UPDATE
+lcomment F30D  SET UP NEW REG ON EXIT
+lcomment F30F  'GO'
+lcomment F311  IGNORE INVALID ENTRY
+lcomment F317  PAST ?
+lcomment F31B  WRAP AROUND
+lcomment F31C  UPDATE
+lcomment F324  T/B KEY ?
+lcomment F326  NO,RETURN
+lcomment F328  YES,SET UP RETURN ADDR
+lcomment F332  4-BYTES PER BLOCK ENTRY
+lcomment F333  TOP OF INFO TABLE
+
+
+
 label F2CA REGBEG
 label F2D5  NOTVRF
 label F2EE  REGDIS
@@ -190,6 +455,8 @@ bin F37A-F37B
 comment F388 -------------------------------------------------------
 comment F388 BRKBEG - BREAKPOINT EDITOR
 comment F388 -------------------------------------------------------
+
+
 label F388 BRKBEG
 label F38E BRKEDT
 label F39C BRKPNT
@@ -251,7 +518,6 @@ label F515 DOPCH
 label F521 FEDGE
 label F527 LOOPF
 
-
 label F533 TIN
 label F546 NOTSH
 label F552 LOOPS
@@ -267,17 +533,46 @@ label F5AA NOTOVR
 label F5B4 BITOVR
 label F5C4 TINDUN
 
-
-
+label F5D1 BIT1
+label F5D3 LOOPB1
+label F5E4 BIT0
+label F5E6 LOOPB0
+label F5FF INVRT
 label F608 PNCHB
+label F615 LPPOUT
+label F625 DO1
+label F62A ENDBIT
+
 label F630 PUNCH
+label F633 LLOOP
+label F651 ADLOOP
+label F66E DLOOP
+label F68D DUNDAT
 label F69C LOAD
-
-
-
-
-
-
-
-
-
+label F6A9 LOPAD
+label F6B7 LOPDAT
+label F6C3 VERF
+label F6C7 LOPBOT
+label F6CF CHKCHK
+label F6D8 BAD
+label F6E4 STOP
+label F6F3 GO
+label F6FE CONTIN
+label F701 ROI
+label F70B GO1
+label F70E GOTO
+label F729 BADSTK
+label F735 ALTBAD
+label F747 GOEXIT
+label F76D ABSOUT
+label F773 NMINT
+label F789 ABORT
+label F791 SAVE
+label F7AB NOTROI
+label F7AE ENNMI
+label F7BC SVSTAT
+label F7C2 SVLOOP
+label F7D2 SWINT
+label F7EC UIRQ
+data F7F1-F7F7
+cvec F7F8-F7FE

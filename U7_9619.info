@@ -101,7 +101,7 @@ lcomment E72F SELECT POR, SET CB2-HI
 bin E730
 lcomment E731 SAVE TO PIA0 CRB
 lcomment E736 RESTORE A&B, RTS
-comment  E738 Set the RTC ADDR from B Reg
+comment  E738 Set the RTC ADDR from B Reg. PB4,5 stay low for RTC-ADDR write.
 lcomment E738 SAVE A&B REGISTERS
 bin E73B
 
@@ -1397,7 +1397,7 @@ lcomment FE0A BACKSPACE?
 lcomment FE0C SKIP IF NOT
 lcomment FE0E DONT BACKSPACE...
 lcomment FE11 PAST BEG OF LINE
-lcomment FE17 LINE DELETE?
+lcomment FE17 CTRL-X, CANCEL
 
 lcomment FE23 WAS IT EOL?
 lcomment FE25 IF NOT GET ANOTHER
