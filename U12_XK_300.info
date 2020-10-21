@@ -12,10 +12,46 @@ comment  .      ADVENT
 comment  .      ELECTRONICS
 comment  .      (312) 297-6200
 
-***** Scratch RAM Addresses
+comment E419 -------------------------------------------------------
+comment E419 DEFS - DEFINITIONS & SCRATCH LOCATIONS
+comment E419 -------------------------------------------------------
+const F003
+const F01F
+const F6EB
+const F631
+const F729
+const F736
+const F4C8
+const F6E5
+const F730
+
+comment E484
+insert E484 PIA     EQU     $E484
+insert E484 KPCOL   EQU     $0
+insert E484 KPROW   EQU     $2
+insert E484 ANOD    EQU     $E484
+insert E484 CATH    EQU     $E486
+insert E484 PIAROW  EQU     $E486
+
+insert E487 PIACRA  EQU     $E485
+insert E486 PIAPB   EQU     $E486
+
+label E484 PIADP
+label E485 PIACR
+
+label E486 PIADPB
+label E487 PIACRB
+
+label E47C  STKTOP-2
+label E47D  STKTOP-1
+label E47E  STKTOP
+
+rmb E419-E463
++dec E419-E463
 label E419  MNPTR
 label E41B  KEY
 label E41C  KEYFLG
+label E41A  DISBUF-3
 label E41D  DISBUF
 label E41E  DISBUF+1
 label E41F  DISBUF+2
@@ -23,11 +59,15 @@ label E420  DISBUF+3
 label E421  DISBUF+4
 label E422  DISBUF+5
 label E423  ROLPAS
+label E424  XSAVD
+label E425  XSAVD+1
+label E426  XSAV1
+label E426  XTMP1
 label E42A  MEMSAV
 label E42B  MEMSAV+1
 label E42C  HEXBUF
-label E42D  HEXBU1
-label E42E  HEXBU2
+label E42D  HEXBUF+1
+label E42E  HEXBUF+2
 label E42F  USP
 label E430  UCC-1
 label E431  UCC
@@ -35,23 +75,32 @@ label E432  UB
 label E433  UA
 label E434  UX
 label E436  UPC
+label E437  UPC+1
+label E438  ROIFLG
+label E439  ROIBAK
+label E43B  UPROG
 label E43C  UIRQV
 label E43E  FNCFL
 label E43F  FNCPNT
+label E441  REGNO
+label E442  BKPNTR
+label E444  BRKNO
+label E445  BRKTAB
+insert E459 BRKEND  EQU     $E459
+lcomment E459 .
+comment E459 .
+comment E459 CASSETTE INTERFACE SCRATCH LOCATIONS
+comment E459 . 
 label E459  BYTE
 label E45A  CYCNT
 label E45B  CYCNT+1
 label E45C  GOOD1S
 label E45D  OLD
+label E45E  CHKSM
+label E45F  NBITS
 label E460  BEGAD
 label E462  ENDAD
-label E484  PIADP
-label E485  PIACR
-label E486  PIAROW
-
-label E424  XSAVD
-label E425  XSAVD+1
-label E426  XSAV1
+label E464  BEGAD+4
 
 
 insert F000 .        NAM RESET
@@ -153,7 +202,7 @@ lcomment F0BA  'GO' GO
 label F0BB PUT
 lcomment F0BB  INIT DIG ENABLE PATTERN
 label F0BD  LP1P
-lcomment F0BD  #DISBUF-3 POINT AT DISPLAY BUFFER
+lcomment F0BD  POINT AT DISPLAY BUFFER
 lcomment F0C0  MAKE EXTRA COPY
 label F0C1  LP2P
 lcomment F0C1  POINT AT NXT DIGIT INFO
@@ -182,7 +231,7 @@ comment F0E5 -------------------------------------------------------
 label F0E5 FUNSEL
 lcomment F0E5  KEY PENDING?
 label F0EB  KEYNOW
-lcomment F0EA  RETURN NO KEY PENDING
+lcomment F0EA  -- RETURN -- NO KEY PENDING
 lcomment F0EB  GET & ACKNOWLEDGE KEY
 lcomment F0EE  IF FUNCTION KEY
 lcomment F0F5  # ENTRY SO ROLL IT IN
@@ -238,7 +287,7 @@ lcomment F14F  NEXT DISPLAY POS
 lcomment F150  LOOP INDEX
 lcomment F151  CONTINUE FOR 6 DIGITS
 lcomment F153  RECOVER ENTRY STATUS
-lcomment F158  RETURN
+lcomment F158  -- RETURN --
 comment F159  . 
 comment F159  . 
 
@@ -272,9 +321,9 @@ lcomment F174  1 MS COUNT
 lcomment F179  REQUIRED FOR SIMILARITY TO DLYl/25
 lcomment F17D  LOOP TILL X=0
 lcomment F17F  RECOVER ENTRY VALUE
-lcomment F182  RETURN
+lcomment F182  -- RETURN --
 
-comment F183 .
+comment F183 . 
 comment F183 SUBROUTINE TO ADD X=X+A
 lcomment F183  TO ALLOW CALCS
 lcomment F186  ADD LOW BYTES
@@ -282,7 +331,7 @@ lcomment F189  UPDATE
 lcomment F18C  IF NO CARRY; YOU'RE DONE
 lcomment F18E  ADD CARRY TO HIGH BYTE
 lcomment F191  RESULT TO X-REG
-lcomment F194  RETURN
+lcomment F194  -- RETURN --
 comment F194  . 
 comment F194  CLEAR DISPLAY PER A-REG
 lcomment F195  SAVE ENTRY VALUE
@@ -294,8 +343,8 @@ lcomment F1Al  DONE ?
 
 lcomment F1A4  CONTINUE 6 TIMES
 lcomment F1A6  RECOVER ENTRY VALUE
-lcomment F1A9  RETURN
-lcomment F1A9   .
+lcomment F1A9  -- RETURN --
+lcomment F1A9  . 
 lcomment F1AA  SAVE ENTRY VALUE
 lcomment F1AD  ADDR TO ROLL
 lcomment F1B0  FIRST PASS ?
@@ -305,7 +354,7 @@ lcomment F1C2  SHIFT ROLL BYTE 4 PLACES
 lcomment F1C4  COMBINE NEW DATA
 lcomment F1C6  UPDATE LOC
 lcomment F1C8  RECOVER ENTRY VAL
-lcomment F1CB  RETURN
+lcomment F1CB  -- RETURN --
 
 label F169 DLY25
 const F16D-F16E
@@ -321,16 +370,97 @@ label F1A0  ARNCLR
 label F1AA ROLL2
 label F1BC  ARNCL2
 label F1C4  R2OUT
+
+comment F1CC . 
 comment F1CC ROLL 4 HEX INTO HEXBUF
 label F1CC ROLL4
+lcomment F1CC SAVE ENTRY VALUES
+lcomment F1CD PASS 1 ?
+lcomment F1D0 NO,CONTINUE
+lcomment F1D2 YES,CLEAR FIRST PASS FLAG &
+lcomment F1D5 CLR FIRST 4 DIGITS
+lcomment F1D8 THEN PUT NEW DATA IN 4TH
+lcomment F1D0 LEFT JUSTIFY NEW DIGIT
 label F1DD  ARNCL4
+lcomment F1E1 LOOP INDEX
+lcomment F1E3 ROLLA INTO HEXBUF
+lcomment F1ED RECOVER B-REG
+lcomment F1EE RETURN
+comment F1EF .
+lcomment F1EF READ & ACKNOWLEDGE KEY
+
 label F1E3  RO4LP
 label F1ED  R4OUT
 label F1EF RDKEY
+
 comment F1F6
 comment F1F6 -------------------------------------------------------
 comment F1F6 MEMCH - MEMORY CHANGE/DISPLAY/OFFSET ROUTINE
 comment F1F6 -------------------------------------------------------
+label F1F6 MEMBEG
+label F205  MEMCH
+label F20B  MEMNOW
+label F21E  OFFOUT
+const F222
+label F221  OFFEND
+label F227  OFFRET
+label F228  OFFUN
+bin   F24D
+label F243  ARNINC
+label F257  BADOFF
+const F258
+bin   F261
+label F26B  CALDUN
+label F281  BADCAL
+label F288  MEMBAK
+label F28D  NORMAL
+label F297  NXMl
+label F29E  NXM2
+label F2B5  NUM
+label F2BA  NEWMEM
+label F2BF  MEMOUT
+
+lcomment F1F9   INT MAIN POINTER
+lcomment F1FC   SET FUNCTION FLAG TO ZERO
+lcomment F1FF  POINT AT ADDR TO DISPLAY
+lcomment F202  EXIT TO UPDATE DISPLAY
+lcomment F205  SEE IF ANY KEY PENDING
+lcomment F20A  -- RETURN --
+lcomment F20B  GET & ACKNOWLEDGE KEY
+lcomment F20E  SAVES STEPS LATER
+lcomment F211  SEE IF IN OFFSET MODE
+lcomment F214  (NOT IN OFFSET MODE)
+lcomment F216  IF OFFSET CALC FINISHED
+lcomment F218  CHECK KEY
+lcomment F219  IF FUNCTION KEY
+lcomment F21B  ENTER NUMBER KEY
+lcomment F21E  CONVERT TO 7-SEG
+lcomment F221  "A"
+lcomment F224  STORE TO LAST DIGITS
+lcomment F227  -- RETURN --
+lcomment F228  'GO' ?
+lcomment F22A  IF NOT; EXIT
+lcomment F22C  GET DESTINATION OF BRANCH
+lcomment F22F  ADJ INSTEAD OF ADJ'ING THE SOURCE
+lcomment F230  UPDATE
+lcomment F233  LOW BYTE OF DESTINATION
+lcomment F236  HI BYTE
+lcomment F239  SUBTRACT LOW BYTES
+lcomment F23C  SUBTRACT W/ CARRY
+lcomment F23F  CHECK POLARITY OF LOW ORDER RESULT
+lcomment F240  IF LO POS DON'T INC HI
+lcomment F242  IF LOW WAS NEG INC HI  $FF - $00
+lcomment F243  IF B NOW ZERO; OFFSET IS IN RANGE
+lcomment F244  IF NOT; TOO FAR
+lcomment F246  SAVE RESULT
+lcomment F249  CONVERT TO 7-SEG
+lcomment F24C  CLEAR FIRST 4 DISPLAYS
+lcomment F253  INDICATE CALC DONE; & OK
+lcomment F256  -- RETURN --
+lcomment F25D  WRITE "BAD" IN FIRST 3 DISPLAYS
+lcomment F262  CLEAR UNUSED DIGITS
+lcomment F267  INDICATE OFFSET NOT VALID
+lcomment F26A  -- RETURN --
 
 lcomment F26B  IF IT WAS $FF IT'S NOW 0
 lcomment F26C  OFFSET WAS BAD
@@ -368,31 +498,6 @@ lcomment F2BF  GET DATA TO DISPLAY
 lcomment F2C1  UPDATE HEX BUFFER
 lcomment F2C4  UPDATE ADDR
 lcomment F2C7  CONV TO 7-SEG
-
-
-
-label F1F6 MEMBEG
-label F205  MEMCH
-label F20B  MEMNOW
-label F21E  OFFOUT
-const F222
-label F221  OFFEND
-label F227  OFFRET
-label F228  OFFUN
-bin   F24D
-label F243  ARNINC
-label F257  BADOFF
-const F258
-bin   F261
-label F26B  CALDUN
-label F281  BADCAL
-label F288  MEMBAK
-label F28D  NORMAL
-label F297  NXMl
-label F29E  NXM2
-label F2B5  NUM
-label F2BA  NEWMEM
-label F2BF  MEMOUT
 comment F2CA
 comment F2CA -------------------------------------------------------
 comment F2CA REGDIS - REGISTER DISPLAY/CHANGE ROUTINE
@@ -427,7 +532,19 @@ lcomment F328  YES,SET UP RETURN ADDR
 lcomment F332  4-BYTES PER BLOCK ENTRY
 lcomment F333  TOP OF INFO TABLE
 
-
+lcomment F336 POINT AT TABLE ENTRY
+lcomment F339 GET 7-SEG INFO
+lcomment F33B SAVE ON STACK
+lcomment F33F GET ADDR OF DESIRED REG
+lcomment F341 SEE IF NEW REGF
+lcomment F346 STORE CURRENT VAL TO DISPLAY STAA HEXBUF
+lcomment F350 TO CONVERT TO 7-SEG
+lcomment F353 RECOVER DISPLAY CODES
+lcomment F354 & STORE TO DISP BUFFER
+lcomment F35D CLEAR UNUSED DISPLAYS
+lcomment F365 UPDATE HIGH OF PSEUDO REG
+lcomment F36D UPDATE LOW BYTE
+lcomment F36F -- RETURN --
 
 label F2CA REGBEG
 label F2D5  NOTVRF
@@ -452,11 +569,36 @@ bin F37E-F37F
 bin F382-F383
 bin F386-F387
 bin F37A-F37B
+
+
+
+
+lcomment F388  FUNCTION FLAG SET ?
+lcomment F38B  YES,EDIT BREAKPIONTS
+lcomment F38D  NO,TAKE NO ACTION
+lcomment F38E  SET MNPTR WITH BREAKPOINT ROUTINE
+lcomment F394  SET UP FOR ADDR INPUT
+lcomment F399  DISPLAY NEXT BKPT
+lcomment F39C  KEY PENDING ?
+lcomment F39F  YES,DECODE KEY ?
+lcomment F3A1  NO,RETURN TO PUT
+lcomment F3A2  GET & ACKNOWLEDGE KEY
+lcomment F3A5  HEX ?
+lcomment F3A7  NO,CHECK FOR FUNCTION
+lcomment F3A9  YES, ROLL INTO HEXBUF
+lcomment F3AC  DISPLAY & RETURN TO PUT
+lcomment F3AF  FS KEY ?
+lcomment F3B1  NO,TRY FC
+lcomment F3B3  YES,ENTER AS BKPT & RETURN
+lcomment F3B5  FC KEY ?
+lcomment F3B7  NO,CHECK FOR GO
+lcomment F3B9  YES,REMOVE A BKPT
+lcomment F3BC  GO KEY ?
+lcomment F3BE  YES,DISPLAY NEXT BKPT & RETURN
+comment F388
 comment F388 -------------------------------------------------------
 comment F388 BRKBEG - BREAKPOINT EDITOR
 comment F388 -------------------------------------------------------
-
-
 label F388 BRKBEG
 label F38E BRKEDT
 label F39C BRKPNT
@@ -464,48 +606,170 @@ label F3A2 BRKTST
 label F3AF NOTHEX
 label F3B5 CKFC
 label F3BC CKGO
+comment F3C0 . 
 comment F3C0 DISBRK - DISPLAY NEXT BREAKPOINT
 label F3C0 DISBRK
 label F3CB BKLOOP
 label F3D7 NOTEND
 label F3E3 BACK
 label F3F0 DISDUN
+
+
+lcomment F3C0 GET # INTO HEXBU
+lcomment F3C3 ANY BREAKPOINTS ?
+lcomment F3C6 NO,RETURN
+lcomment F3C8 YES,DISPLAY NEXT
+lcomment F3CF END OF TAB
+lcomment F3D4 NO,GO TEST FOR B
+lcomment F3D2 YES,WRAP AROUND
+lcomment F3D7 BREAKPOINT ?
+lcomment F3D9 NO,TRY NEXT LOC
+lcomment F3DB YES,MOVE POINTER
+lcomment F3DE GET BKPT ADDR
+lcomment F3E0 & DISPLAY IT
+lcomment F3E6 ANY BREAKPOINTS ?
+lcomment F3E9 YES,RETURN
+lcomment F3EB MASK ALL BUT LSD
+lcomment F3F0 RETURN TO PUT
+
+comment F3F1 .
 comment F3F1 BKTOTB-ENTER A BREAKPOINT FROM HEXBUF INTO
 comment F3F1 .       THE TABLE & UPDATE BRKNO
 label F3F1 BKTOTB
-comment F3FF CHECK FOR RAM
 comment F40E ENTER BKPT INTO TABLE
 label F428 FULL
-comment F3Fl BKFMTB - REMOVE A BREAKPOINT FROM BUFFER
-comment F3Fl .         & UPDATE BRKNO
+
+comment F42E .
+comment F42E BKFMTB - REMOVE A BREAKPOINT FROM BUFFER
+comment F42E .         & UPDATE BRKNO
 label F42E BKFMTB
 label F43E BKNO
 label F444 BKLOP
 label F44D NEXT1
 label F450 ISBKPT
+
+lcomment F3F1 BREAKPOINT EXIST ?
+lcomment F3F4 YES,RETURN
+lcomment F3F6 FIND OPEN SPACE
+lcomment F3F8 GET # OF BREAKPOINTS
+lcomment F3FB FULL ?
+lcomment F3FD YES
+comment F3FF CHECK FOR RAM
+
+lcomment F3FF TEST FOR RAM
+lcomment F407 RAM ?
+lcomment F409 NO ,RETURN
+lcomment F40B YES, RESTORE DATA
+
+lcomment F40E POINT INTO BREAKPOINT TAB
+lcomment F411 SAV OPCODE
+lcomment F413 GET OP CODE ADDR
+lcomment F419 INSERT BREAKPOINT
+lcomment F41D COUNT BREAKPOINT
+lcomment P420 FLAG BRAKPOINT
+lcomment F422 UPDATE BKPT NO.
+lcomment F428 RESET ROLPAS
+lcomment F42D & RETURN
+
+
+lcomment F42E BKPT (DISBUF) IN TABLE ?
+lcomment F430 NO , RETURN
+lcomment F432 YES , GET ITS ADDR
+lcomment F435 & REMOVE IT.
+lcomment F437 REMOVE OP CODE
+lcomment F439 UPDATE COUNT
+lcomment F43C DISPLAY BKPT & RETURN
+
+comment F43E .
+comment F43E BKNO - FIND NUMBER OF BREAKPOINTS, UPDATE BRKNO
+comment F43E .         & PUT ADDR OF LAST OPEN SPACE INTO BKPNTR
+comment F43E .
+lcomment F444 BREAKPOINT HERE ?
+lcomment F446 NO, TRY NEXT ENTRY
+lcomment F448 YES,COUNT IT
+lcomment F44B SO DONT SAVE ADDR
+lcomment F44D & SAVE ADDR
+lcomment F450 POINT TO NEXT' ENTRY
+
+lcomment F454 DONE ?
+lcomment F457 NO,CONTINUE
+lcomment F459 RESET ROLPAS
+lcomment F45E YES
+
+
+
+comment F45F 
+comment F45F -------------------------------------------------------
 comment F45F INBKS - INSERT BREAKPOINTS FROM TABLE TO MEM
+comment F45F -------------------------------------------------------
 label F45F INBKS
 label F467 CKBPT
 label F47B NEXT2
 label F484 NOBPT
+
+lcomment F45F BREAKPOINTS ?
+lcomment F462 NO,RETURN
+lcomment F464 YES,INSTALL'EM
+lcomment F467 BREAKPOINT ?
+lcomment F469 NO,TRY NEXT ENTRY
+lcomment F46B SAVE X
+lcomment F46E SWI
+lcomment F470 GET ADDR
+lcomment F472 GET OP CODE
+lcomment F474 STORE SWI
+lcomment F476 RESTORE X
+lcomment F479 SAVE OPCODE
+lcomment F47F DONE ?
+lcomment F482 NO,CONTINUE
+
+comment F485 -------------------------------------------------------
 comment F485 OUTBKS - REMOVE BREAKPOINTS FROM MEM
+comment F485 -------------------------------------------------------
 label F485 OUTBKS
 label F488 REMOV1
+comment F48C REMOVE BREAKPOINT FROM RAM
+comment F496 NEXT ENTRY
 label F496 NEXT3
-comment F4A0 FDBRI - FIND BREAKPOINT (HEXBUF) IN BRKTAB
+comment F4A0 . 
+comment F4A0 FDBRK - FIND BREAKPOINT (HEXBUF) IN BRKTAB
 comment F4A0 .        BKPNTR POINTS AT BREAKPOINT & CARRY
 comment F4A0 .        IS SET IF BREKPOINT EXISTS,ELSE C IS ="0"
 label F4A0 FNDBRK
 label F4A9 BRKLOP
 label F4AD NEXT
 label F4B8 CKLSB
+
+lcomment F4A0 BREAKPOINT MSB
+lcomment F4A3 BREAKPOINT LSB
+lcomment F4A6 BREAKPOINT TAB
+lcomment F4A9 MATCH ?
+lcomment F4AB YES
+lcomment F4AD NO POINT TO NEXT .
+lcomment F4AE DONE ?
+lcomment F4AF NO,CONTINUE
+lcomment F4B6 YES,BUT NO BKPT
+lcomment F4B8 MATCH ?
+lcomment F4BA NO,TRY NEXT ENTRY
+lcomment F4BC BREAKPOINT ACTIVE ?
+lcomment F4BE NO,TRY AGAIN
+lcomment F4C0 YES,FOUND IT
+lcomment F4C1 SAVE ADDR
+
+comment F4C5 -------------------------------------------------------
 comment F4C5 FSET - SET FUNCTION FLAG & DISPLAY "FS"
+comment F4C5 -------------------------------------------------------
 label F4C5 FSET
 label F4CA FOUT
+comment F4D1 -------------------------------------------------------
 comment F4D1 FCLR - CLEAR FUNCTION FLAG & LAST 2 DIGITS
+comment F4D1 -------------------------------------------------------
+
 label F4D1 FCLR
 const F4D3
 
+comment F4D7 -------------------------------------------------------
+comment F4D7 TAPES - SOFTWARE CASSETTE TAPE INTERFACE
+comment F4D7 -------------------------------------------------------
 label F4D7 TAPBEG
 label F4DC LDTAP
 label F4E2 PCH
@@ -515,12 +779,51 @@ label F4FC FUNK
 label F509 CONOUT
 label F512 DYSOUT
 label F515 DOPCH
+
+lcomment F4D7 SEE IF PUNCH OR LOAD
+lcomment F4DC DO LOAD (OR VERF)
+lcomment F4DF WHEN DONE
+lcomment F4E2 POINT AT BEGEND ROUTINE
+lcomment F4E5 ACTIVATE
+lcomment F4EA DISPLAY BB IN LAST DISPLAYS
+lcomment F4EC SEE IF KEY PENDING
+lcomment F4F1 -- RETURN -- NO KEY
+lcomment F4F2 READ & ACKNOWLEDGE KEY
+lcomment F4F5 FUNCTION KEY
+lcomment F4F7 ENTER NEW NUMBER
+lcomment F4FA CONVERT TO 7-SEG & LEAVE
+lcomment F4FE END ADDR DONE ?
+lcomment F501 GO DO PUNCH
+lcomment F503 SAVE ENTERED ADDR
+lcomment F509 'EE' OR 'BB' TO LAST DISPLAYS
+lcomment F50C CLEAR FIRST FOUR NIBBLES
+lcomment F512 CONV & RETURN
+lcomment F515 SAVE ENTERED ADDR
+lcomment F51B PUNCH TAPE
+lcomment F51E WHEN DONE
+
+comment F521 -------------------------------------------------------
+comment F521 FEDGE - ROUTINE TO LOCATE AN EDGE (POS OR NEG)
+comment F521 .        AND DETRMINE DISTANCE TO IT (TIME)
+comment F521 .        EXECUTION TIME TUNED
+comment F521 -------------------------------------------------------
 label F521 FEDGE
 label F527 LOOPF
+
+comment F533 -------------------------------------------------------
+comment F533 TIN - READ 1 BYTE FROM TAPE
+comment F533 .      TIME TUNED
+comment F533 -------------------------------------------------------
 
 label F533 TIN
 label F546 NOTSH
 label F552 LOOPS
+
+
+comment F55D . 
+comment F55D EDGE SENSE SET-UP TO SENSE TRAILING EDGE OF CYCLES
+comment F55D & YOU ARE IN THE MIDDLE OF THE FIRST LONG CYCLE
+
 label F569 LPOUT
 label F56D LPMID
 label F576 LPIN
@@ -530,24 +833,65 @@ label F58E SHRT
 label F593 WITHIN
 label F5A6 CHKOVR
 label F5AA NOTOVR
+
+comment F5B4 . 
+comment F5B4 END OF A BIT-TIME
 label F5B4 BITOVR
+
+comment F5C4 . 
+comment F5C4 DATA BYTE READ; CLEAN-UP AND LEAVE
 label F5C4 TINDUN
 
+comment F5D1 -------------------------------------------------------
+comment F5D1 BIT1 - SEND A LOGIC 1 BIT-TIME
+comment F5D1 .       LESS 177 CLOCK CYCLES
+comment F5D1 .          TIME TUNED
+comment F5D1 -------------------------------------------------------
 label F5D1 BIT1
 label F5D3 LOOPB1
+
+comment F5E4 -------------------------------------------------------
+comment F5E4 BIT0 - SEND A LOGIC 0 BIT-TIME
+comment F5E4 .       LESS 177 CLOCK CYCLES
+comment F5E4 .          TIME TUNED
+comment F5E4 -------------------------------------------------------
 label F5E4 BIT0
 label F5E6 LOOPB0
+
+comment F5FF -------------------------------------------------------
+comment F5FF INVRT - ROUTINE TO TRANSMIT A RISING
+comment F5FF .        OR FALLING EDGE TO THE CASSETTE
+comment F5FF .            TIME TUNED
+comment F5FF -------------------------------------------------------
 label F5FF INVRT
+
+comment F608 -------------------------------------------------------
+comment F608 PNCHB - PUNCH 1 BYTE TO TAPE. INCLUDES
+comment F608 .        START BIT,DATA,AND ALL BUT LAST HALF-CYCLE
+comment F608 .        OF STOP BITS
+comment F608 .                   TIME TUNED
+comment F608 -------------------------------------------------------
 label F608 PNCHB
 label F615 LPPOUT
 label F625 DO1
 label F62A ENDBIT
 
+comment F630 -------------------------------------------------------
+comment F630 PUNCH - FORMAT AND PUNCH A CASSETTE DATA FILE
+comment F630 .        INCLUDING LEADER AND CHECKSUM
+comment F630 .        EXECUTION TIME TUNED
+comment F630 -------------------------------------------------------
 label F630 PUNCH
 label F633 LLOOP
 label F651 ADLOOP
 label F66E DLOOP
 label F68D DUNDAT
+
+comment F69C -------------------------------------------------------
+comment F69C LOAD - LOAD OR VERIFY A DATA FILE FROM
+comment F69C .       CASSETTE TAPE
+comment F69C -------------------------------------------------------
+
 label F69C LOAD
 label F6A9 LOPAD
 label F6B7 LOPDAT
@@ -556,6 +900,10 @@ label F6C7 LOPBOT
 label F6CF CHKCHK
 label F6D8 BAD
 label F6E4 STOP
+
+comment F6F3 -------------------------------------------------------
+comment F6F3 GO - GO TO USER PROGRAM
+comment F6F3 -------------------------------------------------------
 label F6F3 GO
 label F6FE CONTIN
 label F701 ROI
@@ -565,6 +913,10 @@ label F729 BADSTK
 label F735 ALTBAD
 label F747 GOEXIT
 label F76D ABSOUT
+
+comment F773 -------------------------------------------------------
+comment F773 INTERRUPTS - INTERRUPT HANDLING ROUTINES
+comment F773 -------------------------------------------------------
 label F773 NMINT
 label F789 ABORT
 label F791 SAVE
