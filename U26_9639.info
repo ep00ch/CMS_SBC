@@ -1,5 +1,6 @@
 FILE "U26_9639.bin" E000
 option os9
+*option 6309
 
 ***** General Info
 comment  .
@@ -17,18 +18,22 @@ unused FF5C-FFDF
 insert   .        ORG     $E000
 insert   .        FILL    $FF,$1000
 
-data F000-F02C
 comment F000 --------------------------------------------------
 comment F000 Boot module header.
 comment F000 --------------------------------------------------
-
+*data F000-F02C
 lcomment F00D "Boot"
+data    F00D-F010
+char F010
 comment  .  FF80-FFDF    I/O SPACE?
 data   FF5C-FFEF
 data   F3F6-F456
 word   FFE0-FFF0
 comment  .  FFE0-FFFF    VECTORS
 
+
+comment F08F Write to Disk Drive
+comment F0A2 Read from  Disk Drive
 
 comment F139 --------------------------------------------------
 comment F139 Delay25msec.@2MHz
@@ -43,7 +48,7 @@ comment F145  ModEntrB
 comment F145  OS9p1 calls the Boot module at this entry point.
 comment F145  IN:U
 comment F145 --------------------------------------------------
-
+label F145 start
 lcomment F147 reserve space on stack for temporary variables
 const F14B
 lcomment F14A request system memory to use for sector buffer
@@ -123,7 +128,7 @@ label   D.Clock0000 D.WDAddr
 rmb     0020-0037
 
 label 0020 D.Tasks
-label 0022 D.TmpDAT
+label 0022 D.Tasks+2
 label 0024 D.Init
 label 0026 D.Poll
 label 0028 D.Time
@@ -149,9 +154,10 @@ label 0037 D.BtSz
 rmb     0040-0060
 *dec    0040-0060
 label 0040 D.BlkMap
-label 0042 D.BlkMap#2
+label 0042 D.BlkMap+2
 label 0044 D.ModDir
-label 0046 D.ModDir#2
+label 0045 D.ModDir+1
+label 0046 D.ModDir+2
 
 label 0048 D.PrcDBT
 label 004A D.SysPrc
@@ -173,6 +179,7 @@ label   0050 D.Proc
 rmb     00C0-00FF
 
 label 00C0 D.SysSvc
+label 00C1 D.SysSvc+1
 label 00C2 D.SysDis
 label 00C4 D.SysIRQ
 label 00C6 D.UsrSvc
