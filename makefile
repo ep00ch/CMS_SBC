@@ -1,6 +1,6 @@
 SRC=$(wildcard *.mon)
 O_SRC=$(sort ${SRC})
-F9DASM=f9dasm -noconv -noflex
+F9DASM=f9dasm -noconv -noflex -cchar \*
 
 $(warning ${O_SRC} )
 
@@ -36,7 +36,7 @@ $(warning ${O_SRC} )
 #%.info : %.bin
 	#echo "FILE \"$<\" E000" > $@
 
-%9609.asm : %9609.info U22_9609.bin U23_9609.bin U7_9619.info
+9609_U22_U23.asm : 9609_U22_U23.info 9609_U22.bin 9609_U23.bin 9619_U7.info
 	$(F9DASM) -info $< -out $@
 
 %.asm : %.info %.bin
@@ -71,14 +71,14 @@ help :
 	@echo "Uses xxd, f9dasm, lwasm, and diff to disassemble, reassemble, and\n\
 	  compare 6809 code as exported from the Apple II monitor or DEBUG19. Try: \n\
 	     make all \n\
-	     make U7_9619.hex\n     make U7_9619.asm\n\
-	     make U7_9619.raw\n     make U7_9619.diff\n\
+	     make 9619_U7.hex\n     make 9619_U7.asm\n\
+	     make 9619_U7.raw\n     make 9619_U7.diff\n\
 	     make clean is aggressive, don't keep modifications in this folder."
 
-all : U22_U23_9609.asm U7_9619.asm U26_9639.asm U3_9642.asm
+all : 9609_U22_U23.asm 9619_U7.asm 9639_U26.asm 9642_U3.asm XK-300_U12.asm
 
 # This sets up for a git commit with a few viewable asm files for convenience.
-clean-git : | clean U7_9619.asm U26_9639.asm U3_9642.asm
+clean-git : | clean 9619_U7.asm 9642_U3.asm XK-300_U12.asm
 	git status
 
 clean:

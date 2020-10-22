@@ -4,8 +4,9 @@ This project contains data downloaded from the Read Only Memory (ROM) of a
 Creative Micro Systems (CMS) 6909 MPU module, 9619 Advanced Single Board Computer (SBC),
 9639 Memory Management Processor, and 9642 Serial I/O Processor.
 
-The initial data is in the Apple II System Monitor memory dump format (.mondmp), 
-or the DEBUG09 memory view format (.dbgdmp).
+There are also some other ROMs from various EXORbus compatible modules.
+
+The initial data is in the DEBUG09 memory view format (.dbgdmp).
 However, they are easily changed to other more standard formats using make and the makefile. 
 
 ## Background
@@ -18,9 +19,9 @@ is available online. The sections with similar functions have comments straight 
 The [debugger in Nitros-9](https://github.com/boisy/nitros9/blob/master/level1/cmds/debug.asm) contains similar code. 
 
 My original workflow for ripping EPROMS and programming new EEPROMS used an Apple II and a 
-Super Serial card, so some of the original file formats revolve around the Apple II System Monitor.
-Now, I am using the CMS 9619 for ripping and programming EEPROMS, so the files are 
-moving towards that format.
+SuperSerial card, so some of the original file formats revolved around the Apple II System Monitor.
+Now, I am using the CMS 9619 for ripping and programming EEPROMS, so the files have 
+moved towards that format.
 
 ## Prerequisites
 
@@ -73,13 +74,13 @@ to add comments to asm files.
 
 For example, the command:
 
-`make U7_9619.asm`
+`make 9619_U7.asm`
 
-will convert U7_9619.dbgdmp to a binary format, then disassemble it using f9dasm.
+will convert 9619_U7.dbgdmp to a binary format, then disassemble it using f9dasm.
 
 The command:
 
-`make U7_9619.diff`
+`make 9619_U7.diff`
 
 does the same as above, then assembles the the .asm file using lwtools, then generates a hexdump of the re-assembled binary. Finally, it compares the original binary hexdump to the re-assembled binary hexdump.
 
@@ -91,10 +92,9 @@ will convert all of the dbgdmp files, and then disassemble them.
 
 Use:
 
-`make U7_9619.aif`
+`make 9619_U7.aif`
 
-to generate an Apple II monitor input file or cassete input audio file to upload back to the 
-Apple II for EEPROM programming.
+to generate a cassette input audio file to upload back to the Apple II for EEPROM programming.
 
 ## TO DO
 

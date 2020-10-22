@@ -1,5 +1,5 @@
-FILE "U22_9609.bin" FF00
-FILE 'U23_9609.bin' F800
+FILE "9609_U22.bin" FF00
+FILE '9609_U23.bin' F800
 
 label FC93 >CMD
 label FC9F <CMD
@@ -24,7 +24,7 @@ remap    FDAF-FB01 3B
 remap    FDAF-FFD8 6F
 
 * Use the 9619 info file which is very similar
-include  U7_9619.info
+include  9619_U7.info
 
 uncomment FFE0-FFFF
 uncomment 0000-F800
