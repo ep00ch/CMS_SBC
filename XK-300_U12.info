@@ -760,12 +760,21 @@ comment F4C5 FSET - SET FUNCTION FLAG & DISPLAY "FS"
 comment F4C5 -------------------------------------------------------
 label F4C5 FSET
 label F4CA FOUT
+
+lcomment F4C5 TO SET FUNCTION FLAG
+lcomment F4C7 CODE FOR 'FS'
+lcomment F4D0 RETURN TO PUT
+
+
 comment F4D1 -------------------------------------------------------
 comment F4D1 FCLR - CLEAR FUNCTION FLAG & LAST 2 DIGITS
 comment F4D1 -------------------------------------------------------
 
 label F4D1 FCLR
 const F4D3
+
+lcomment F4D1 TO CLEAR FUNCTION FLAG
+lcomment F4D2 TO CLEARLAST 2 DIGITS
 
 comment F4D7 -------------------------------------------------------
 comment F4D7 TAPES - SOFTWARE CASSETTE TAPE INTERFACE
@@ -807,22 +816,103 @@ comment F521 FEDGE - ROUTINE TO LOCATE AN EDGE (POS OR NEG)
 comment F521 .        AND DETRMINE DISTANCE TO IT (TIME)
 comment F521 .        EXECUTION TIME TUNED
 comment F521 -------------------------------------------------------
+
 label F521 FEDGE
 label F527 LOOPF
+
+lcomment F521 FOR BSR
+lcomment F521 START COUNT«FIXED (-1)
+lcomment F523 CLEAR INTERRUPT
+lcomment F526 DELAY
+lcomment F527 DURATION COUNT IN A-REG
+lcomment F528 CHECK FOR EDGE FOUND
+lcomment F52B IF NOT;KEEP LOOKING
+lcomment F52D INVERT EDGE SENSE CONTROL
+lcomment F52F PIA LOOKS FOR OTHER EDGE
+lcomment F532 --RETURN--
 
 comment F533 -------------------------------------------------------
 comment F533 TIN - READ 1 BYTE FROM TAPE
 comment F533 .      TIME TUNED
 comment F533 -------------------------------------------------------
-
 label F533 TIN
 label F546 NOTSH
 label F552 LOOPS
 
+lcomment F533 FOR JSR
+lcomment F535 INITIALIZE BYTE
+lcomment F53B INIT BIT-TIME COUNT
+lcomment F53E INIT LOGIC SENSE
+lcomment F541 [22/21+-5] SYNC TO AN EDGE
+lcomment F543 DELAY
+lcomment F546 DELAY
+lcomment F549 "
+lcomment F54C [22/21+-5] MEASURE TO NEXT EDGE
+lcomment F54E <1.5 SHORT HALF ?
+lcomment F550 MUST FIND SHORT FIRST
+lcomment F552 SAVE LAST COUNT
+lcomment F555 [22/21+-5) MEASURE TO NEXT
+lcomment F557 MAKE EXTRA COPY
+lcomment F558 SUM OF LAST 2
+lcomment F55B >2.33 NOM. SHORTS?
+lcomment F55D KEEP LOOKING FOR LONG
 
-comment F55D . 
-comment F55D EDGE SENSE SET-UP TO SENSE TRAILING EDGE OF CYCLES
-comment F55D & YOU ARE IN THE MIDDLE OF THE FIRST LONG CYCLE
+
+comment F55F .
+comment F55F EDGE SENSE SET-UP TO SENSE TRAILING EDGE OF CYCLES
+comment F55F & YOU ARE IN THE MIDDLE OF THE FIRST LONG CYCLE
+
+lcomment F55F DELAY
+lcomment F562 CLEAR INTERRUPT FLAG
+lcomment F565 COMPENSATE FOR PROCESSING
+lcomment F567 BRANCH INTO COUNT LOOP
+lcomment F569 INIT BIT-TIME COUNT
+lcomment F56B DELAY
+lcomment F570 ESTABLISH BIT-TIME COUNT
+lcomment F573 INIT LOGIC SENSE
+lcomment F576 FIXED TIME (-1)= INIT COUNT
+lcomment F578 A-REG HOLDS DURATION COUNT
+lcomment F579 EDGE YET?
+lcomment F57C IF NOT;KEEP LOOKING
+lcomment F57E CLEAR INTERRUPT FLAG
+lcomment F581 DELAY TO MAKE PASS TIME...
+lcomment F584 EVEN MULTIPLE OF LOOP TIME
+lcomment F585 <1.4 SHORT ?
+lcomment F589 GOOD1S POS MEANS 0
+lcomment F58E GOODIS NEG MEANS 1
+lcomment F591 DELAY
+lcomment F593 HIGH BYTE
+lcomment F596 ADD CURRENT TO BIT-TIME COUNT
+lcomment F599 UPDATE
+lcomment F59C ADD IN CARRY
+lcomment F59E UPDATE HIGH BYTE
+lcomment F5A1 IF CARRY; BIT MAY BE OVER
+lcomment F5A3 DELAY
+lcomment F5A4 BIT NOT OVER
+lcomment F5A6 (279-256)
+lcomment F5A8 BIT-TIME EXPIRED
+lcomment F5AA [38] 2
+lcomment F5AC "    2
+lcomment F5AD "    4
+
+comment  F5B4 .
+comment  F5B4 END OF A BIT-TIME
+
+F5B4 LOGIC SENSE TO CARRY
+F5B7 SHIFT NEW BIT INTO BYTE
+F5BA DONE WHEN START FALLS OUT
+F5BC >2.5 NOM. SHORTS ?
+F5BE NO; BIT-TIME STARTS AT 0
+F5C0 YES; TRY MAINTAIN FRAMING
+F5C2 NEXT BIT-TIME
+
+F5C4 .
+F5C4 READ; CLEAN-UP AND LEAVE
+F5C4 GET CURRENT BYTE
+F5C7 ADD TO CHECKSUM
+F5CA GET RECEIVED DATA IN A-REG
+F5D0 -- RETURN --
+
 
 label F569 LPOUT
 label F56D LPMID
@@ -833,10 +923,6 @@ label F58E SHRT
 label F593 WITHIN
 label F5A6 CHKOVR
 label F5AA NOTOVR
-
-comment F5B4 . 
-comment F5B4 END OF A BIT-TIME
-label F5B4 BITOVR
 
 comment F5C4 . 
 comment F5C4 DATA BYTE READ; CLEAN-UP AND LEAVE

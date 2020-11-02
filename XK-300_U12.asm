@@ -739,16 +739,16 @@ CKLSB   CMPB    $01,X                    *F4B8: E1 01          '..'    MATCH ?
 * -------------------------------------------------------
 * FSET - SET FUNCTION FLAG & DISPLAY "FS"
 * -------------------------------------------------------
-FSET    LDAA    #$01                     *F4C5: 86 01          '..'
-        LDX     #$716D                   *F4C7: CE 71 6D       '.qm'
+FSET    LDAA    #$01                     *F4C5: 86 01          '..'    TO SET FUNCTION FLAG
+        LDX     #$716D                   *F4C7: CE 71 6D       '.qm'   CODE FOR 'FS'
 FOUT    STAA    FNCFL                    *F4CA: B7 E4 3E       '..>'
         STX     DISBUF+4                 *F4CD: FF E4 21       '..!'
-        RTS                              *F4D0: 39             '9'
+        RTS                              *F4D0: 39             '9'     RETURN TO PUT
 * -------------------------------------------------------
 * FCLR - CLEAR FUNCTION FLAG & LAST 2 DIGITS
 * -------------------------------------------------------
-FCLR    CLRA                             *F4D1: 4F             'O'
-        LDX     #$0000                   *F4D2: CE 00 00       '...'
+FCLR    CLRA                             *F4D1: 4F             'O'     TO CLEAR FUNCTION FLAG
+        LDX     #$0000                   *F4D2: CE 00 00       '...'   TO CLEARLAST 2 DIGITS
         BRA     FOUT                     *F4D5: 20 F3          ' .'
 * -------------------------------------------------------
 * TAPES - SOFTWARE CASSETTE TAPE INTERFACE
@@ -786,80 +786,81 @@ DOPCH   LDX     HEXBUF                   *F515: FE E4 2C       '..,'   SAVE ENTE
 *         AND DETRMINE DISTANCE TO IT (TIME)
 *         EXECUTION TIME TUNED
 * -------------------------------------------------------
-FEDGE   LDAA    #$05                     *F521: 86 05          '..'
-        LDAB    PIADP                    *F523: F6 E4 84       '...'
-        NOP                              *F526: 01             '.'
-LOOPF   INCA                             *F527: 4C             'L'
-        LDAB    PIACR                    *F528: F6 E4 85       '...'
-        BPL     LOOPF                    *F52B: 2A FA          '*.'
-        EORB    #$02                     *F52D: C8 02          '..'
-        STAB    PIACR                    *F52F: F7 E4 85       '...'
-        RTS                              *F532: 39             '9'
+FEDGE   LDAA    #$05                     *F521: 86 05          '..'    FOR BSR
+                                         * START COUNT«FIXED (-1)
+        LDAB    PIADP                    *F523: F6 E4 84       '...'   CLEAR INTERRUPT
+        NOP                              *F526: 01             '.'     DELAY
+LOOPF   INCA                             *F527: 4C             'L'     DURATION COUNT IN A-REG
+        LDAB    PIACR                    *F528: F6 E4 85       '...'   CHECK FOR EDGE FOUND
+        BPL     LOOPF                    *F52B: 2A FA          '*.'    IF NOT;KEEP LOOKING
+        EORB    #$02                     *F52D: C8 02          '..'    INVERT EDGE SENSE CONTROL
+        STAB    PIACR                    *F52F: F7 E4 85       '...'   PIA LOOKS FOR OTHER EDGE
+        RTS                              *F532: 39             '9'     --RETURN--
 * -------------------------------------------------------
 * TIN - READ 1 BYTE FROM TAPE
 *       TIME TUNED
 * -------------------------------------------------------
-TIN     LDAA    #$FF                     *F533: 86 FF          '..'
-        STAA    BYTE                     *F535: B7 E4 59       '..Y'
+TIN     LDAA    #$FF                     *F533: 86 FF          '..'    FOR JSR
+        STAA    BYTE                     *F535: B7 E4 59       '..Y'   INITIALIZE BYTE
         CLR     CYCNT                    *F538: 7F E4 5A       '..Z'
-        CLR     CYCNT+1                  *F53B: 7F E4 5B       '..['
-        CLR     GOOD1S                   *F53E: 7F E4 5C       '..\'
-        BSR     FEDGE                    *F541: 8D DE          '..'
-MF543   TST     MF543                    *F543: 7D F5 43       '}.C'
-NOTSH   TST     NOTSH                    *F546: 7D F5 46       '}.F'
-        STAA    OLD                      *F549: B7 E4 5D       '..]'
-        BSR     FEDGE                    *F54C: 8D D3          '..'
-        CMPA    #$1B                     *F54E: 81 1B          '..'
-        BGE     NOTSH                    *F550: 2C F4          ',.'
-LOOPS   STAA    OLD                      *F552: B7 E4 5D       '..]'
-        BSR     FEDGE                    *F555: 8D CA          '..'
-        TAB                              *F557: 16             '.'
-        ADDB    OLD                      *F558: FB E4 5D       '..]'
-        CMPB    #$2B                     *F55B: C1 2B          '.+'
-*  
+        CLR     CYCNT+1                  *F53B: 7F E4 5B       '..['   INIT BIT-TIME COUNT
+        CLR     GOOD1S                   *F53E: 7F E4 5C       '..\'   INIT LOGIC SENSE
+        BSR     FEDGE                    *F541: 8D DE          '..'    [22/21+-5] SYNC TO AN EDGE
+MF543   TST     MF543                    *F543: 7D F5 43       '}.C'   DELAY
+NOTSH   TST     NOTSH                    *F546: 7D F5 46       '}.F'   DELAY
+        STAA    OLD                      *F549: B7 E4 5D       '..]'   "
+        BSR     FEDGE                    *F54C: 8D D3          '..'    [22/21+-5] MEASURE TO NEXT EDGE
+        CMPA    #$1B                     *F54E: 81 1B          '..'    <1.5 SHORT HALF ?
+        BGE     NOTSH                    *F550: 2C F4          ',.'    MUST FIND SHORT FIRST
+LOOPS   STAA    OLD                      *F552: B7 E4 5D       '..]'   SAVE LAST COUNT
+        BSR     FEDGE                    *F555: 8D CA          '..'    [22/21+-5) MEASURE TO NEXT
+        TAB                              *F557: 16             '.'     MAKE EXTRA COPY
+        ADDB    OLD                      *F558: FB E4 5D       '..]'   SUM OF LAST 2
+        CMPB    #$2B                     *F55B: C1 2B          '.+'    >2.33 NOM. SHORTS?
+        BLE     LOOPS                    *F55D: 2F F3          '/.'    KEEP LOOKING FOR LONG
+
 * EDGE SENSE SET-UP TO SENSE TRAILING EDGE OF CYCLES
 * & YOU ARE IN THE MIDDLE OF THE FIRST LONG CYCLE
-        BLE     LOOPS                    *F55D: 2F F3          '/.'
-        JMP     ZF562                    *F55F: 7E F5 62       '~.b'
-ZF562   LDAB    PIADP                    *F562: F6 E4 84       '...'
-        ADDA    #$05                     *F565: 8B 05          '..'
-        BRA     SYNCIN                   *F567: 20 10          ' .'
-LPOUT   LDAA    #$00                     *F569: 86 00          '..'
-        BRA     LPMID                    *F56B: 20 00          ' .'
+        JMP     ZF562                    *F55F: 7E F5 62       '~.b'   DELAY
+ZF562   LDAB    PIADP                    *F562: F6 E4 84       '...'   CLEAR INTERRUPT FLAG
+        ADDA    #$05                     *F565: 8B 05          '..'    COMPENSATE FOR PROCESSING
+        BRA     SYNCIN                   *F567: 20 10          ' .'    BRANCH INTO COUNT LOOP
+LPOUT   LDAA    #$00                     *F569: 86 00          '..'    INIT BIT-TIME COUNT
+        BRA     LPMID                    *F56B: 20 00          ' .'    DELAY
 LPMID   CLR     CYCNT                    *F56D: 7F E4 5A       '..Z'
-        STAA    CYCNT+1                  *F570: B7 E4 5B       '..['
-        CLR     GOOD1S                   *F573: 7F E4 5C       '..\'
-LPIN    LDAA    #$0A                     *F576: 86 0A          '..'
-LOOP1   INCA                             *F578: 4C             'L'
-SYNCIN  LDAB    PIACR                    *F579: F6 E4 85       '...'
-        BPL     LOOP1                    *F57C: 2A FA          '*.'
-        LDAB    PIADP                    *F57E: F6 E4 84       '...'
-MF581   TST     MF581                    *F581: 7D F5 81       '}..'
-        NOP                              *F584: 01             '.'
-        CMPA    #$34                     *F585: 81 34          '.4'
+        STAA    CYCNT+1                  *F570: B7 E4 5B       '..['   ESTABLISH BIT-TIME COUNT
+        CLR     GOOD1S                   *F573: 7F E4 5C       '..\'   INIT LOGIC SENSE
+LPIN    LDAA    #$0A                     *F576: 86 0A          '..'    FIXED TIME (-1)= INIT COUNT
+LOOP1   INCA                             *F578: 4C             'L'     A-REG HOLDS DURATION COUNT
+SYNCIN  LDAB    PIACR                    *F579: F6 E4 85       '...'   EDGE YET?
+        BPL     LOOP1                    *F57C: 2A FA          '*.'    IF NOT;KEEP LOOKING
+        LDAB    PIADP                    *F57E: F6 E4 84       '...'   CLEAR INTERRUPT FLAG
+MF581   TST     MF581                    *F581: 7D F5 81       '}..'   DELAY TO MAKE PASS TIME...
+        NOP                              *F584: 01             '.'     EVEN MULTIPLE OF LOOP TIME
+        CMPA    #$34                     *F585: 81 34          '.4'    <1.4 SHORT ?
         BLT     SHRT                     *F587: 2D 05          '-.'
-        INC     GOOD1S                   *F589: 7C E4 5C       '|.\'
+        INC     GOOD1S                   *F589: 7C E4 5C       '|.\'   GOOD1S POS MEANS 0
         BRA     WITHIN                   *F58C: 20 05          ' .'
-SHRT    DEC     GOOD1S                   *F58E: 7A E4 5C       'z.\'
-        BRA     WITHIN                   *F591: 20 00          ' .'
-WITHIN  LDAB    CYCNT                    *F593: F6 E4 5A       '..Z'
-        ADDA    CYCNT+1                  *F596: BB E4 5B       '..['
-        STAA    CYCNT+1                  *F599: B7 E4 5B       '..['
-        ADCB    #$00                     *F59C: C9 00          '..'
-        STAB    CYCNT                    *F59E: F7 E4 5A       '..Z'
-        BNE     CHKOVR                   *F5A1: 26 03          '&.'
-        NOP                              *F5A3: 01             '.'
-        BRA     NOTOVR                   *F5A4: 20 04          ' .'
-CHKOVR  CMPA    #$17                     *F5A6: 81 17          '..'
-        BGE     BITOVR                   *F5A8: 2C 0A          ',.'
-NOTOVR  LDAB    #$05                     *F5AA: C6 05          '..'
-ZF5AC   DECB                             *F5AC: 5A             'Z'
-        BPL     ZF5AC                    *F5AD: 2A FD          '*.'
+SHRT    DEC     GOOD1S                   *F58E: 7A E4 5C       'z.\'   GOODIS NEG MEANS 1
+        BRA     WITHIN                   *F591: 20 00          ' .'    DELAY
+WITHIN  LDAB    CYCNT                    *F593: F6 E4 5A       '..Z'   HIGH BYTE
+        ADDA    CYCNT+1                  *F596: BB E4 5B       '..['   ADD CURRENT TO BIT-TIME COUNT
+        STAA    CYCNT+1                  *F599: B7 E4 5B       '..['   UPDATE
+        ADCB    #$00                     *F59C: C9 00          '..'    ADD IN CARRY
+        STAB    CYCNT                    *F59E: F7 E4 5A       '..Z'   UPDATE HIGH BYTE
+        BNE     CHKOVR                   *F5A1: 26 03          '&.'    IF CARRY; BIT MAY BE OVER
+        NOP                              *F5A3: 01             '.'     DELAY
+        BRA     NOTOVR                   *F5A4: 20 04          ' .'    BIT NOT OVER
+CHKOVR  CMPA    #$17                     *F5A6: 81 17          '..'    (279-256)
+        BGE     ZF5B4                    *F5A8: 2C 0A          ',.'    BIT-TIME EXPIRED
+NOTOVR  LDAB    #$05                     *F5AA: C6 05          '..'    [38] 2
+ZF5AC   DECB                             *F5AC: 5A             'Z'     "    2
+        BPL     ZF5AC                    *F5AD: 2A FD          '*.'    "    4
         JMP     ZF5B2                    *F5AF: 7E F5 B2       '~..'
 ZF5B2   BRA     LPIN                     *F5B2: 20 C2          ' .'
-*  
+
 * END OF A BIT-TIME
-BITOVR  ASL     GOOD1S                   *F5B4: 78 E4 5C       'x.\'
+ZF5B4   ASL     GOOD1S                   *F5B4: 78 E4 5C       'x.\'
         ROR     BYTE                     *F5B7: 76 E4 59       'v.Y'
         BCC     TINDUN                   *F5BA: 24 08          '$.'
         CMPA    #$5D                     *F5BC: 81 5D          '.]'
