@@ -814,22 +814,22 @@ lcomment F51E WHEN DONE
 comment F521 -------------------------------------------------------
 comment F521 FEDGE - ROUTINE TO LOCATE AN EDGE (POS OR NEG)
 comment F521 .        AND DETRMINE DISTANCE TO IT (TIME)
-comment F521 .        EXECUTION TIME TUNED
+comment F521 .             EXECUTION TIME TUNED
 comment F521 -------------------------------------------------------
 
 label F521 FEDGE
 label F527 LOOPF
 
-lcomment F521 FOR BSR
-lcomment F521 START COUNT«FIXED (-1)
-lcomment F523 CLEAR INTERRUPT
-lcomment F526 DELAY
-lcomment F527 DURATION COUNT IN A-REG
-lcomment F528 CHECK FOR EDGE FOUND
-lcomment F52B IF NOT;KEEP LOOKING
-lcomment F52D INVERT EDGE SENSE CONTROL
-lcomment F52F PIA LOOKS FOR OTHER EDGE
-lcomment F532 --RETURN--
+comment F521 8 FOR BSR
+lcomment F521 2 START COUNT«FIXED (-1)
+lcomment F523 4 CLEAR INTERRUPT
+lcomment F526 2 DELAY
+lcomment F527 2 DURATION COUNT IN A-REG
+lcomment F528 4 CHECK FOR EDGE FOUND
+lcomment F52B 4 IF NOT;KEEP LOOKING
+lcomment F52D 2 INVERT EDGE SENSE CONTROL
+lcomment F52F 5 PIA LOOKS FOR OTHER EDGE
+lcomment F532 5 --RETURN--
 
 comment F533 -------------------------------------------------------
 comment F533 TIN - READ 1 BYTE FROM TAPE
@@ -839,79 +839,85 @@ label F533 TIN
 label F546 NOTSH
 label F552 LOOPS
 
-lcomment F533 FOR JSR
-lcomment F535 INITIALIZE BYTE
-lcomment F53B INIT BIT-TIME COUNT
-lcomment F53E INIT LOGIC SENSE
+comment F533 8 FOR JSR
+lcomment F535 5 INITIALIZE BYTE
+lcomment F538 6
+lcomment F53B 6 INIT BIT-TIME COUNT
+lcomment F53E 6 INIT LOGIC SENSE
 lcomment F541 [22/21+-5] SYNC TO AN EDGE
-lcomment F543 DELAY
-lcomment F546 DELAY
-lcomment F549 "
+lcomment F543 6 DELAY
+lcomment F546 6 DELAY
+lcomment F549 5 "
 lcomment F54C [22/21+-5] MEASURE TO NEXT EDGE
-lcomment F54E <1.5 SHORT HALF ?
-lcomment F550 MUST FIND SHORT FIRST
-lcomment F552 SAVE LAST COUNT
+lcomment F54E 2 <1.5 SHORT HALF ?
+lcomment F550 4 MUST FIND SHORT FIRST
+lcomment F552 5 SAVE LAST COUNT
 lcomment F555 [22/21+-5) MEASURE TO NEXT
-lcomment F557 MAKE EXTRA COPY
-lcomment F558 SUM OF LAST 2
-lcomment F55B >2.33 NOM. SHORTS?
-lcomment F55D KEEP LOOKING FOR LONG
+lcomment F557 2 MAKE EXTRA COPY
+lcomment F558 4 SUM OF LAST 2
+lcomment F55B 2 >2.33 NOM. SHORTS?
+lcomment F55D 4 KEEP LOOKING FOR LONG
 
 
 comment F55F .
 comment F55F EDGE SENSE SET-UP TO SENSE TRAILING EDGE OF CYCLES
 comment F55F & YOU ARE IN THE MIDDLE OF THE FIRST LONG CYCLE
 
-lcomment F55F DELAY
-lcomment F562 CLEAR INTERRUPT FLAG
-lcomment F565 COMPENSATE FOR PROCESSING
-lcomment F567 BRANCH INTO COUNT LOOP
-lcomment F569 INIT BIT-TIME COUNT
-lcomment F56B DELAY
-lcomment F570 ESTABLISH BIT-TIME COUNT
-lcomment F573 INIT LOGIC SENSE
-lcomment F576 FIXED TIME (-1)= INIT COUNT
-lcomment F578 A-REG HOLDS DURATION COUNT
-lcomment F579 EDGE YET?
-lcomment F57C IF NOT;KEEP LOOKING
-lcomment F57E CLEAR INTERRUPT FLAG
-lcomment F581 DELAY TO MAKE PASS TIME...
-lcomment F584 EVEN MULTIPLE OF LOOP TIME
-lcomment F585 <1.4 SHORT ?
-lcomment F589 GOOD1S POS MEANS 0
-lcomment F58E GOODIS NEG MEANS 1
-lcomment F591 DELAY
-lcomment F593 HIGH BYTE
-lcomment F596 ADD CURRENT TO BIT-TIME COUNT
-lcomment F599 UPDATE
-lcomment F59C ADD IN CARRY
-lcomment F59E UPDATE HIGH BYTE
-lcomment F5A1 IF CARRY; BIT MAY BE OVER
-lcomment F5A3 DELAY
-lcomment F5A4 BIT NOT OVER
-lcomment F5A6 (279-256)
-lcomment F5A8 BIT-TIME EXPIRED
+lcomment F55F 3 DELAY
+lcomment F562 4 CLEAR INTERRUPT FLAG
+lcomment F565 2 COMPENSATE FOR PROCESSING
+lcomment F567 4 BRANCH INTO COUNT LOOP
+lcomment F569 2 INIT BIT-TIME COUNT
+lcomment F56B 4 DELAY
+lcomment F56D 6
+lcomment F570 5 ESTABLISH BIT-TIME COUNT
+lcomment F573 6 INIT LOGIC SENSE
+lcomment F576 2 FIXED TIME (-1)= INIT COUNT
+lcomment F578 2 A-REG HOLDS DURATION COUNT
+lcomment F579 4 EDGE YET?
+lcomment F57C 4 IF NOT;KEEP LOOKING
+lcomment F57E 4 CLEAR INTERRUPT FLAG
+lcomment F581 6 DELAY TO MAKE PASS TIME...
+lcomment F584 2 EVEN MULTIPLE OF LOOP TIME
+lcomment F585 2 <1.4 SHORT ?
+lcomment F587 4
+lcomment F589 6 GOOD1S POS MEANS 0
+lcomment F58C 4
+lcomment F58E 6 GOODIS NEG MEANS 1
+lcomment F591 4 DELAY
+lcomment F593 4 HIGH BYTE
+lcomment F596 4 ADD CURRENT TO BIT-TIME COUNT
+lcomment F599 5 UPDATE
+lcomment F59C 2 ADD IN CARRY
+lcomment F59E 5 UPDATE HIGH BYTE
+lcomment F5A1 4 IF CARRY; BIT MAY BE OVER
+lcomment F5A3 2 DELAY
+lcomment F5A4 4 BIT NOT OVER
+lcomment F5A6 2 (279-256)
+lcomment F5A8 4 BIT-TIME EXPIRED
 lcomment F5AA [38] 2
 lcomment F5AC "    2
 lcomment F5AD "    4
+lcomment F5AF "    3
+lcomment F5B2 "    4
 
 comment  F5B4 .
 comment  F5B4 END OF A BIT-TIME
+lcomment F5B4 6 LOGIC SENSE TO CARRY
+lcomment F5B7 6 SHIFT NEW BIT INTO BYTE
+lcomment F5BA 4 DONE WHEN START FALLS OUT
+lcomment F5BC 2 >2.5 NOM. SHORTS ?
+lcomment F5BE 4 NO; BIT-TIME STARTS AT 0
+lcomment F5C0 2 YES; TRY MAINTAIN FRAMING
+lcomment F5C2 4 NEXT BIT-TIME
 
-F5B4 LOGIC SENSE TO CARRY
-F5B7 SHIFT NEW BIT INTO BYTE
-F5BA DONE WHEN START FALLS OUT
-F5BC >2.5 NOM. SHORTS ?
-F5BE NO; BIT-TIME STARTS AT 0
-F5C0 YES; TRY MAINTAIN FRAMING
-F5C2 NEXT BIT-TIME
-
-F5C4 .
-F5C4 READ; CLEAN-UP AND LEAVE
-F5C4 GET CURRENT BYTE
-F5C7 ADD TO CHECKSUM
-F5CA GET RECEIVED DATA IN A-REG
-F5D0 -- RETURN --
+comment F5C4 .
+comment F5C4 DATA BYTE READ; CLEAN-UP AND LEAVE
+lcomment F5C4 4 GET CURRENT BYTE
+lcomment F5C7 4 ADD TO CHECKSUM
+lcomment F5CA 5 UPDATE
+lcomment F5CD 4 GET RECEIVED DATA IN A-REG
+lcomment F5D0 5 -- RETURN --
 
 
 label F569 LPOUT
@@ -924,8 +930,6 @@ label F593 WITHIN
 label F5A6 CHKOVR
 label F5AA NOTOVR
 
-comment F5C4 . 
-comment F5C4 DATA BYTE READ; CLEAN-UP AND LEAVE
 label F5C4 TINDUN
 
 comment F5D1 -------------------------------------------------------
@@ -936,6 +940,18 @@ comment F5D1 -------------------------------------------------------
 label F5D1 BIT1
 label F5D3 LOOPB1
 
+comment F5D1 8 FOR BSR
+lcomment F5D1 2 # SHORT H-CYCS (-1)
+lcomment F5D3 [20/5] TRANSMIT EDGE
+lcomment F5D6 [152] 2 DELAY
+lcomment F5D8 " 2
+lcomment F5D9 " 4
+lcomment F5DB 4 DELAY
+lcomment F5DD 2 1 LESS HALF CYCLE
+lcomment F5DE 4 TILL 2ND LAST EDGE
+lcomment F5E0 [20/5] 15TH EDGE IN BIT-TIME
+lcomment F5E3 5 --RETURN-- 177 CYC TO NXT
+
 comment F5E4 -------------------------------------------------------
 comment F5E4 BIT0 - SEND A LOGIC 0 BIT-TIME
 comment F5E4 .       LESS 177 CLOCK CYCLES
@@ -944,12 +960,38 @@ comment F5E4 -------------------------------------------------------
 label F5E4 BIT0
 label F5E6 LOOPB0
 
+comment F5E4 8 FOR BSR
+
+lcomment F5E4 2 # LONG H-CYCS (-1)
+lcomment F5E6 [20/5] TRANSMIT EDGE
+lcomment F5E9 [344] 2 DELAY
+lcomment F5EB " 2
+lcomment F5EC " 4
+lcomment F5EE 2 DELAY
+lcomment F5EF 2 1 LESS TO GO
+lcomment F5F0 4 TILL 2ND LAST EDGE
+lcomment F5F2 [20/5] 7TH EDGE IN BIT-TIME
+lcomment F5F5 [182] 2 DELAY
+lcomment F5F7 " 2
+lcomment F5F8 " 4
+lcomment F5FA 3 DELAY
+lcomment F5FD 2 "
+lcomment F5FE 5 --RETURN-- 177 CYC TO NXT
+
+
 comment F5FF -------------------------------------------------------
 comment F5FF INVRT - ROUTINE TO TRANSMIT A RISING
 comment F5FF .        OR FALLING EDGE TO THE CASSETTE
 comment F5FF .            TIME TUNED
 comment F5FF -------------------------------------------------------
 label F5FF INVRT
+
+comment F5FF 9 FOR JSR
+lcomment F5FF 2
+lcomment F601 4
+lcomment F604 5 INVERT OUTPUT
+lcomment F607 5 -- RETURN --
+
 
 comment F608 -------------------------------------------------------
 comment F608 PNCHB - PUNCH 1 BYTE TO TAPE. INCLUDES
@@ -962,6 +1004,27 @@ label F615 LPPOUT
 label F625 DO1
 label F62A ENDBIT
 
+comment F608 9 FOR JSR
+lcomment F608 5 SAVE BYTE TO PUNCH
+lcomment F60B [30/<177>] SEND START BIT
+lcomment F60D 2 # BITS IN BYTE (+2 STOP) (-1)
+lcomment F60F 5 ESTABLISH BIT COUNT
+lcomment F612 6 DELAY
+lcomment F615 [122] 2 DELAY
+lcomment F617 " 2
+lcomment F618 " 4
+lcomment F61A 2 SO LAST 2 BIT TIMES - I'S
+lcomment F61B 6 LOGIC SENSE TO CARRY
+lcomment F61E 4 IF LOGIC 1
+lcomment F620 [30/<177>] XMIT A 0 BIT-TIME
+lcomment F622 3
+lcomment F625 [30/<177>] XMIT A 1 BIT-TIME
+lcomment F627 3 MATCHING DELAY
+lcomment F62A 6 1 LESS BIT-TIME TO GO
+lcomment F62D 4 CONTINUE FOR BYTE+STOP BITS
+lcomment F627 5 -- RETURN -- 159 CYC TO NXT
+
+
 comment F630 -------------------------------------------------------
 comment F630 PUNCH - FORMAT AND PUNCH A CASSETTE DATA FILE
 comment F630 .        INCLUDING LEADER AND CHECKSUM
@@ -972,6 +1035,72 @@ label F633 LLOOP
 label F651 ADLOOP
 label F66E DLOOP
 label F68D DUNDAT
+
+comment F630 9 FOR JSR
+lcomment F630 3 COUNT FOR 30-SEC LEADER
+lcomment F633 2 LEADER CHARACTER
+lcomment F635 [104] 2 DELAY
+lcomment F637 " 2
+lcomment F638 " 4
+lcomment F63A [44/<159>] PUNCH A LEADER CHAR
+lcomment F63D 4
+lcomment F63E 4 CONTINUE FOR 30-SEC
+
+comment F640 .
+comment F640 LEADER FINISHED
+
+lcomment F640 2 BLOCH START CHAR
+lcomment F642 [104] 2 DELAY
+lcomment F644 " 2
+lcomment F645 " 4
+lcomment F647 [44/<159>] PUNCH START CHAR
+lcomment F64A 2 DELAY
+lcomment F64B 6 INITIALIZE CHECKSUM
+lcomment F64E 3 POINT AT FIRST ADDR BYTE0LT
+lcomment F653 2 EXTRA COPY
+lcomment F654 4 ADDR IS PART OF CHECKSUM
+lcomment F657 5 UPDATE
+lcomment F65A 2 DELAY
+lcomment F65B [86] 2
+lcomment F65D " 2
+lcomment F65E " 4
+lcomment F660 [44/<159>] PUNCH ADDR BYTE
+lcomment F663 4 ADV TO NXT ADDR BYTE
+lcomment F664 3 DONE YET ?
+lcomment F667 4 CONTINUE FOR 4 ADDR CHARS
+
+comment F669 .
+comment F669 READY TO PUNCH DATA
+
+lcomment F669 2 DELAY
+lcomment F66A 2 DELAY
+lcomment F66B 5 GET BEG ADDR OF DATA
+lcomment F66E 5 GET A DATA BYTE
+lcomment F670 2 EXTRA COPY
+lcomment F671 4 ADD TO CHECKSUM
+lcomment F674 5 UPDATE
+lcomment F677 5 DELAY
+lcomment F67A [74] 2
+lcomment F67C " 2
+lcomment F67D " 4
+lcomment F67F [44/<159>] PUNCH DATA BYTE
+lcomment F682 3 DELAY
+lcomment F685 5 SEE IF DONE
+lcomment F688 4 IF FINISHED
+lcomment F68A 4 ELSE ADV TO NXT
+lcomment F68B 4 AND CONTINUE LOOP
+
+comment F68D .
+comment F68D READY TO PUNCH CHECKSUM
+
+lcomment F68D 6 SUM INCL, CHECK WILL BE
+lcomment F690 4 PREPARE TO SEND
+lcomment F693 [128] 2
+lcomment F695 " 2
+lcomment F696 " 4
+lcomment F698 [44/<159>] PUNCH CHECKSUM
+lcomment F69B -- RETURN --
+
 
 comment F69C -------------------------------------------------------
 comment F69C LOAD - LOAD OR VERIFY A DATA FILE FROM
