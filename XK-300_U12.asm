@@ -1016,71 +1016,79 @@ ZF695   DECB                             *F695: 5A             'Z'     " 2
 * LOAD - LOAD OR VERIFY A DATA FILE FROM
 *        CASSETTE TAPE
 * -------------------------------------------------------
-LOAD    JSR     TIN                      *F69C: BD F5 33       '..3'
-        CMPA    #$53                     *F69F: 81 53          '.S'
-        BNE     LOAD                     *F6A1: 26 F9          '&.'
-        LDX     #BEGAD                   *F6A3: CE E4 60       '..`'
-        CLR     CHKSM                    *F6A6: 7F E4 5E       '..^'
-LOPAD   JSR     TIN                      *F6A9: BD F5 33       '..3'
-        STAA    ,X                       *F6AC: A7 00          '..'
-        INX                              *F6AE: 08             '.'
-        CPX     #BEGAD+4                 *F6AF: 8C E4 64       '..d'
-        BNE     LOPAD                    *F6B2: 26 F5          '&.'
-        LDX     BEGAD                    *F6B4: FE E4 60       '..`'
-LOPDAT  JSR     TIN                      *F6B7: BD F5 33       '..3'
-        TST     FNCFL                    *F6BA: 7D E4 3E       '}.>'
-        BEQ     VERF                     *F6BD: 27 04          ''.'
-        STAA    ,X                       *F6BF: A7 00          '..'
-        BRA     LOPBOT                   *F6C1: 20 04          ' .'
-VERF    CMPA    ,X                       *F6C3: A1 00          '..'
-        BNE     BAD                      *F6C5: 26 11          '&.'
-LOPBOT  CPX     ENDAD                    *F6C7: BC E4 62       '..b'
-        BEQ     CHKCHK                   *F6CA: 27 03          ''.'
-        INX                              *F6CC: 08             '.'
-        BRA     LOPDAT                   *F6CD: 20 E8          ' .'
-CHKCHK  JSR     TIN                      *F6CF: BD F5 33       '..3'
+* 9 FOR A JSR
+LOAD    JSR     TIN                      *F69C: BD F5 33       '..3'   [56/101+-5] READ A BYTE FROM TAPE
+        CMPA    #$53                     *F69F: 81 53          '.S'    2 BLOCK START ?
+        BNE     LOAD                     *F6A1: 26 F9          '&.'    4 NO; TRY AGAIN
+
+* BLOCK START FOUND; NOW READ BEG & END ADDR'S
+        LDX     #BEGAD                   *F6A3: CE E4 60       '..`'   3 POINT AT ADDR AREA
+        CLR     CHKSM                    *F6A6: 7F E4 5E       '..^'   6 INITIALIZE CHECKSUM
+LOPAD   JSR     TIN                      *F6A9: BD F5 33       '..3'   [56/101+-5] GET ADDR CHAR
+        STAA    ,X                       *F6AC: A7 00          '..'    6 STORE RECIEVED ADDR CHAR
+        INX                              *F6AE: 08             '.'     4 POINT AT NEXT ADDR LOC
+        CPX     #BEGAD+4                 *F6AF: 8C E4 64       '..d'   3 DONE GETTING ADDR'S ?
+        BNE     LOPAD                    *F6B2: 26 F5          '&.'    4 NO; CONTINUE
+
+* READY TO READ DATA
+        LDX     BEGAD                    *F6B4: FE E4 60       '..`'   5 POINT TO WHERE DATA GOES
+LOPDAT  JSR     TIN                      *F6B7: BD F5 33       '..3'   [56/101+-5] GET DATA FROM TAPE
+        TST     FNCFL                    *F6BA: 7D E4 3E       '}.>'   6 SEE IF LOAD OR VERF ?
+        BEQ     VERF                     *F6BD: 27 04          ''.'    4 IF NOT SET; IT'S VERF
+        STAA    ,X                       *F6BF: A7 00          '..'    6 IT'S LOAD SO STORE DATA
+        BRA     LOPBOT                   *F6C1: 20 04          ' .'    4 GO TO BOTTOM OF LOOP
+VERF    CMPA    ,X                       *F6C3: A1 00          '..'    5 JUST COMPARE TO MEM
+        BNE     BAD                      *F6C5: 26 11          '&.'    4 IF NON-COMPARE; SIGNAL ERROR
+LOPBOT  CPX     ENDAD                    *F6C7: BC E4 62       '..b'   5 DONE ?
+        BEQ     CHKCHK                   *F6CA: 27 03          ''.'    4 IF SO; CHECK CHECKSUM
+        INX                              *F6CC: 08             '.'     4 POINT AT NEXT DATA LO
+        BRA     LOPDAT                   *F6CD: 20 E8          ' .'    4 AND CONTINUE LOAD/VERF
+
+* DATA FINISHED... NOW CHECK CHECKSUM
+CHKCHK  JSR     TIN                      *F6CF: BD F5 33       '..3'   [56/105+-5] GET CHECKSUM
         TST     CHKSM                    *F6D2: 7D E4 5E       '}.^'
-        BNE     BAD                      *F6D5: 26 01          '&.'
-        RTS                              *F6D7: 39             '9'
-BAD     STX     UX                       *F6D8: FF E4 34       '..4'
-        STAA    UA                       *F6DB: B7 E4 33       '..3'
-        TST     FNCFL                    *F6DE: 7D E4 3E       '}.>'
+        BNE     BAD                      *F6D5: 26 01          '&.'    4 IF NOT ZERO; BAD CHECKSUM
+        RTS                              *F6D7: 39             '9'     5 -- RETURN --
+BAD     STX     UX                       *F6D8: FF E4 34       '..4'   6 SO USER CAN SEE END ADDR
+        STAA    UA                       *F6DB: B7 E4 33       '..3'   5 SO USER CAN CHECK IT
+        TST     FNCFL                    *F6DE: 7D E4 3E       '}.>'   CHECK FOR ERROR OVERRIDE
         BPL     STOP                     *F6E1: 2A 01          '*.'
-        RTS                              *F6E3: 39             '9'
-STOP    LDX     #$7177                   *F6E4: CE 71 77       '.qw'
+        RTS                              *F6E3: 39             '9'     -- RETURN -- NO MESSAGE
+STOP    LDX     #$7177                   *F6E4: CE 71 77       '.qw'   "FA"
         STX     DISBUF                   *F6E7: FF E4 1D       '...'
-        LDX     #$0638                   *F6EA: CE 06 38       '..8'
+        LDX     #$0638                   *F6EA: CE 06 38       '..8'   "IL"
         STX     DISBUF+2                 *F6ED: FF E4 1F       '...'
-        JMP     ALTBAD                   *F6F0: 7E F7 35       '~.5'
+        JMP     ALTBAD                   *F6F0: 7E F7 35       '~.5'   PRINT "FAIL ??"
 * -------------------------------------------------------
 * GO - GO TO USER PROGRAM
 * -------------------------------------------------------
-GO      TST     ROLPAS                   *F6F3: 7D E4 23       '}.#'
-        BNE     CONTIN                   *F6F6: 26 06          '&.'
-        LDX     HEXBUF                   *F6F8: FE E4 2C       '..,'
-        STX     UPC                      *F6FB: FF E4 36       '..6'
-CONTIN  LDX     #GO1                     *F6FE: CE F7 0B       '...'
-ROI     STX     ROIBAK                   *F701: FF E4 39       '..9'
+GO      TST     ROLPAS                   *F6F3: 7D E4 23       '}.#'   HEX DATA PRIOR TO 'GO' ?
+        BNE     CONTIN                   *F6F6: 26 06          '&.'    IF NOT; ASSUME UPC
+        LDX     HEXBUF                   *F6F8: FE E4 2C       '..,'   GET ENTERED VALUE
+        STX     UPC                      *F6FB: FF E4 36       '..6'   STORE AS GO ADDR
+CONTIN  LDX     #GO1                     *F6FE: CE F7 0B       '...'   RETURN ADDR AFTER ROI
+ROI     STX     ROIBAK                   *F701: FF E4 39       '..9'   SAVE IN RAM
         LDAA    #$01                     *F704: 86 01          '..'
-        STAA    ROIFLG                   *F706: B7 E4 38       '..8'
-        BRA     GOTO                     *F709: 20 03          ' .'
-GO1     JSR     INBKS                    *F70B: BD F4 5F       '.._'
-GOTO    LDS     USP                      *F70E: BE E4 2F       '../'
-        LDAA    #$55                     *F711: 86 55          '.U'
+        STAA    ROIFLG                   *F706: B7 E4 38       '..8'   SIGNAL SINGLE TRACE
+        BRA     GOTO                     *F709: 20 03          ' .'    EXIT (NO BREAKS)
+* COME HERE AFTER RUNNING ONE INSTRUCTION
+GO1     JSR     INBKS                    *F70B: BD F4 5F       '.._'   INSTALL BREAKPOINTS
+GOTO    LDS     USP                      *F70E: BE E4 2F       '../'   GET USER'S STACK POINTER
+        LDAA    #$55                     *F711: 86 55          '.U'    START TEST FOR EXISTANCE OF
         PSHA                             *F713: 36             '6'
         PULA                             *F714: 32             '2'
-        CMPA    #$55                     *F715: 81 55          '.U'
-        BNE     BADSTK                   *F717: 26 10          '&.'
-        LDAA    UPC+1                    *F719: B6 E4 37       '..7'
-        PSHA                             *F71C: 36             '6'
-        LDAA    UPC                      *F71D: B6 E4 36       '..6'
+        CMPA    #$55                     *F715: 81 55          '.U'    DID IT GO ?
+        BNE     BADSTK                   *F717: 26 10          '&.'    NO; STACK IS BAD
+        LDAA    UPC+1                    *F719: B6 E4 37       '..7'   LOW BYTE
+        PSHA                             *F71C: 36             '6'     STACK FOR RTS
+        LDAA    UPC                      *F71D: B6 E4 36       '..6'   HIGH BYTE
         PSHA                             *F720: 36             '6'
-        LDAA    #$AA                     *F721: 86 AA          '..'
+        LDAA    #$AA                     *F721: 86 AA          '..'    SEE IF STACK STILL OK
         PSHA                             *F723: 36             '6'
         PULA                             *F724: 32             '2'
         CMPA    #$AA                     *F725: 81 AA          '..'
-        BEQ     GOEXIT                   *F727: 27 1E          ''.'
-BADSTK  FCB     $CE                      *F729: CE             '.'
+        BEQ     GOEXIT                   *F727: 27 1E          ''.'    OK; FINAL EXIT SEQ
+BADSTK  FCB     $CE                      *F729: CE             '.'     MESSAGE "-SP- ??" TO 7-SEGS
         NEGA                             *F72A: 40             '@'
         TST     $FF,X                    *F72B: 6D FF          'm.'
         ANDB    $1D,X                    *F72D: E4 1D          '..'
@@ -1088,86 +1096,91 @@ BADSTK  FCB     $CE                      *F729: CE             '.'
         STX     DISBUF+2                 *F732: FF E4 1F       '...'
 ALTBAD  LDX     #$5353                   *F735: CE 53 53       '.SS'
         STX     DISBUF+4                 *F738: FF E4 21       '..!'
-        LDS     #STKTOP                  *F73B: 8E E4 7E       '..~'
-        LDX     #DIDDLE                  *F73E: CE F0 A2       '...'
-        STX     MNPTR                    *F741: FF E4 19       '...'
-        JMP     PUT                      *F744: 7E F0 BB       '~..'
-GOEXIT  LDX     UX                       *F747: FE E4 34       '..4'
+        LDS     #STKTOP                  *F73B: 8E E4 7E       '..~'   INIT TO GOOD AREA
+        LDX     #DIDDLE                  *F73E: CE F0 A2       '...'   DO-NNOTHING SUB
+        STX     MNPTR                    *F741: FF E4 19       '...'   STORE AS MAIN PROG
+        JMP     PUT                      *F744: 7E F0 BB       '~..'   ONLY ESCAPE IS RESET OR 'EX
+
+GOEXIT  LDX     UX                       *F747: FE E4 34       '..4'   RECOVER USER STATUS
         LDAB    UB                       *F74A: F6 E4 32       '..2'
         LDAA    UA                       *F74D: B6 E4 33       '..3'
-        PSHA                             *F750: 36             '6'
+        PSHA                             *F750: 36             '6'     TEMP SAVE ON USER'S STACK
         LDAA    #$01                     *F751: 86 01          '..'
-        STAA    UPROG                    *F753: B7 E4 3B       '..;'
-        TST     ROIFLG                   *F756: 7D E4 38       '}.8'
-        BEQ     ABSOUT                   *F759: 27 12          ''.'
+        STAA    UPROG                    *F753: B7 E4 3B       '..;'   FLAG SIGNALS IN USER PROG
+        TST     ROIFLG                   *F756: 7D E4 38       '}.8'   TRACE EXIT ?
+        BEQ     ABSOUT                   *F759: 27 12          ''.'    IF NOT;; JUST GET GOING
         LDAA    #$3C                     *F75B: 86 3C          '.<'
-        STAA    PIACR                    *F75D: B7 E4 85       '...'
+        STAA    PIACR                    *F75D: B7 E4 85       '...'   HOLDS TRACE COUNTER RESET
         LDAA    PIADPB                   *F760: B6 E4 86       '...'
         LDAA    #$0E                     *F763: 86 0E          '..'
-        STAA    PIACRB                   *F765: B7 E4 87       '...'
+        STAA    PIACRB                   *F765: B7 E4 87       '...'   ENABLE TRACE NMI
         LDAA    #$34                     *F768: 86 34          '.4'
-        STAA    PIACR                    *F76A: B7 E4 85       '...'
-ABSOUT  LDAA    UCC                      *F76D: B6 E4 31       '..1'
-        TAP                              *F770: 06             '.'
-        PULA                             *F771: 32             '2'
-        RTS                              *F772: 39             '9'
+        STAA    PIACR                    *F76A: B7 E4 85       '...'   RELEASE TIMER
+ABSOUT  LDAA    UCC                      *F76D: B6 E4 31       '..1'   TIMED EXIT TO USER PROG
+        TAP                              *F770: 06             '.'     SET USER COND CODES
+        PULA                             *F771: 32             '2'     GET USER A-REG; DON'T MESS 'CC'
+        RTS                              *F772: 39             '9'     --- EXIT TO USER PROG ---
 * -------------------------------------------------------
 * INTERRUPTS - INTERRUPT HANDLING ROUTINES
 * -------------------------------------------------------
-NMINT   NOP                              *F773: 01             '.'
+NMINT   NOP                              *F773: 01             '.'     SET IRQ FLAG
         SEI                              *F774: 0F             '.'
-        LDAA    #$04                     *F775: 86 04          '..'
-        STAA    PIACRB                   *F777: B7 E4 87       '...'
-        LDAA    PIACRB                   *F77A: B6 E4 87       '...'
-        BPL     SAVE                     *F77D: 2A 12          '*.'
-        JSR     GET                      *F77F: BD F0 4E       '..N'
-        CMPA    #$81                     *F782: 81 81          '..'
+        LDAA    #$04                     *F775: 86 04          '..'    PIA DISABLE CODE
+        STAA    PIACRB                   *F777: B7 E4 87       '...'   DISABLE NMI'S DURING SERVICE
+        LDAA    PIACRB                   *F77A: B6 E4 87       '...'   READ INT STATUS
+        BPL     SAVE                     *F77D: 2A 12          '*.'    IF RETURN FROM TRACE
+* KEY CLOSURE CAUSED NMI
+        JSR     GET                      *F77F: BD F0 4E       '..N'   FIND AND DEBOUNCE KEY
+        CMPA    #$81                     *F782: 81 81          '..'    'EX' ?
         BEQ     ABORT                    *F784: 27 03          ''.'
-        BSR     ENNMI                    *F786: 8D 26          '.&'
-        RTI                              *F788: 3B             ';'
-ABORT   TST     UPROG                    *F789: 7D E4 3B       '}.;'
-        BNE     SAVE                     *F78C: 26 03          '&.'
-        JMP     PROMPT                   *F78E: 7E F0 24       '~.$'
-SAVE    STS     USP                      *F791: BF E4 2F       '../'
-        LDS     #STKTOP                  *F794: 8E E4 7E       '..~'
-        BSR     SVSTAT                   *F797: 8D 23          '.#'
-        BSR     ENNMI                    *F799: 8D 13          '..'
-        CLR     UPROG                    *F79B: 7F E4 3B       '..;'
-        TST     ROIFLG                   *F79E: 7D E4 38       '}.8'
-        BEQ     NOTROI                   *F7A1: 27 08          ''.'
-        CLR     ROIFLG                   *F7A3: 7F E4 38       '..8'
-        LDX     ROIBAK                   *F7A6: FE E4 39       '..9'
-        JMP     ,X                       *F7A9: 6E 00          'n.'
-NOTROI  JMP     REGBEG                   *F7AB: 7E F2 CA       '~..'
-ENNMI   LDAA    PIADPB                   *F7AE: B6 E4 86       '...'
-        LDAA    #$07                     *F7B1: 86 07          '..'
-        STAA    PIACRB                   *F7B3: B7 E4 87       '...'
+        BSR     ENNMI                    *F786: 8D 26          '.&'    RE-ENABLE INTERRUPT
+        RTI                              *F788: 3B             ';'     --- DONE: RETURN ---
+* 'EX' KEY; PROMPT OR ABORT
+ABORT   TST     UPROG                    *F789: 7D E4 3B       '}.;'   ESCAPE FROM USER PROG ?
+        BNE     SAVE                     *F78C: 26 03          '&.'    IF ESCAPE FROM USER PROG
+        JMP     PROMPT                   *F78E: 7E F0 24       '~.$'   --- ALREADY IN OP-SYST ---
+SAVE    STS     USP                      *F791: BF E4 2F       '../'   SAVE POINTER TO USER REGS
+        LDS     #STKTOP                  *F794: 8E E4 7E       '..~'   INIT TO SYST AREA
+        BSR     SVSTAT                   *F797: 8D 23          '.#'    RECOVER STATUS AT 'EX' TIME
+        BSR     ENNMI                    *F799: 8D 13          '..'    RE-ENABLE KEY NMI
+        CLR     UPROG                    *F79B: 7F E4 3B       '..;'   SIGNAL NOT IN USER PROGRAM
+        TST     ROIFLG                   *F79E: 7D E4 38       '}.8'   IS THIS RETURN FROM TRACE ?
+        BEQ     NOTROI                   *F7A1: 27 08          ''.'    IF NOT
+        CLR     ROIFLG                   *F7A3: 7F E4 38       '..8'   SIGNAL NOT ROI NOW
+        LDX     ROIBAK                   *F7A6: FE E4 39       '..9'   GET RETURN ADDR
+        JMP     ,X                       *F7A9: 6E 00          'n.'    AND RETURN FROM ROI
+NOTROI  JMP     REGBEG                   *F7AB: 7E F2 CA       '~..'   --- TO REG DISPLAY ---
+
+
+ENNMI   LDAA    PIADPB                   *F7AE: B6 E4 86       '...'   DUMMY READ TO CLEAR FLAGS
+        LDAA    #$07                     *F7B1: 86 07          '..'    ENABLE KEY INTERRUPT CODE
+        STAA    PIACRB                   *F7B3: B7 E4 87       '...'   TO PIA CONTROL REG
         LDAA    #$FF                     *F7B6: 86 FF          '..'
-        STAA    PIADPB                   *F7B8: B7 E4 86       '...'
-        RTS                              *F7BB: 39             '9'
-SVSTAT  LDS     USP                      *F7BC: BE E4 2F       '../'
-        LDX     #UCC                     *F7BF: CE E4 31       '..1'
-SVLOOP  PULA                             *F7C2: 32             '2'
-        STAA    ,X                       *F7C3: A7 00          '..'
-        INX                              *F7C5: 08             '.'
-        CPX     #ROIFLG                  *F7C6: 8C E4 38       '..8'
-        BNE     SVLOOP                   *F7C9: 26 F7          '&.'
-        STS     USP                      *F7CB: BF E4 2F       '../'
-        LDS     #STKTOP-2                *F7CE: 8E E4 7C       '..|'
-        RTS                              *F7D1: 39             '9'
-SWINT   NOP                              *F7D2: 01             '.'
+        STAA    PIADPB                   *F7B8: B7 E4 86       '...'   ENABLE ALL KEY ROWS
+        RTS                              *F7BB: 39             '9'     -- RETURN --
+SVSTAT  LDS     USP                      *F7BC: BE E4 2F       '../'   POINT AT STACKED STATUS
+        LDX     #UCC                     *F7BF: CE E4 31       '..1'   POINT AT PSEUDO REG AREA
+SVLOOP  PULA                             *F7C2: 32             '2'     GET STACKED BYTE
+        STAA    ,X                       *F7C3: A7 00          '..'    STORE AT PSEUDO REG RAM LOC
+        INX                              *F7C5: 08             '.'     POINT AT NEXT REG LOC
+        CPX     #ROIFLG                  *F7C6: 8C E4 38       '..8'   PAST END ?
+        BNE     SVLOOP                   *F7C9: 26 F7          '&.'    IF NOT CONTINUE LOOP
+        STS     USP                      *F7CB: BF E4 2F       '../'   SAVE USER SP AT INTERRUPT TIME
+        LDS     #STKTOP-2                *F7CE: 8E E4 7C       '..|'   SET FOR RETURN
+        RTS                              *F7D1: 39             '9'     -- RETURN --
+SWINT   NOP                              *F7D2: 01             '.'     SET IRQ FLAG
         SEI                              *F7D3: 0F             '.'
-        STS     USP                      *F7D4: BF E4 2F       '../'
-        LDS     #STKTOP                  *F7D7: 8E E4 7E       '..~'
-        BSR     SVSTAT                   *F7DA: 8D E0          '..'
-        LDX     UPC                      *F7DC: FE E4 36       '..6'
+        STS     USP                      *F7D4: BF E4 2F       '../'   POINTER TO USER'S REGS
+        LDS     #STKTOP                  *F7D7: 8E E4 7E       '..~'   INIT TO SYST AREA
+        BSR     SVSTAT                   *F7DA: 8D E0          '..'    RECOVER BREAK STATUS
+        LDX     UPC                      *F7DC: FE E4 36       '..6'   BACK UP PROG CNTR
         DEX                              *F7DF: 09             '.'
         STX     UPC                      *F7E0: FF E4 36       '..6'
-        JSR     OUTBKS                   *F7E3: BD F4 85       '...'
-        CLR     UPROG                    *F7E6: 7F E4 3B       '..;'
-        JMP     REGBEG                   *F7E9: 7E F2 CA       '~..'
-UIRQ    LDX     UIRQV                    *F7EC: FE E4 3C       '..<'
-        JMP     ,X                       *F7EF: 6E 00          'n.'
+        JSR     OUTBKS                   *F7E3: BD F4 85       '...'   TAKE OUT BREAKPOINTS
+        CLR     UPROG                    *F7E6: 7F E4 3B       '..;'   SIGNAL NOT IN USER PROG
+        JMP     REGBEG                   *F7E9: 7E F2 CA       '~..'   --- TO REG DISPLAY ---
+UIRQ    LDX     UIRQV                    *F7EC: FE E4 3C       '..<'   GET USER IRQ VECTOR
+        JMP     ,X                       *F7EF: 6E 00          'n.'    --- GO TO USER SERVICE ROUTINE ---
         FCB     $00,$00,$00,$00,$00,$00  *F7F1: 00 00 00 00 00 00 '......'
         FCB     $00                      *F7F7: 00             '.'
         FDB     UIRQ,SWINT,NMINT,RESET   *F7F8: F7 EC F7 D2 F7 73 F0 00 '.....s..'
