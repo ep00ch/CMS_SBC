@@ -1,6 +1,6 @@
        NAM    SYSMON 1.1
-*       OPT    O,NOC
-       OPT    noc
+       OPT    O,NOC
+
 ********************************
 *     SYSTEM MONITOR EPROM     *
 *             FOR              *

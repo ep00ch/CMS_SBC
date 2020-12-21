@@ -55,7 +55,12 @@ $(warning ${O_SRC} )
 
 9600_U23.asm : 9600_U23.s
 	# remove the offending space between opcode and register
-	sed -e 's/ X$$/ ,X/' -e 's/ X / ,X /' $< | cut -b -10,12- > $@
+	sed -e 's/ X$$/ ,X/' -e 's/ X / ,X /' -e's/O,NOC/noc/' $< | \
+	cut -b -10,12- > $@
+
+9600_U23.hex : 9600_U23.s19
+	cut -b 5-70 $< | sed -e 's/^..../&: /' -e '$$d' > $@
+
 
 %.raw %.raw.bin : %.asm
 	lwasm --pragma=noforwardrefmax -9 -f raw -o $@ $<
