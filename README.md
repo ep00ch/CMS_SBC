@@ -4,15 +4,15 @@ This project contains data downloaded from the Read Only Memory (ROM) of a
 Creative Micro Systems (CMS) 6909 MPU module, 9619 Advanced Single Board Computer (SBC),
 9639 Memory Management Processor, and 9642 Serial I/O Processor.
 
-There are also some other ROMs from various EXORbus compatible modules.
+There are also some other ROMs or sources from various EXORbus compatible modules.
 
 The initial data is in the DEBUG09 memory view format (.dbgdmp).
 However, they are easily changed to other more standard formats using make and the makefile. 
 
 ## Background
 
-The CMS 9619 and 9609 computers are EXORBus compatible, have MC6809 processors 
-and a number of PIAs and ACIAs, making them fairly capable SBCs. 
+The CMS 9619 and 9609 are EXORBus compatible MC6809-based computers 
+with a number of PIAs and ACIAs, making them fairly capable SBCs. 
 The ROMS appear to be versions of the MICROWARE SYSTEMS CORPORATION DEBUG 
 machine monitor. [The source code of an earlier version of it](http://www.retro.co.za/6809/documents/debug09.pdf) 
 is available online. The sections with similar functions have comments straight from that document. 

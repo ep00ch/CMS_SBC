@@ -2,6 +2,17 @@ SRC=$(wildcard *.mon)
 O_SRC=$(sort ${SRC})
 F9DASM=f9dasm -noconv -noflex -cchar \*
 
+ASSEMBLYS=	6530_U10.asm \
+	9600_U23.asm \
+	9609_U22_U23.asm \
+	9611_U19.asm \
+	9619_U17.asm \
+	9619_U7.asm \
+	9639_U26.asm \
+	9639_boot.asm \
+	9642_U3.asm \
+	XK-300_U12.asm
+
 $(warning ${O_SRC} )
 
 #Format from Apple II system monitor dump, ROM saved to $8000
@@ -42,6 +53,10 @@ $(warning ${O_SRC} )
 %.asm : %.info %.bin
 	$(F9DASM) -info $< -out $@
 
+9600_U23.asm : 9600_U23.s
+	# remove the offending space between opcode and register
+	sed -e 's/ X$$/ ,X/' -e 's/ X / ,X /' $< | cut -b -10,12- > $@
+
 %.raw %.raw.bin : %.asm
 	lwasm --pragma=noforwardrefmax -9 -f raw -o $@ $<
 
@@ -81,6 +96,9 @@ all : 9609_U22_U23.asm 9619_U7.asm 9639_U26.asm 9642_U3.asm XK-300_U12.asm
 clean-git : | clean 9619_U7.asm 9642_U3.asm XK-300_U12.asm
 	git status
 
+rm-%:
+	sed -e "s/ /.$*" $(ROMS) 
+
 clean:
 	rm -f *.mon
 	rm -f *.aif
@@ -91,8 +109,7 @@ clean:
 	rm -f *.diff
 	rm -f *.dbgee
 	rm -f *.dbge
-	#rm -f *9.asm
-	rm -i *.asm
+	rm -f $(ASSEMBLYS)
 
 .PHONY: clean all 9609 9619 help
 
