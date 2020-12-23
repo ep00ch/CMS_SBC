@@ -925,7 +925,7 @@ FUTABL EQU    *
        FCC    /N/
        FDB    ECHOFF
 TBLEND EQU    *
-       ORG    $FFF8
+*      ORG    $FFF8
        FDB    IO     IRQ VECTOR
        FDB    SWI    SWI VECTOR
        FDB    POWDWN NMI VECTOR

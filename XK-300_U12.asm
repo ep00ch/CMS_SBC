@@ -80,7 +80,6 @@ ENDAD   RMB     2                        *E462:
         ORG     $F000 
 
         NAM RESET
-        OPT CREF,LLEN=80
 
 * -------------------------------------------------------
 * RESET - COLD START ROUTINE
@@ -317,9 +316,9 @@ ADDAX   STX     XSAVD                    *F183: FF E4 24       '..$'   TO ALLOW 
         BCC     ARND                     *F18C: 24 03          '$.'    IF NO CARRY; YOU'RE DONE
         INC     XSAVD                    *F18E: 7C E4 24       '|.$'   ADD CARRY TO HIGH BYTE
 ARND    LDX     XSAVD                    *F191: FE E4 24       '..$'   RESULT TO X-REG
+        RTS                              *F194: 39             '9'     -- RETURN --
 *  
 * CLEAR DISPLAY PER A-REG
-        RTS                              *F194: 39             '9'     -- RETURN --
 CLRDS   STX     XTMP1                    *F195: FF E4 26       '..&'   SAVE ENTRY VALUE
         LDX     #DISBUF+5                *F198: CE E4 22       '.."'   RIGHTMOST DIGIT
 CLRLP   LSRA                             *F19B: 44             'D'
@@ -330,7 +329,7 @@ ARNCLR  DEX                              *F1A0: 09             '.'
         BNE     CLRLP                    *F1A4: 26 F5          '&.'    CONTINUE 6 TIMES
         LDX     XTMP1                    *F1A6: FE E4 26       '..&'   RECOVER ENTRY VALUE
         RTS                              *F1A9: 39             '9'     -- RETURN --
-                                         *  
+*  
 ROLL2   STX     XTMP1                    *F1AA: FF E4 26       '..&'   SAVE ENTRY VALUE
         LDX     HEXBUF                   *F1AD: FE E4 2C       '..,'   ADDR TO ROLL
         TST     ROLPAS                   *F1B0: 7D E4 23       '}.#'   FIRST PASS ?
@@ -351,12 +350,11 @@ R2OUT   ORAA    ,X                       *F1C4: AA 00          '..'    COMBINE N
 ROLL4   PSHB                             *F1CC: 37             '7'     SAVE ENTRY VALUES
         TST     ROLPAS                   *F1CD: 7D E4 23       '}.#'   PASS 1 ?
         BEQ     ARNCL4                   *F1D0: 27 0B          ''.'    NO,CONTINUE
-                                         * LEFT JUSTIFY NEW DIGIT
         CLR     ROLPAS                   *F1D2: 7F E4 23       '..#'   YES,CLEAR FIRST PASS FLAG &
         CLR     HEXBUF                   *F1D5: 7F E4 2C       '..,'   CLR FIRST 4 DIGITS
         STAA    HEXBUF+1                 *F1D8: B7 E4 2D       '..-'   THEN PUT NEW DATA IN 4TH
         BRA     R4OUT                    *F1DB: 20 10          ' .'
-ARNCL4  ASLA                             *F1DD: 48             'H'
+ARNCL4  ASLA                             *F1DD: 48             'H'     LEFT JUSTIFY NEW DIGIT
         ASLA                             *F1DE: 48             'H'
         ASLA                             *F1DF: 48             'H'
         ASLA                             *F1E0: 48             'H'
@@ -944,10 +942,9 @@ ZF617   DECA                             *F617: 4A             'J'     " 2
         JMP     ENDBIT                   *F622: 7E F6 2A       '~.*'   3
 DO1     BSR     BIT1                     *F625: 8D AA          '..'    [30/<177>] XMIT A 1 BIT-TIME
         JMP     ENDBIT                   *F627: 7E F6 2A       '~.*'   3 MATCHING DELAY
-                                         * 5 -- RETURN -- 159 CYC TO NXT
 ENDBIT  DEC     NBITS                    *F62A: 7A E4 5F       'z._'   6 1 LESS BIT-TIME TO GO
         BPL     LPPOUT                   *F62D: 2A E6          '*.'    4 CONTINUE FOR BYTE+STOP BITS
-        RTS                              *F62F: 39             '9'
+        RTS                              *F62F: 39             '9'     5 -- RETURN -- 159 CYC TO NXT
 * -------------------------------------------------------
 * PUNCH - FORMAT AND PUNCH A CASSETTE DATA FILE
 *         INCLUDING LEADER AND CHECKSUM

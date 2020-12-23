@@ -104,7 +104,7 @@ label E464  BEGAD+4
 
 
 insert F000 .        NAM RESET
-insert F000 .        OPT CREF,LLEN=80
+*insert F000 .        OPT CREF,LLEN=80
 
 ***** Program Addresses
 comment F000
@@ -332,8 +332,8 @@ lcomment F18C  IF NO CARRY; YOU'RE DONE
 lcomment F18E  ADD CARRY TO HIGH BYTE
 lcomment F191  RESULT TO X-REG
 lcomment F194  -- RETURN --
-comment F194  . 
-comment F194  CLEAR DISPLAY PER A-REG
+comment F195  . 
+comment F195  CLEAR DISPLAY PER A-REG
 lcomment F195  SAVE ENTRY VALUE
 lcomment F198  RIGHTMOST DIGIT
 lcomment F19C  IF BIT IN A-REG NOT SET
@@ -344,7 +344,7 @@ lcomment F1Al  DONE ?
 lcomment F1A4  CONTINUE 6 TIMES
 lcomment F1A6  RECOVER ENTRY VALUE
 lcomment F1A9  -- RETURN --
-lcomment F1A9  . 
+comment F1AA  . 
 lcomment F1AA  SAVE ENTRY VALUE
 lcomment F1AD  ADDR TO ROLL
 lcomment F1B0  FIRST PASS ?
@@ -380,7 +380,7 @@ lcomment F1D0 NO,CONTINUE
 lcomment F1D2 YES,CLEAR FIRST PASS FLAG &
 lcomment F1D5 CLR FIRST 4 DIGITS
 lcomment F1D8 THEN PUT NEW DATA IN 4TH
-lcomment F1D0 LEFT JUSTIFY NEW DIGIT
+lcomment F1DD LEFT JUSTIFY NEW DIGIT
 label F1DD  ARNCL4
 lcomment F1E1 LOOP INDEX
 lcomment F1E3 ROLLA INTO HEXBUF
@@ -1022,7 +1022,7 @@ lcomment F625 [30/<177>] XMIT A 1 BIT-TIME
 lcomment F627 3 MATCHING DELAY
 lcomment F62A 6 1 LESS BIT-TIME TO GO
 lcomment F62D 4 CONTINUE FOR BYTE+STOP BITS
-lcomment F627 5 -- RETURN -- 159 CYC TO NXT
+lcomment F62F 5 -- RETURN -- 159 CYC TO NXT
 
 
 comment F630 -------------------------------------------------------
