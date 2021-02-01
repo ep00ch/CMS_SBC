@@ -1,4 +1,4 @@
-FILE "9609_U22.bin" FF00
+FILE "9609_U22.bin" F000
 FILE '9609_U23.bin' F800
 
 label FC93 >CMD
@@ -9,8 +9,7 @@ code FE1B-FE20
 word FDE7
 word FDEB
 
-remap    9F00-9F0B 4800 *to E000
-remap    F8A2
+remap    9F00-9FFF 4800 *to E700
 remap    F84D-FC57 -9
 remap    FC59-FC9E -C
 remap    FCA0-FD01 1A
@@ -26,12 +25,17 @@ remap    FDAF-FFD8 6F
 * Use the 9619 info file which is very similar
 include  9619_U7.info
 
+setdp     F000 E7
+setdp     F804-FF7F E7
+
+uncomment E000-EFFF
 uncomment FFE0-FFFF
-uncomment 0000-F800
+uncomment 0000-F000
+uncomment F800
 
-unlabel  E000-F7FF
+unlabel  E000-E6FF
+unlabel  E70F-E7FF
 unlabel  FFDF-FFFF
-
 
 label E3C0 ACAADDR0
 label E3C8 ACAADDR1
@@ -44,3 +48,6 @@ comment  F800     RAM AT $E700-$E7FF
 comment  F800     ACIA AT $E3C0
 comment  F800     PTM AT $E3E0 (ENABLED TO NMI)
 comment  F800 .
+
+comment  FD1C Unclear why these JMPs are disabled. 
+comment  FD1C Should be 9F (JMP indirect) as in CMS 9619.
