@@ -25,11 +25,6 @@ M44FF   EQU     $44FF
 M5043   EQU     $5043
 RAM_PAT EQU     $8008
 M9D01   EQU     $9D01
-M9D17   EQU     $9D17
-M9D1E   EQU     $9D1E
-M9D1F   EQU     $9D1F
-M9D22   EQU     $9D22
-M9D23   EQU     $9D23
 P_BUFFLOC EQU     $9D82
 P_START EQU     $9D84
 P_END   EQU     $9D86
@@ -62,6 +57,7 @@ RAM_NMI_VEC EQU     $9F17
 M9F19   EQU     $9F19
 M9F1A   EQU     $9F1A
 M9F1E   EQU     $9F1E
+M9F1F   EQU     $9F1F
 M9F20   EQU     $9F20
 BYTCNT  EQU     $9F22
 M9F23   EQU     $9F23
@@ -1121,6 +1117,8 @@ XCMDTBL FCC     "P"                      *EFDB: 50             'P'
         FCB     $FF,$FF,$FF,$FF,$FF,$FF  *EFF3: FF FF FF FF FF FF '......'
         FCB     $FF,$FF,$FF,$FF,$FF,$FF  *EFF9: FF FF FF FF FF FF '......'
         FCB     $FF                      *EFFF: FF             '.'
+        SETDP   $9F
+
 
 * ### ASSEMBLER
         FCB     $AA                      *F000: AA             '.'
@@ -1148,40 +1146,40 @@ DICMD   JSR     CHKEOL                   *F01C: BD FE 2A       '..*'
         BCC     DICM1                    *F024: 24 05          '$.'
 DIERR   LDA     #$32                     *F026: 86 32          '.2'
         JMP     _NCMDERR                 *F028: 7E FD B2       '~..'
-DICM1   STD     M9D23                    *F02B: DD 23          '.#'
+DICM1   STD     M9F23                    *F02B: DD 23          '.#'
 DICM2   LDY     #M9F23                   *F02D: 10 8E 9F 23    '...#'
         CLRA                             *F031: 4F             'O'
-        CLR     M9D22                    *F032: 0F 22          '."'
+        CLR     BYTCNT                   *F032: 0F 22          '."'
         LBSR    ZF0AE                    *F034: 17 00 77       '..w'
         BRA     DBCMR                    *F037: 20 23          ' #'
 
 * "DB" COMMAND: DISASSMEBLE BLOCK OF INSTRUCTIONS
 DBCMD   JSR     CHKEOL                   *F039: BD FE 2A       '..*'
         BNE     DBCM1                    *F03C: 26 04          '&.'
-        LDD     M9D23                    *F03E: DC 23          '.#'
+        LDD     M9F23                    *F03E: DC 23          '.#'
         BRA     DBCM2                    *F040: 20 05          ' .'
 DBCM1   JSR     HEX4BIN                  *F042: BD FE BF       '...'
         BCS     DIERR                    *F045: 25 DF          '%.'
 DBCM2   PSHS    D                        *F047: 34 06          '4.'
         LDA     #$16                     *F049: 86 16          '..'
-        STA     M9D22                    *F04B: 97 22          '."'
+        STA     BYTCNT                   *F04B: 97 22          '."'
 DBCM3   LEAY    ,S                       *F04D: 31 E4          '1.'
         CLRA                             *F04F: 4F             'O'
         LBSR    ZF0AE                    *F050: 17 00 5B       '..['
         STY     ,S                       *F053: 10 AF E4       '...'
-        DEC     M9D22                    *F056: 0A 22          '."'
+        DEC     BYTCNT                   *F056: 0A 22          '."'
         BPL     DBCM3                    *F058: 2A F3          '*.'
         PULS    Y                        *F05A: 35 20          '5 '
-DBCMR   STY     M9D23                    *F05C: 10 9F 23       '..#'
+DBCMR   STY     M9F23                    *F05C: 10 9F 23       '..#'
         RTS                              *F05F: 39             '9'
 TDCMD   LDA     #$16                     *F060: 86 16          '..'
-        STA     M9D22                    *F062: 97 22          '."'
+        STA     BYTCNT                   *F062: 97 22          '."'
 XDCMD   JSR     CHKEOL                   *F064: BD FE 2A       '..*'
         BEQ     ZF06D                    *F067: 27 04          ''.'
-        CLR     M9D1E                    *F069: 0F 1E          '..'
-        CLR     M9D1F                    *F06B: 0F 1F          '..'
+        CLR     M9F1E                    *F069: 0F 1E          '..'
+        CLR     M9F1F                    *F06B: 0F 1F          '..'
 ZF06D   LDX     #SSBK2?X                 *F06D: 8E F0 7A       '..z'
-        STX     M9D17                    *F070: 9F 17          '..'
+        STX     RAM_NMI_VEC              *F070: 9F 17          '..'
         JMP     _NSSCMD                  *F072: 7E FD B8       '~..'
         LDA     #$31                     *F075: 86 31          '.1'
         JMP     _NCMDERR                 *F077: 7E FD B2       '~..'
@@ -1189,8 +1187,6 @@ SSBK2?X LDA     #$01                     *F07A: 86 01          '..'
 * Looks same as SSBK @ FCD1
         STA     TIMER                    *F07C: B7 FF D8       '...'   STOP TIMER
         LDA     #$9F                     *F07F: 86 9F          '..'
-        SETDP   $9F
-
         TFR     A,DP                     *F081: 1F 8B          '..'
         STS     USERSP                   *F083: 10 DF 00       '...'   SAVE USER STACK
         LEAY    $0A,S                    *F086: 31 6A          '1j'

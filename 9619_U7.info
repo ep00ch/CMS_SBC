@@ -347,7 +347,7 @@ lcomment E85A IF NOT, WAIT FOR EMPTY
 lcomment E85C RESTORE OUTPUT BYTE FROM STACK
 lcomment E85E PUT DATA BYTE INTO ACIA TRANSMIT REG
 
-setdp	E864 9D
+setdp	 E864  9D
 comment E863 .
 comment E863 EPROM PROGRAMMER ENTRY POINT
 comment E863 FOR CMS 9614, 9617, 9618 HEADS
@@ -724,7 +724,7 @@ comment  F000 .
 comment  F000 ### ASSEMBLER
 
 *** Section Format
-setdp   F081 9F
+setdp   F000 9F
 
 data    F000-F01B
 data    F0AE-F117
@@ -782,7 +782,7 @@ comment  F800 .
 comment  F800 ### DEBUGGER
 
 *** Section Format
-setdp     F804-FF7F 9F
+setdp F800 9F
 
 data F9F3-FA17
 data FD1A-FD48
@@ -821,10 +821,11 @@ label 9F02 DBUGSP
 label 9F04 IOBUF
 label 9F06 BKPTBL
 label 9F08 INBKPT
-label 9F0B ACVECT
-label 9F0C TIMOUT
 label 9F09 ACECHO
 label 9F0A USECRLF
+label 9F0B ACVECT
+label 9F0C TIMOUT
+
 
 label 00FF ACEC_ON
 
