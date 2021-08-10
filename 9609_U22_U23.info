@@ -51,3 +51,8 @@ comment  F800 .
 
 comment  FD1C Unclear why these JMPs are disabled. 
 comment  FD1C Should be 9F (JMP indirect) as in CMS 9619.
+
+code     F84B-F84C
+unlcomment F846-F84B
+lcomment  F849 ACIA MASTER RESET 
+lcomment  F84B COUNTER /64, 8-N-1, /RTS low
