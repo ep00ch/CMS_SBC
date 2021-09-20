@@ -6,6 +6,10 @@ comment  .(C) 198? MICROWARE SYSTEMS CORPORATION
 comment  .         DES MOINES, IOWA
 comment  .
 
+* Patch to enter Debugger instead of user code
+patch FFFE F8 00
+lcomment FFFE ENTER DEBUGGER ON RESET
+
 ***** General Info
 comment  F800 .
 comment  F800 .HARDWARE REQUIREMENTS:

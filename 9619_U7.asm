@@ -2870,6 +2870,6 @@ svec_FIRQ FDB     hdlr_FIRQ                *FFF6: FD 0E          '..'
 svec_IRQ FDB     hdlr_IRQ                 *FFF8: FD 12          '..'
 svec_SWI FDB     hdlr_SWI                 *FFFA: FD 0A          '..'
 svec_NMI FDB     hdlr_NMI                 *FFFC: FD 16          '..'
-svec_RST FDB     hdlr_RST                 *FFFE: F8 00          '..'
+svec_RST FDB     hdlr_RST                 *FFFE: F8 00          '..'    ENTER DEBUGGER ON RESET
 
         END
