@@ -62,7 +62,7 @@ label E423  ROLPAS
 label E424  XSAVD
 label E425  XSAVD+1
 label E426  XSAV1
-label E426  XTMP1
+label E428  XTMP1
 label E42A  MEMSAV
 label E42B  MEMSAV+1
 label E42C  HEXBUF

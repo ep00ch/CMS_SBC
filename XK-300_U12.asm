@@ -44,8 +44,8 @@ KEYFLG  RMB     1                        *E41C:
 DISBUF  RMB     6                        *E41D: 
 ROLPAS  RMB     1                        *E423: 
 XSAVD   RMB     2                        *E424: 
-XTMP1   RMB     2                        *E426: 
-ME428   RMB     2                        *E428: 
+XSAV1   RMB     2                        *E426: 
+XTMP1   RMB     2                        *E428: 
 MEMSAV  RMB     2                        *E42A: 
 HEXBUF  RMB     3                        *E42C: 
 USP     RMB     2                        *E42F: 
@@ -247,7 +247,7 @@ SYSFNC  FDB     MEMBEG                   *F110: F1 F6          '..'    'MD'
 * DECODE HEX TO 7-SEGMENT
 DYSCOD  PSHA                             *F120: 36             '6'     SAVE REGS
         PSHB                             *F121: 37             '7'
-        STX     XTMP1                    *F122: FF E4 26       '..&'
+        STX     XSAV1                    *F122: FF E4 26       '..&'
         LDX     #HEXBUF                  *F125: CE E4 2C       '..,'   POINT AT HEX INFO
 LPOl    LDAA    ,X                       *F128: A6 00          '..'    GET HEX BYTE
         TAB                              *F12A: 16             '.'     MAKE EXTRA COPY
@@ -263,17 +263,17 @@ LPOl    LDAA    ,X                       *F128: A6 00          '..'    GET HEX B
         BNE     LPOl                     *F137: 26 EF          '&.'    LOOP 3 TIMES
         LDX     #DISBUF+5                *F139: CE E4 22       '.."'   LAST DISPLAY BUFFER DIGIT
         LDAB    #$05                     *F13C: C6 05          '..'    LOOP INDEX
-LPO2    STX     ME428                    *F13E: FF E4 28       '..('   SAVE TEMPORARILY
+LPO2    STX     XTMP1                    *F13E: FF E4 28       '..('   SAVE TEMPORARILY
         LDX     #DYSTBL                  *F141: CE F1 59       '..Y'   POINT AT LOOK-UP TABLE
         PULA                             *F144: 32             '2'     GET A HEX DIGIT TO CONVERT
         JSR     ADDAX                    *F145: BD F1 83       '...'   POINT AT 7-SEG EQUIV
         LDAA    ,X                       *F148: A6 00          '..'    GET IT
-        LDX     ME428                    *F14A: FE E4 28       '..('   RECOVER POINTER TO DISP BUFFER
+        LDX     XTMP1                    *F14A: FE E4 28       '..('   RECOVER POINTER TO DISP BUFFER
         STAA    ,X                       *F14D: A7 00          '..'    STORE CONVERTED DIG
         DEX                              *F14F: 09             '.'     NEXT DISPLAY POS
         DECB                             *F150: 5A             'Z'     LOOP INDEX
         BPL     LPO2                     *F151: 2A EB          '*.'    CONTINUE FOR 6 DIGITS
-        LDX     XTMP1                    *F153: FE E4 26       '..&'   RECOVER ENTRY STATUS
+        LDX     XSAV1                    *F153: FE E4 26       '..&'   RECOVER ENTRY STATUS
         PULB                             *F156: 33             '3'
         PULA                             *F157: 32             '2'
         RTS                              *F158: 39             '9'     -- RETURN --
@@ -319,7 +319,7 @@ ARND    LDX     XSAVD                    *F191: FE E4 24       '..$'   RESULT TO
         RTS                              *F194: 39             '9'     -- RETURN --
 *  
 * CLEAR DISPLAY PER A-REG
-CLRDS   STX     XTMP1                    *F195: FF E4 26       '..&'   SAVE ENTRY VALUE
+CLRDS   STX     XSAV1                    *F195: FF E4 26       '..&'   SAVE ENTRY VALUE
         LDX     #DISBUF+5                *F198: CE E4 22       '.."'   RIGHTMOST DIGIT
 CLRLP   LSRA                             *F19B: 44             'D'
         BCC     ARNCLR                   *F19C: 24 02          '$.'    IF BIT IN A-REG NOT SET
@@ -327,10 +327,10 @@ CLRLP   LSRA                             *F19B: 44             'D'
 ARNCLR  DEX                              *F1A0: 09             '.'
         CPX     #KEYFLG                  *F1A1: 8C E4 1C       '...'
         BNE     CLRLP                    *F1A4: 26 F5          '&.'    CONTINUE 6 TIMES
-        LDX     XTMP1                    *F1A6: FE E4 26       '..&'   RECOVER ENTRY VALUE
+        LDX     XSAV1                    *F1A6: FE E4 26       '..&'   RECOVER ENTRY VALUE
         RTS                              *F1A9: 39             '9'     -- RETURN --
 *  
-ROLL2   STX     XTMP1                    *F1AA: FF E4 26       '..&'   SAVE ENTRY VALUE
+ROLL2   STX     XSAV1                    *F1AA: FF E4 26       '..&'   SAVE ENTRY VALUE
         LDX     HEXBUF                   *F1AD: FE E4 2C       '..,'   ADDR TO ROLL
         TST     ROLPAS                   *F1B0: 7D E4 23       '}.#'   FIRST PASS ?
         BEQ     ARNCL2                   *F1B3: 27 07          ''.'
@@ -343,7 +343,7 @@ ARNCL2  ASL     ,X                       *F1BC: 68 00          'h.'
         ASL     ,X                       *F1C2: 68 00          'h.'    SHIFT ROLL BYTE 4 PLACES
 R2OUT   ORAA    ,X                       *F1C4: AA 00          '..'    COMBINE NEW DATA
         STAA    ,X                       *F1C6: A7 00          '..'    UPDATE LOC
-        LDX     XTMP1                    *F1C8: FE E4 26       '..&'   RECOVER ENTRY VAL
+        LDX     XSAV1                    *F1C8: FE E4 26       '..&'   RECOVER ENTRY VAL
         RTS                              *F1CB: 39             '9'     -- RETURN --
 *  
 * ROLL 4 HEX INTO HEXBUF
