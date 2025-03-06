@@ -21,22 +21,165 @@ insert   .        FILL    $FF,$1000
 comment F000 --------------------------------------------------
 comment F000 Boot module header.
 comment F000 --------------------------------------------------
-*data F000-F02C
+
+insert F000 .        nam     Boot
+insert F000 .        ttl     os9 system module
+insert F000 .
+insert F000 .        use     defsfile
+insert F000 .
+insert F000 tylg    set     Systm+Objct
+insert F000 atrv    set     ReEnt+rev
+insert F000 rev     set     $01
+insert F000 .        mod     BootEnd,name,tylg,atrv,start,0
+insert F000 .
+insert F000 name    equ  \*
+insert F000 .        fcs  /Boot/
+insert F000 .        fcb  $05
+insert F000 .        ifdef HEADER_DATA
+insert F012 .        endc
+
+data F000-F011
 lcomment F00D "Boot"
-data    F00D-F010
-char F010
+data    F00D-F011
+
 comment  .  FF80-FFDF    I/O SPACE?
 data   FF5C-FFEF
 data   F3F6-F456
 word   FFE0-FFF0
 comment  .  FFE0-FFFF    VECTORS
 
+RMB  0010-001E
+label 0010        * seems to be where 1 byte data is stored, and $18,U often points here
+label 0011 MSBCNT * this starts as 0 if P4 is set, $40 if not
+label 0012 LSNLSW
+label 0014 LSNMSB
+label 0015 CLEARS
+label 0016 MEMLOC
+label 0018 CMDLOC
+label 001A    *ENDLOC
+label 001C SCSISTAT
+label 001D SCSICTRL
+label 001E SECCNT
 
-comment F08F Write to Disk Drive
-comment F0A2 Read from  Disk Drive
+data  F012-F02D
 
+option nofcc
+comment  F02E SCSI CONTROL REG DATA (EXTDEVC):
+comment  F02E BIT |  7  |  6  |  5  |  4  |  3  |  2  |  1  |  0  |
+comment  F02E RD  | REQ | BSY | CB5 | PUP | CB3 | MSG | C/D | I/O |
+comment  F02E WT  |     |     |     |     |     |     |     | PAL-16|
+
+label    F012 P4OPEN
+label    F020 P4CLOS
+        
+data F074-F07B
+label    F02E SETCMD
+lcomment F02E get device control reg
+label    F046 SETCRT
+lcomment F031 preemptively set carry
+lcomment F033 Busy?
+bin      F034
+lcomment F035 If so, return with carry set
+lcomment F037 store CMDLOC, DATALOC, SCSICTRL
+lcomment F041 store command to device reg
+lcomment F044 success, clear carry
+lcomment F046 return
+label    F047 HDSHK
+lcomment F047 get device control reg
+lcomment F04A P4 jumper set?
+lcomment F04C Busy?
+bin      F04D
+lcomment F04E if so, keep checking
+
+comment  F052 2.3.4 Information Transfer Phases
+label    F052 INFOXFR
+lcomment F052 save start status in B
+bin F055
+lcomment F054 Busy?
+lcomment F056 if not, return err
+lcomment F058 get the low 3 bits to lookup
+lcomment F05A table lookup
+lcomment F060 jump to indicated lookup table function
+label    F062 CLEANUP
+lcomment F062 command stored?
+lcomment F065 If not, keep communicating
+
+lcomment F067 get saved target status
+lcomment F06A Error status code?
+lcomment F06C If so, return error
+lcomment F06E clear carry
+label    F071 DDERR
+lcomment F071 set carry (error)
+label    F074 IXFRTBL
+comment  F074 Lookup phase by EXTDEVC 3 LSBits :
+lcomment F074 WT_DATA-CTLTBL
+lcomment F075 RD_DATA-CTLTBL
+lcomment F076 WT_CMD -CTLTBL
+lcomment F077 RD_STAT-CTLTBL
+lcomment F078 RETURN-CTLTBL Return
+lcomment F079 RETURN-CTLTBL Return
+lcomment F07A RETURN-CTLTBL Return
+lcomment F07B RD_CTRL-CTLTBL
+comment  F07C 2.3.5 Command Phase
+label    F07C WT_CMD
+lcomment F07C load the CMDLOC start memory address
+label    F07F WTCLOOP
+label    F084 WTCDLY
+lcomment F086 device control reg same?
+lcomment F089 if so, keep looping
+label    F08E RETURN
+lcomment F08F load the DATALOC start address
+lcomment F08B store the CMDLOC end memory address
+comment  F0A2 2.3.6.1 Data In Phase
+label    F08F WT_DATA
+label    F092 WTDLOOP
+label    F097 WTDDLY
+lcomment F099 device control reg same?
+lcomment F09C if so, keep looping
+lcomment F09E store the DATALOC end address
+comment  F08F 2.3.6.2 Data Out Phase
+label    F0A2 RD_DATA
+lcomment F0A2 load the DATALOC start address
+label    F0A5 RDDLOOP
+lcomment F0AA device control reg same?
+lcomment F0AD if so, keep looping
+lcomment F0AF store the DATALOC end address
+label    F0B3 RD_STAT
+lcomment F0B6 store the status in SCSISTAT
+comment  F0BA 2.3.8.1 Control Message In Phase
+label    F0BA RD_CTRL
+
+
+label    F0C1 IOPREP
+lcomment F0C3 store number of sectors requested
+lcomment F0C6 store LSN LSW
+lcomment F0CA get device status
+bin      F0CE
+lcomment F0CD check P4 jumper
+lcomment F0D5 save MSBCNT
+lcomment F0DB return
+lcomment F0DF X points to the start of the xfer settings
+lcomment F0E2 start memory from the STARTLOC
+lcomment F0EA store the error to be returned as B
+lcomment F0EC return
+label    F0EE ACKNOW
+lcomment F0EE Assert [ACK?]
+lcomment F0F0 check BUSY and send command
+lcomment F0F3 busy, keep trying
+lcomment F0FA indicate E$Read-Read Error
+label    F0FD RDSEC2
+lcomment F0FF store total number of sectors needed
+lcomment F102 indicate 1 sector
+lcomment F112 X points to the start of the xfer settings
+const F121
+lcomment F115 Y is memory location to save to
+lcomment F120 increment current sector (LSNLSW)
+lcomment F126 Roll over the LSN MSB if necessary
+lcomment F12E Decrement the sector counter
+lcomment F131 if not done, keep looping
+lcomment F133 return when done
 comment F139 --------------------------------------------------
-comment F139 Delay25msec.@2MHz
+comment F139 * MOTOR ON spin-up delay loop 25msec @2MHz
 comment F139 --------------------------------------------------
 label F139 DLY25MS
 label F13E DLY25M2
@@ -49,13 +192,46 @@ comment F145  OS9p1 calls the Boot module at this entry point.
 comment F145  IN:U
 comment F145 --------------------------------------------------
 label F145 start
-lcomment F147 reserve space on stack for temporary variables
+lcomment F147 reserve space on stack for temporary vars
+lcomment F14A 256 bytes for LSN0 buffer
 const F14B
-lcomment F14A request system memory to use for sector buffer
-lcomment F154 store starting address of memory area
+lcomment F140 reserve memory for LSN0
+lcomment F154 store pointer to start of LSN0 memory area
+lcomment F157 keep pointer to vars area of stack
+lcomment F159 enable drive motor bit
+lcomment F15B save to device control
+lcomment F15E wait for spin up
+lcomment F160 get device status
+lcomment F163 point to table values
+lcomment F168 clear TOTSEC
+lcomment F16B check P4 jumper
+lcomment F16F point to different table values
+lcomment F17D store $C4 into $10,U
+const F18D
+const F190
+lcomment F18C 1 sector, $00 MSB
+lcomment F18F $0000 LSW (=LSN0 address)
+lcomment F195 Error?
+lcomment F19A point X to CMDLOC
+lcomment F19E If no command, error bad media
+lcomment F1AE 256 bytes for LSN0 buffer
+lcomment F1B1 done with LSN0 buffer
+lcomment F1B4 get size of bootstrap
+lcomment F1B6 reserve memory for bootstrap
+lcomment F1BB store pointer to start of current block
+lcomment F1BE pointer to start of bootstrap to be returned as x
+lcomment F1C6 No error.
+lcomment F1C1 restore pointer to temp vars
+lcomment F1C8 Error
+label    F1CA ERR_BAD
+lcomment F1CA set carry
+lcomment F1CB indicate E$BTyp-Bad Type (incompatable) media
 
-lcomment F1D0 return space on stack used for temporary
-
+label F1CA
+lcomment F1C3 load 1 sector
+lcomment F1CD store error to be returned as b
+lcomment F1D0 return space on stack used for temp vars
+lcomment F1D3 return to kernel routine
 comment F28C  Initialize user interupt vectors
 
 lcomment F28C Get SWI2 (os9 command) service routine pointer
@@ -100,11 +276,11 @@ lcomment F3BD No errors, let's try to link it again
 lcomment F3BF obviously can't do it, restart machine
 lcomment F3C3 execute krnp2
 
-label   F3A1 L01B0
-label   F3B0 L01BF
-label   F3B2 L01C1
-label   F3BF L01CE
-label   F3C3 L01D0
+label   F3A1 Cold.z1
+label   F3B0 Cold.z2
+label   F3B2 Cold.z3
+label   F3BF ColdErr
+label   F3C3 ColdExit
 
 label   0024 D.Init
 
@@ -117,13 +293,27 @@ label   F457 init
 label   F45B krnp2
 label   F4EB SysCall
 label   F4FC L033B
-label   F464 DisTable
+
+lcomment FFE0 D.Clock absolute address at the start
+lcomment FFE2 D.XSWI3
+lcomment FFE4 D.XSWI2
+lcomment FFE6 D.XFIRQ crash on an FIRQ
+lcomment FFE8 D.XIRQ
+lcomment FFEA D.XSWI
+lcomment FFEC D.XNMI crash on an NMI
+
+label   FD87 L0CD2
+label   F467 XSWI3
+label   F471 XSWI2
+label   F210 D.Crash
+label   F47A XSWI
 
 label   FECA S.Poll
 label   FF47 SWICal
+label   FFE0 DisTable
 
-rmb     0000-001E
-label   D.Clock0000 D.WDAddr
+label 000D Dat.BlCt-ROMCount-RAMCount
+
 
 rmb     0020-0037
 
@@ -213,8 +403,16 @@ label   00CE D.SvcIRQ
 label   00E4 D.XSWI2
 label   00E8 D.XIRQ
 label   00FE IOEntry
+data     F21D-F222
+comment  F223
+comment  F223  OS9P1 begins here
+comment  F223      Routine Cold
+comment  F223
+comment  F223    System Coldstart; determines system state, initializes
+comment  F223  system data structures, searches for the remainder of the
+comment  F223  system and attempts to start operation.
+comment  F223
 
-label   2000
 lcomment F232  D = $0100
 lcomment F233  set Task Structure pointer to $0100
 lcomment F237  set Task image table pointer to $0180
@@ -254,10 +452,24 @@ lcomment F260 set module directory DAT pointer to $1000
 lcomment set pointer to beginning of global memory to $1000
 
 comment  F266 Initialize secondary interrupt vectors to all point to Vectors for now
-
-label    F26B L0065
+label    F223 Cold
+label    F22C Cold10
+label    F26B Cold14
 lcomment F26B Set all IRQ vectors to go to Vectors for now
 comment F272 .
+
+label F27F  Cold15
+label F2E6  Cold16
+label F2F9  Cold17
+label F304  Cold20
+label F329  Cold30
+label F32D  Cold40
+label F341  Cold50
+label F35C  Cold60
+label F37A  Cold62
+label F384  Cold70
+label F386  Cold75
+label F39B  Cold80
 
 comment  F2B0 Setup System calls
 lcomment F2DA initialize 1st block to 0 (for this DP)
@@ -303,6 +515,48 @@ label   F510 L034F
 label   F516 L0355
 label   F51C L035B
 label   F540 SysSvc
+
+label   F8CA SkipSpc
+
+label   FAA9 Boot
+
+label   FACA Boot30
+label   FAEB Boot35
+label   FAF1 Boot40
+label   FAF3 Boot50
+label   FAF9 BootXX
+label   FAFA AllRAM
+label   FB02 AllRAM10
+label   FB03 RAMBlk
+label   FB07 RAMBlk10
+label   FB0B RAMBlk20
+
+label   FB20 RAMBlk25
+label   FB28 RAMBlk30
+label   FB29 AllImg
+label   FB33 AllImage
+label   FB42 AllI.A
+label   FB57 AllI.B
+label   FB5F AllI.C
+label   FB67 AllI.D
+label   FB6C AllImErr
+label   FB75 AllI.E
+label   FB77 AllI.F
+label   FB7F AllI.G
+label   FB8B AllI.H
+
+label   FB9A FreeHB
+
+
+
+
+
+
+
+
+
+
+
 
 
 
